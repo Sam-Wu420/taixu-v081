@@ -332,8 +332,8 @@ function drawEnemyStatus(g: G, e: Enemy, t: number): void {
 }
 
 function emitEnemySparks(c: Combat, e: Enemy): void {
-  if (e.st.burn && Math.random() < 0.5) c.sparks.push({ x: e.x + (Math.random() - 0.5) * 40, y: e.y - Math.random() * 60, vx: 0, vy: -60, t: 0, max: 0.5, size: 4, color: '255,130,40' });
-  if (e.st.poison && Math.random() < 0.3) c.sparks.push({ x: e.x + (Math.random() - 0.5) * 40, y: e.y - Math.random() * 50, vx: 0, vy: -30, t: 0, max: 0.7, size: 3, color: '140,210,60' });
+  if (e.st.burn && Math.random() < 0.5) { const s = c.acquireSpark(); s.anchor = undefined; s.x = e.x + (Math.random() - 0.5) * 40; s.y = e.y - Math.random() * 60; s.vx = 0; s.vy = -60; s.t = 0; s.max = 0.5; s.size = 4; s.color = '255,130,40'; c.sparks.push(s); }
+  if (e.st.poison && Math.random() < 0.3) { const s = c.acquireSpark(); s.anchor = undefined; s.x = e.x + (Math.random() - 0.5) * 40; s.y = e.y - Math.random() * 50; s.vx = 0; s.vy = -30; s.t = 0; s.max = 0.7; s.size = 3; s.color = '140,210,60'; c.sparks.push(s); }
 }
 
 /** 妖气：五级以上妖兽周身缭绕，等阶越高越浓；八级以上（化形大妖）脚下有妖纹旋转 */

@@ -302,6 +302,11 @@ export class Combat {
   summons: Summon[] = [];
   strikes: Strike[] = [];
   sparks: Spark[] = [];
+  /** GC 优化：火花对象池，避免每帧 new Spark */
+  private _sparkPool: Spark[] = [];
+  acquireSpark(): Spark {
+    return this._sparkPool.pop() ?? { x: 0, y: 0, vx: 0, vy: 0, t: 0, max: 0, size: 0, color: '' };
+  }
   cds = new Map<string, number>();
   cdMax = new Map<string, number>();
   // 玩家状态
@@ -1151,7 +1156,7 @@ export class Combat {
   }
 
   private burstShards(x: number, y: number, color: string) {
-    for (let i = 0; i < 14; i++) { const a = Math.random() * TAU, v = rand(120, 320); this.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, t: 0, max: rand(0.4, 0.8), size: rand(2, 5), color }); }
+    for (let i = 0; i < 14; i++) { const a = Math.random() * TAU, v = rand(120, 320), s = this.acquireSpark(); s.x = x; s.y = y; s.vx = Math.cos(a) * v; s.vy = Math.sin(a) * v - 80; s.t = 0; s.max = rand(0.4, 0.8); s.size = rand(2, 5); s.color = color; s.anchor = undefined; this.sparks.push(s); }
   }
 
   private kill(e: Enemy) {
@@ -1579,7 +1584,7 @@ export class Combat {
     const regen = (ooc ? 0.025 : 0.003) + this.buffs.regen;
     h.hp = Math.min(1, h.hp + regen * dt);
     if (!(g.senseBurstT > 0) && !p.boosting && !g.dunkong?.active) h.mp = Math.min(1, h.mp + (ooc ? 0.035 : 0.008) * dt);   // 神识外放 / 催动遁光 / 遁空（蓄势到收势）期间法力不回
-    if (this.heal) { this.heal.t -= dt; h.hp = Math.min(1, h.hp + this.heal.rate * dt); h.mp = Math.min(1, h.mp + this.heal.mp * dt); if (Math.random() < dt * 8) this.sparks.push({ anchor: { x: p.x, y: p.y, offsetY: -p.st.lift }, x: p.x + rand(-30, 30), y: p.y - rand(0, 80), vx: 0, vy: -40, t: 0, max: 1, size: 3, color: '150,230,120' }); if (this.heal.t <= 0) this.heal = null; }
+    if (this.heal) { this.heal.t -= dt; h.hp = Math.min(1, h.hp + this.heal.rate * dt); h.mp = Math.min(1, h.mp + this.heal.mp * dt); if (Math.random() < dt * 8) { const s = this.acquireSpark(); s.anchor = { x: p.x, y: p.y, offsetY: -p.st.lift }; s.x = p.x + rand(-30, 30); s.y = p.y - rand(0, 80); s.vx = 0; s.vy = -40; s.t = 0; s.max = 1; s.size = 3; s.color = '150,230,120'; this.sparks.push(s); } if (this.heal.t <= 0) this.heal = null; }
     this.lingdun.update(dt);
     if (this.shield) { this.shield.t -= dt; if (this.shield.t <= 0) this.shield = null; }
     this.blockT = Math.max(0, this.blockT - dt * 3);
@@ -1608,7 +1613,7 @@ export class Combat {
       const nx = p.x + d.vx * dt, ny = p.y + d.vy * dt;
       if (g.isFlying || (g.terrain.walkFactor(nx, ny) > 0 && g.terrain.canTraverse(p.x, p.y, nx, ny))) { p.x = nx; p.y = ny; }
       d.sparkAcc += emitDt * 54;
-      while (d.sparkAcc >= 1) { d.sparkAcc--; this.sparks.push({ anchor: { x: p.x, y: p.y, offsetY: -p.st.lift }, x: p.x + rand(-10, 10), y: p.y - rand(10, 70), vx: -d.vx * 0.1, vy: -d.vy * 0.1, t: 0, max: 0.4, size: rand(3, 6), color: d.color }); }
+      while (d.sparkAcc >= 1) { d.sparkAcc--; const s = this.acquireSpark(); s.anchor = { x: p.x, y: p.y, offsetY: -p.st.lift }; s.x = p.x + rand(-10, 10); s.y = p.y - rand(10, 70); s.vx = -d.vx * 0.1; s.vy = -d.vy * 0.1; s.t = 0; s.max = 0.4; s.size = rand(3, 6); s.color = d.color; this.sparks.push(s); }
       if (d.dmg > 0) for (const e of this.enemies) if (!e.dead && !d.hit.has(e.id) && Math.hypot(e.x - p.x, e.y - p.y) < 70 && meleeReaches(p.z, e.z)) { d.hit.add(e.id); this.hitEnemy(e, d.dmg, { realm: h.realm, stCh: 0, school: '风' }, p.x, p.y); }
       if (d.t >= d.dur) this.dash = null;
     }
@@ -1687,8 +1692,24 @@ export class Combat {
     // 文字 / 特效
     this.tickTexts(dt);
     this.vfx = this.vfx.filter((v) => { v.t += dt; return v.t < v.dur; });
-    this.sparks = this.sparks.filter((s) => { s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 60 * dt; return s.t < s.max; });
-    if (this.sparks.length > 500) this.sparks.splice(0, this.sparks.length - 500);
+    // GC 优化：就地压缩 + 回收死亡火花到对象池
+    { let w = 0;
+      for (let i = 0; i < this.sparks.length; i++) {
+        const s = this.sparks[i];
+        s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 60 * dt;
+        if (s.t >= s.max) { if (this._sparkPool.length < 600) this._sparkPool.push(s); continue; }
+        this.sparks[w++] = s;
+      }
+      while (this.sparks.length > w) {
+        const s = this.sparks.pop()!;
+        if (this._sparkPool.length < 600) this._sparkPool.push(s);
+      }
+      this.sparks.length = w;
+      if (w > 500) {
+        for (let i = 0; i < w - 500; i++) if (this._sparkPool.length < 600) this._sparkPool.push(this.sparks[i]);
+        this.sparks.splice(0, w - 500);
+      }
+    }
     // 清理
     this.brawl.update(dt);   // 近战：击飞的物理、罡气、单位级顿帧
     this.gore.update(dt);   // 打飞的尸身、碎块、血迹（要在下面按 deathT 清尸之前）
@@ -1871,7 +1892,7 @@ export class Combat {
     let base = ps.hp * (t.k === 'pet' ? 0.9 : t.k === 'summon' ? (t.ref.kind === 'puppet' ? 0.8 : 0.45) : 1);
     if (t.k === 'ally') { const RR = REALMS[t.ref.d.realm]; base = RR.hp[Math.min(t.ref.d.stage, RR.hp.length - 1)] * 1.2; }
     const frac = raw * realmTakeK(realm - R, R) / Math.max(1, base);
-    this.sparks.push({ x: t.x + rand(-10, 10), y: t.y - 40, vx: rand(-80, 80), vy: rand(-120, -40), t: 0, max: 0.35, size: 5, color: '255,200,150' });
+    { const s = this.acquireSpark(); s.anchor = undefined; s.x = t.x + rand(-10, 10); s.y = t.y - 40; s.vx = rand(-80, 80); s.vy = rand(-120, -40); s.t = 0; s.max = 0.35; s.size = 5; s.color = '255,200,150'; this.sparks.push(s); }
     if (t.k === 'swarm') {
       const sw = t.ref as Swarm, k = Math.max(1, Math.round(frac * 140));
       sw.n = Math.max(0, sw.n - k);
@@ -1996,7 +2017,7 @@ export class Combat {
               const side = Math.random() < 0.5 ? 1 : -1;
               e.kx += -pr.vy / sp * side * 620; e.ky += pr.vx / sp * side * 420;
               this.texts.push({ anchor: { x: e.x, y: e.y, offsetY: -e.flyH - e.lift }, x: e.x, y: e.y - 110, s: '闪', color: '#d8e8ff', t: 0, vy: -40 });
-              this.sparks.push({ anchor: { x: e.x, y: e.y, offsetY: -e.flyH - e.lift }, x: e.x, y: e.y - 40, vx: pr.vy / sp * side * 200, vy: -pr.vx / sp * side * 120, t: 0, max: 0.3, size: 6, color: '220,230,255' });
+              { const s = this.acquireSpark(); s.anchor = { x: e.x, y: e.y, offsetY: -e.flyH - e.lift }; s.x = e.x; s.y = e.y - 40; s.vx = pr.vy / sp * side * 200; s.vy = -pr.vx / sp * side * 120; s.t = 0; s.max = 0.3; s.size = 6; s.color = '220,230,255'; this.sparks.push(s); }
             }
             break;
           }
@@ -2143,7 +2164,7 @@ export class Combat {
       pr.trail.push([pr.x, pr.y]); if (pr.trail.length > 14) pr.trail.shift(); { const tl = pr.trail; const lim = 240 * pr.size; while (tl.length > 2 && Math.hypot(tl[0][0] - pr.x, tl[0][1] - pr.y) > lim) tl.shift(); }
       if (pr.fx === 'fireball' || pr.fx === 'firesnake' || pr.fx === 'crow' || pr.fx === 'blood' || pr.fx === 'talisman') {
         pr.sparkAcc = (pr.sparkAcc ?? 0) + dt * 42;
-        while (pr.sparkAcc >= 1) { pr.sparkAcc--; this.sparks.push({ anchor: { x: pr.x, y: pr.y + pr.visual.groundOffsetY, offsetY: -pr.visual.elevation }, x: pr.x + rand(-6, 6), y: pr.y + rand(-6, 6), vx: rand(-20, 20), vy: rand(-50, -10), t: 0, max: rand(0.3, 0.6), size: rand(2, 5) * pr.size, color: pr.color }); }
+        while (pr.sparkAcc >= 1) { pr.sparkAcc--; const s = this.acquireSpark(); s.anchor = { x: pr.x, y: pr.y + pr.visual.groundOffsetY, offsetY: -pr.visual.elevation }; s.x = pr.x + rand(-6, 6); s.y = pr.y + rand(-6, 6); s.vx = rand(-20, 20); s.vy = rand(-50, -10); s.t = 0; s.max = rand(0.3, 0.6); s.size = rand(2, 5) * pr.size; s.color = pr.color; this.sparks.push(s); }
       }
       if (pr.fac === 'p') {
         for (const e of this.enemies) {
