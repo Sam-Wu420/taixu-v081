@@ -4,7 +4,7 @@
   "version": "0.8.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5202 --strictPort",
+    "dev": "vite --host 0.0.0.0 --port 5202 --strictPort",
     "build": "vite build --config vite.slim.config.ts",
     "build:single": "vite build --config vite.lowmem.config.ts && node tools/inject-inline.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
