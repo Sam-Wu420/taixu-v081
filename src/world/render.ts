@@ -1181,6 +1181,17 @@ export class Renderer {
           // 按位置哈希只留一部分（0.13 时约六成），留下的放大一点补满林冠——这么远看不出少了，帧时降下来（取哈希不动随机序列）
           const thin = hd && z < 0.19 && !fixedTrees;
           if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > Math.pow(z / 0.19, 1.4)) continue;
+          // 优化：远景代表树系统（借鉴 taixu071）
+          // 当 zoom 很远时（z < 0.25），用屏幕空间网格把树分组，每组只画一棵"代表树"
+          // 比哈希剔除更稳定：树不会随机闪烁，森林密度视觉一致
+          if (hd && z < 0.25 && z >= 0.19 && !fixedTrees) {
+            // 屏幕空间网格：每格约 40×40 像素，同格内只留离格心最近的一棵
+            const gridSize = 40 / (z * dpr);  // 世界坐标下的格大小
+            const gx = Math.floor(d.x / gridSize), gy = Math.floor(d.y / gridSize);
+            const repHash = hash2(gx, gy, 137);
+            // 每格约留 1/3 的树（repHash < 0.33），视觉上足够密
+            if (repHash > 0.33) continue;
+          }
           nTrees++;
           const td = d as TreeDeco & { _refl?: number; _dw?: Drawable; _dwk?: number; _ts?: number; _ta?: number; _cosPh?: number; _sinPh?: number; _cosPh2?: number; _sinPh2?: number };
           const treeScale = fixedTrees ? 1 : lodMax < 2 ? (lodMax === 0 ? (thin ? 1.45 : 1.25) : 1.1) : 1;
@@ -1399,7 +1410,33 @@ export class Renderer {
     if (modx) { modx.collect(list); tag('D·模组'); }   // v0.56：模组的绘制
     prof.add('R·收集单位', _p); _p = prof.t();
 
-    list.sort((a, b) => a.y - b.y);
+    // 优化：Y 桶计数排序 O(n)，替代 Array.sort O(n log n)
+    // 借鉴 taixu071 的 2048 桶方案：绘制项的 Y 跨度大但分布均匀，
+    // 桶数够多时同桶内的顺序不影响视觉（同深度的谁先谁后无所谓）
+    {
+      const N = list.length;
+      if (N > 64) {
+        const BUCKETS = 2048;
+        let minY = Infinity, maxY = -Infinity;
+        for (let i = 0; i < N; i++) { const y = list[i].y; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+        const range = maxY - minY || 1;
+        const counts = new Int32Array(BUCKETS + 1);
+        for (let i = 0; i < N; i++) {
+          const b = Math.min(BUCKETS - 1, ((list[i].y - minY) / range * BUCKETS) | 0);
+          counts[b + 1]++;
+        }
+        for (let i = 1; i <= BUCKETS; i++) counts[i] += counts[i - 1];
+        const sorted: typeof list = new Array(N);
+        for (let i = 0; i < N; i++) {
+          const b = Math.min(BUCKETS - 1, ((list[i].y - minY) / range * BUCKETS) | 0);
+          sorted[counts[b]++] = list[i];
+        }
+        list.length = 0;
+        for (let i = 0; i < N; i++) list.push(sorted[i]);
+      } else {
+        list.sort((a, b) => a.y - b.y);
+      }
+    }
     prof.add('R·排序', _p);
     // 分层：先画静态件（山、树、屋、草），再画人在上面
     if (hd) this.drawListHD(list, hd);
