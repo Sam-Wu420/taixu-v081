@@ -2058,7 +2058,7 @@ export class Renderer {
     hd.buildings.sync(RC.walls ? [{ id: 'mj:' + key, layout: RC.walls, x: REALM_OX, y: REALM_OY, tier: 0 }] : [], () => 0);
     this.ctx = hd.wctx;
     { const x = hd.decalXf(); this.Z = x.Z; this.ox = x.ox; this.oy = x.oy; this.world(); }
-    const list: Drawable[] = [];
+    const list = this._drawList; list.length = 0;
     M.collect(list, view, t);
     collectCombat(game.combat, list, view, t, dt);
     game.npcs.collect(list, view, t, dt);
@@ -2127,7 +2127,7 @@ export class Renderer {
     this.Z = z * dpr; this.ox = W * dpr / 2 - camX * this.Z; this.oy = H * dpr / 2 - camY * this.Z;
     this.world();
     M.drawFloor(ctx, view);
-    const list: Drawable[] = [];
+    const list = this._drawList; list.length = 0;
     M.collect(list, view, t);
     collectCombat(game.combat, list, view, t, dt);
     game.npcs.collect(list, view, t, dt);
@@ -2546,7 +2546,7 @@ export class Renderer {
     { const x = hd.decalXf(); this.Z = x.Z; this.ox = x.ox; this.oy = x.oy; this.world(); }
     // 虚空里没有遮挡、没有迷雾：神识圈不限（敌人照神识圈显隐，界内那一套是在世界层画的时候才定圈的位置）
     game.life.sense.x = p.x; game.life.sense.y = p.y; game.life.sense.R = 1e9;
-    const list: Drawable[] = [];
+    const list = this._drawList; list.length = 0;
     collectCombat(game.combat, list, view, t, dt);
     game.zhenfa.collect(list, view, t);
     game.yuanying.collect(list); game.shen?.collect(list);
