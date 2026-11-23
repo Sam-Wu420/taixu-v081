@@ -912,26 +912,42 @@ export class HdScene {
     return { Z: s, ox: cx - (x + l) * s, oy: cy - (y + t) * s, clip: [cx, cy, (r - l) * s, (b - t) * s] as const };
   }
 
+  // 优化：复用排序数组，避免每帧 new + map 产生大量短命对象
+  private _batchOrder: { request: HdAllocRequest; index: number; h: number }[] = [];
   /** 先按高度排格位，再由调用方按原顺序绘制；空间不足时统一降低分辨率重试。 */
   allocBatch(requests: readonly HdAllocRequest[]): (HdAllocCell | null)[] {
     const slots: (HdAllocCell | null)[] = Array(requests.length).fill(null);
     const start = { px: this.px, py: this.py, rowH: this.rowH, count: this.items.length };
     const capacity = Math.max(0, MAX_BB - start.count);
-    const order = requests.map((request, index) => ({ request, index }));
-    if (order.length > capacity) {
-      order.sort((a, b) => b.request.priority - a.request.priority || a.request.seq - b.request.seq);
-      order.length = capacity;
+    // 优化：复用数组，避免每帧 map 创建新对象
+    const order = this._batchOrder;
+    order.length = requests.length;
+    for (let i = 0; i < requests.length; i++) {
+      const r = requests[i];
+      if (i < order.length) { order[i].request = r; order[i].index = i; order[i].h = (r.b - r.t) * r.scale; }
+      else order[i] = { request: r, index: i, h: (r.b - r.t) * r.scale };
     }
-    order.sort((a, b) => (b.request.b - b.request.t) * b.request.scale - (a.request.b - a.request.t) * a.request.scale);
+    if (order.length > capacity) {
+      // 优化：单次排序（合并优先级 + 高度），截断后不再二次排序
+      order.sort((a, b) => b.request.priority - a.request.priority || b.h - a.h || a.request.seq - b.request.seq);
+      order.length = capacity;
+    } else {
+      // 只需按高度排
+      order.sort((a, b) => b.h - a.h);
+    }
     let largest = 1;
-    for (const { request: r } of order) largest = Math.max(largest, Math.max(r.r - r.l, r.b - r.t) * r.scale);
+    for (let i = 0; i < order.length; i++) {
+      const r = order[i].request;
+      const d = Math.max(r.r - r.l, r.b - r.t) * r.scale;
+      if (d > largest) largest = d;
+    }
     const minFactor = 1 / largest;
     let factor = 1;
     for (;;) {
       this.px = start.px; this.py = start.py; this.rowH = start.rowH; this.items.length = start.count;
       let failed = false;
-      for (const { request: r, index } of order) {
-        // r14：图集挤不下要整体降清晰度时，主角（priority 1）先不降——前几轮都由别的立板让；实在不行（降到三成以下）才一起降
+      for (let i = 0; i < order.length; i++) {
+        const { request: r, index } = order[i];
         const f = r.priority > 0 && factor > 0.3 ? 1 : factor;
         const cell = this.alloc(r.x, r.y, r.l, r.r, r.t, r.b, r.scale * f, r.air, r.alpha, r.k, r.seq, !!r.add);
         slots[index] = cell;

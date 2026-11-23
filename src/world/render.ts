@@ -514,9 +514,16 @@ export class Renderer {
     if (dt <= 0 || this.fixedQuality) return;
     if (dt > 0.25) return; // 切页、加载造成的单次长帧不计入
     // 缩放途中（含换档后的重烘）帧时不代表常态：清零重计，免得一次缩放把画质降下去、降档又引发二次卡顿
-    if (resTier.busy || sprites.pending > 0) { this.perfT = 0; this.perfN = 0; this.perfAcc = 0; this.goodRun = 0; return; }
+    if (resTier.busy) { this.perfT = 0; this.perfN = 0; this.perfAcc = 0; this.goodRun = 0; return; }
+    // 优化：精灵 pending（树/山在后台生成）时，跳过这一帧的数据但不清零计时器——
+    // 原来一有 pending 就全部清零，导致飞过密林时 sprites.pending 永远 >0，
+    // 自适应画质永远不触发，用户 21fps 还在最高画质。现在只跳过、不停表，
+    // 2.5 秒内只要有足够多的"稳态帧"就能正常降档。
+    if (sprites.pending > 0) { this.perfT += dt; return; }
     this.perfT += dt; this.perfN++; this.perfAcc += dt;
     if (this.perfT <= 2.5) return;
+    // 优化：至少要有 30 个稳态帧才做判断（避免 pending 太多时仅凭几帧就降档）
+    if (this.perfN < 30) return;
     const avg = this.perfAcc / this.perfN;
     this.perfT = 0; this.perfN = 0; this.perfAcc = 0;
     const max = Renderer.LEVELS.length - 1;
