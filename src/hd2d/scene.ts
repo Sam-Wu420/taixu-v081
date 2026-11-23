@@ -544,6 +544,8 @@ export class HdScene {
   realm(): HdRealm { return this.realmFx ??= new HdRealm(this.scene, glyphAtlas(), this.shadowU.uNoise.value as Texture | null); }
   hideRealm(): void { if (this.realmFx) this.realmFx.group.visible = false; }
   private shadowTarget: WebGLRenderTarget | null = null;
+  /** 外部设置：帧时间紧时置 true，阴影隔帧渲染 */
+  _shadowSkip = false;
   private readonly shadowCam = new OrthographicCamera(-1, 1, 1, -1, 1, 1000);
   private shadowBbMat: ShaderMaterial | null = null;
   private readonly shadowDepthMat = new MeshBasicMaterial({ colorWrite: false });
@@ -1082,12 +1084,20 @@ export class HdScene {
   }
 
   /** 阴影那一遍：从太阳方向用正交相机看可见地面，把立板和建筑的深度写进阴影图 */
+  /** 阴影隔帧渲染：帧预算紧时隔帧更新阴影图，阴影移动缓慢看不出闪烁 */
+  private shadowFrame = 0;
   private renderShadows() {
     const U = this.shadowU;
     if (!U) return;   // 测试里按原型拼出来的场景没有阴影资源
     const on = SHADOWS_ON && this.shadowsEnabled && this.sunStrength > 0.01;
     hdShadows.active = on;
     if (!on) { U.uShadowParams.value.x = 0; return; }
+    // 优化：帧时间超 12ms 时隔帧渲染阴影（省 ~2ms），已有阴影图继续用
+    this.shadowFrame++;
+    if (this._shadowSkip && (this.shadowFrame & 1) === 0 && this.shadowTarget) {
+      U.uShadowMap.value = this.shadowTarget.depthTexture;
+      return;
+    }
     if (!this.shadowTarget) {
       const sz = this.shadowSize;
       const depth = new DepthTexture(sz, sz, UnsignedIntType);

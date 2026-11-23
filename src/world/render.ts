@@ -1631,6 +1631,8 @@ export class Renderer {
       { const sv = game.seabeast.view(); if (this.seaThings || game.jueyu.sea || sv.sprites.length + sv.ribbons.length + sv.flats.length) { this.seaThings ??= new SeaThings(hd.scene); const _s = prof.t(); this.seaThings.update(sv, hd, this.hdTarget ? { tex: this.hdTarget.groundDepth, w: this.hdTarget.w, h: this.hdTarget.h, gl: hd.gl } : null); game.seabeast.hdReady = this.seaThings.ready; prof.add('R·海兽网格', _s); } }   // 收官 B2：海兽在 HD 场景里单独画；第五轮返工：一进险地就开始加载贴图（原来要等海兽出水才加载，那几息里触须退回立板图集，画成平躺的小紫条）
       { const bv = bossViewOf(game); if (this.bossThings || bv.sprites.length) { this.bossThings ??= new BossThings(hd.scene); const _s = prof.t(); this.bossThings.update(bv, hd); bossReadyTo(game, this.bossThings.ready); prof.add('R·首领立板', _s); } }   // r16 夜无赦：首领（几个人高的魔躯）不进共享立板图集，在 HD 场景里单独画（hd2d/bossthings.ts）
       this.fx3dFrame(hd, dt);   // r7-fx3d
+      // 优化：帧时间紧时阴影隔帧渲染（省 ~2ms/帧），阴影移动慢看不出
+      hd._shadowSkip = LOD.emaMs() > 14;
       hd.render(this.hdTarget);
       ctx = this.ctx = worldCtx;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
