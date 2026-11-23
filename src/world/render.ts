@@ -1139,7 +1139,15 @@ export class Renderer {
     prof.add('R┊底图分块(含于底图水面)', _p, 0);   // 收官 P7：拆开计时，分清是建地块还是画水波
 
     // ---------- 2. 水波（GPU 地表自带流水、浪花、粼光）----------
-    if (z >= 0.35 && !GROUND && !game.jueyu.seaOwnsWater) this.drawWater(left, top, right, bottom, t);   // 收官 P7：绝域里海面由后期着色器整片重画，底图上的波纹看不见了还在逐格画（图外海面比陆上慢一倍的主因），省掉
+    // LOD 波段平滑：水面波纹在 z∈[0.33,0.38] 渐显，避免硬切跳变
+    { const waterK = LOD.k(LOD.BAND.water, z);
+      if (waterK > 0.01 && !GROUND && !game.jueyu.seaOwnsWater) {
+        const prevAlpha = ctx.globalAlpha;
+        if (waterK < 0.99) ctx.globalAlpha *= waterK;
+        this.drawWater(left, top, right, bottom, t);
+        ctx.globalAlpha = prevAlpha;
+      }
+    }
     // ---------- 2b. 草丛 ----------
     // 第十九步：原设名地的地面贴花（熔岩湖、血潭、白玉广场……）
     prof.add('R·底图水面', _p); _p = prof.t();
@@ -1149,7 +1157,15 @@ export class Renderer {
     { const V = WR.view; if (hd) { const rd = hd.rightDir, ud = hd.upDir; V.rx = rd.x; V.ry = rd.y; V.ux = ud.x; V.uy = ud.y; V.fs = hd.foreshorten; } else { V.rx = 1; V.ry = 0; V.ux = 0; V.uy = -1; V.fs = 1; } }
     WR.drawGround(ctx, left, top, right, bottom);
     prof.add('R·名地地面', _p); _p = prof.t();
-    if (z >= 0.42) this.drawGrass(left, top, right, bottom, t, season, z);
+    // LOD 波段平滑：草丛在 z∈[0.40,0.46] 渐显
+    { const grassK = LOD.k(LOD.BAND.grass, z);
+      if (grassK > 0.01) {
+        const prevAlpha = ctx.globalAlpha;
+        if (grassK < 0.99) ctx.globalAlpha *= grassK;
+        this.drawGrass(left, top, right, bottom, t, season, z);
+        ctx.globalAlpha = prevAlpha;
+      }
+    }
     prof.add('R·草', _p); _p = prof.t();
 
     // ---------- 3. 收集装饰 ----------
@@ -1275,7 +1291,15 @@ export class Renderer {
 
     // 倒影（贴在水面上）—— 帧预算控制：掉帧时跳过
     this.frameBudget.syncElapsed();
-    if (reflect.length && z >= 0.35 && this.lowered < 4 && this.frameBudget.allow(RenderPriority.DECO, 0.7)) this.drawReflections(reflect, t);
+    // LOD 波段平滑：倒影在 z∈[0.33,0.38] 渐显
+    { const reflK = LOD.k(LOD.BAND.reflect, z);
+      if (reflect.length && reflK > 0.01 && this.lowered < 4 && this.frameBudget.allow(RenderPriority.DECO, 0.7)) {
+        const prevAlpha = ctx.globalAlpha;
+        if (reflK < 0.99) ctx.globalAlpha *= reflK;
+        this.drawReflections(reflect, t);
+        ctx.globalAlpha = prevAlpha;
+      }
+    }
     prof.add('R·倒影', _p); _p = prof.t();
 
     // ---------- 4. 地点 ----------
@@ -1777,7 +1801,15 @@ export class Renderer {
       this.drawLabel(l, x, y, game.isExplored(x, y));
     }
     hdUi.at = null; hdUi.ground = null; hdUi.dir = null; this.world();
-    if (hd && z >= 0.45) this.drawBuildingNames(hd, visibleLocs, z, W, H);
+    // LOD 波段平滑：建筑名牌 z∈[0.45,0.55] 渐显
+    { const bldK = LOD.k(LOD.BAND.bld, z);
+      if (hd && bldK > 0.01) {
+        const prevAlpha = this.ctx.globalAlpha;
+        if (bldK < 0.99) this.ctx.globalAlpha *= bldK;
+        this.drawBuildingNames(hd, visibleLocs, z, W, H);
+        this.ctx.globalAlpha = prevAlpha;
+      }
+    }
     if (hd) game.stall?.drawSigns(this.ctx, hd, W, H, this.uiDpr);   // 收官 D：摊主头顶的招牌（world/stall.ts，界面层）
     if (hd && game.dunkong?.ambush) this.drawAmbushPointer(hd, W, H);   // 第五轮：遁空被拦截时，拦截点在画面外就在屏幕边上指过去
 
@@ -2580,8 +2612,9 @@ export class Renderer {
         ctx.beginPath(); ctx.moveTo(x - len * 0.4 + dx, y + 7); ctx.quadraticCurveTo(x + dx, y + 3, x + len * 0.4 + dx, y + 7); ctx.stroke();
       }
     }
-    // 粼光：日光下的细碎闪点（夜里换成月色）
-    if (z > 0.45) {
+    // 粼光：日光下的细碎闪点（夜里换成月色）—— LOD 波段平滑 z∈[0.40,0.50]
+    { const sparkleK = LOD.k(LOD.BAND.sparkle, z);
+    if (sparkleK > 0.01) {
       const gs = 70, day = 1 - game.night;
       ctx.globalAlpha = ga0;
       const col = day > 0.5 ? 'rgb(255,252,232)' : 'rgb(220,230,255)';
@@ -2598,9 +2631,10 @@ export class Renderer {
         ctx.beginPath(); ctx.ellipse(x, y, L * (0.5 + k * 0.5), 1.6, 0, 0, Math.PI * 2); ctx.fill();
         if (h < 0.04 && k > 0.7) { ctx.fillRect(x - 0.6, y - 5 * k, 1.2, 10 * k); }
       }
-    }
-    // 岸边浪花：贴着画出的岸线一涨一退
-    if (z > 0.4) {
+    } }
+    // 岸边浪花：贴着画出的岸线一涨一退 —— LOD 波段平滑 z∈[0.36,0.46]
+    { const shoreK = LOD.k(LOD.BAND.shore, z);
+    if (shoreK > 0.01) {
       const fs = 34;
       ctx.lineWidth = Math.max(1.3, 1.8 / z);
       for (let gy = Math.floor(top / fs); gy <= Math.floor(bottom / fs); gy++) for (let gx = Math.floor(left / fs); gx <= Math.floor(right / fs); gx++) {
@@ -2628,10 +2662,11 @@ export class Renderer {
           ctx.stroke();
         }
       }
-    }
+    } }
     ctx.globalAlpha = ga0;
-    // 河流：顺流而下的细碎水光
-    if (z > 0.35) {
+    // 河流：顺流而下的细碎水光 —— LOD 波段平滑 z∈[0.32,0.42]
+    { const riverK = LOD.k(LOD.BAND.river, z);
+    if (riverK > 0.01) {
       ctx.lineCap = 'round';
       for (const rv of T.rivers) {
         const bb = (rv as any)._bb ?? ((rv as any)._bb = (() => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; for (const [px, py] of rv.pts) { a = Math.min(a, px); b = Math.min(b, py); c = Math.max(c, px); d = Math.max(d, py); } return [a * WORLD_SCALE - 200, b * WORLD_SCALE - 200, c * WORLD_SCALE + 200, d * WORLD_SCALE + 200]; })());
@@ -2657,7 +2692,7 @@ export class Renderer {
         }
         ctx.setLineDash([]);
       }
-    }
+    } }
     game.scenery.drawWaterOver(ctx, game, { left, top, right, bottom }, t);
     ctx.restore();
   }
@@ -3032,8 +3067,9 @@ export class Renderer {
     ctx.setTransform(fl * this.Z, 0, 0, this.Z, d.x * this.Z + this.ox, d.y * this.Z + this.oy);
     ctx.drawImage(s.canvas, -s.ax, -s.ay, s.w, s.h);
     prof.add('D·山┊贴图', _q, 1); _q = prof.t();
-    // 瀑布流动与水雾
-    if (meta?.falls.length && z > 0.3) {
+    // 瀑布流动与水雾 —— LOD 波段平滑 z∈[0.26,0.36]
+    { const fallK = LOD.k(LOD.BAND.fall, z);
+    if (meta?.falls.length && fallK > 0.01) {
       ctx.save();
       ctx.lineCap = 'round';
       for (const f of meta.falls) {
@@ -3050,7 +3086,7 @@ export class Renderer {
         }
       }
       ctx.restore();
-    }
+    } }
     ctx.globalAlpha = 1;
     this.world();
   }
