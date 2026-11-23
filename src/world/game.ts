@@ -2270,10 +2270,10 @@ export class Game {
 
   // ---------- 操作 ----------
   setZoom(z: number) { this.cam.targetZoom = clamp(z, this.minZoom, 1.6); }
-  /** 镜头最远能拉到多远：平时 0.22；人在占山的大宗门地界里时再拉远一档（0.13），看得到一整座山 */
+  /** 镜头最远能拉到多远：平时 0.05；人在占山的大宗门地界里时再拉远一档（0.13），看得到一整座山 */
   get minZoom(): number {
     const m = this.terrain?.surface?.massifAt(this.player?.x ?? 0, this.player?.y ?? 0);
-    return m && m.weight > 0.5 && isMajorSect(m.plan) ? 0.13 : 0.22;
+    return m && m.weight > 0.5 && isMajorSect(m.plan) ? 0.13 : 0.05;
   }
   zoomBy(f: number) { if (this.xukong.inVoid) this.xukong.zoomBy(f); else this.setZoom(this.cam.targetZoom * f); }
   /** 第三十五步：禁空（追兵的禁空令）剩余秒数 */
