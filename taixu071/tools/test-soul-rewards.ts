@@ -1,0 +1,12 @@
+import './env';
+import assert from 'node:assert/strict';
+import {Happen} from '../src/world/happen';
+import {Combat} from '../src/world/combat';
+import {updateWorldDrop} from '../src/world/combatDropSafety';
+import * as C from '../src/world/cultivation';
+const hero=C.newHero();hero.bag=[{id:'mat_lingshi',n:Number.MAX_SAFE_INTEGER}];const combat:any={loot:[]};combat.dropLoot=Combat.prototype.dropLoot.bind(combat);let toasts:string[]=[];
+const g:any={hero,combat,player:{x:100,y:100},toast:(s:string)=>toasts.push(s)};const sys:any=new Happen(g);sys.obtain={onKill(){}};sys.great={onKill(){}};
+const e:any={tag:'duoshe_soul',realm:2};sys.onKill(e);assert.equal(C.bagCount(hero,'pill_yanghun'),0);assert.equal(combat.loot.length,2);assert(combat.loot.every((v:any)=>v.blocked));assert.match(toasts[0],/留在脚边/);sys.onKill(e);assert.equal(combat.loot.length,2);
+hero.bag=[];for(const drop of combat.loot)assert.equal(updateWorldDrop(drop,g.player,false,1,(id,n)=>C.addItem(hero,id,n),()=>{}),false);assert.equal(C.bagCount(hero,'pill_yanghun'),1);assert.equal(C.bagCount(hero,'mat_lingshi'),480);
+const e2:any={tag:'duoshe_soul',realm:1};let nested=0;const listener=()=>{nested++;sys.onKill(e2)};C.itemListeners.push(listener);try{sys.onKill(e2)}finally{C.itemListeners.splice(C.itemListeners.indexOf(listener),1)}assert.equal(nested,2);assert.equal(C.bagCount(hero,'pill_yanghun'),2);assert.equal(C.bagCount(hero,'mat_lingshi'),640);
+console.log('soul rewards: atomic payout, overflow ground recovery, duplicate and reentrant kill notifications');

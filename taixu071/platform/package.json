@@ -1,0 +1,12 @@
+{
+  "name": "fanren-mod-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "凡人修仙传 · 模组平台（模组商店 / 创意工坊）——零依赖 Node 服务",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test/api.test.mjs"
+  }
+}

@@ -1,0 +1,13 @@
+import './env';
+import assert from 'node:assert/strict';
+import { MijingSys } from '../src/world/mijing';
+import { audio } from '../src/world/audio';
+(audio as any).sfx=()=>{};
+const world={x:20,y:30,id:'mat_lingshi',n:1,t:3,blocked:true};
+const protectedDrop={x:9999,y:8888,id:'mat_lingshi',n:3,t:2,blocked:true};
+const normalDrop={x:9999,y:8888,id:'mat_lingshi',n:4,t:2};
+const already={x:9999,y:8888,id:'mat_lingshi',n:5,t:2,blocked:true,collected:true};
+const game:any={player:{x:9999,y:8888,st:{strands:new Map(),springs:new Map()}},combat:{loot:[protectedDrop,normalDrop,already],enemies:[]},cam:{},npcs:{followers:()=>[]},hero:{medStale:0},ws:{},day:1,toast(){},updateUI(){}};
+const sys=new MijingSys(game);sys.cur={spec:{name:'测试秘境',tier:1,theme:'cave',seed:1,floors:1,rooms:3,lv:1} as any,floors:[{bossDead:false} as any],fi:0,back:{x:20,y:30,flying:false},stash:[],stashLoot:[world],t:0,got:[],kills:0};
+sys.leave('down');assert.equal(sys.cur,null);assert.equal(game.combat.loot.length,2);assert.equal(game.combat.loot[0],world);assert.deepEqual(game.combat.loot[1],{...protectedDrop,x:20,y:30,t:0});assert.equal(game.player.x,20);
+console.log('mijing protected drops: world stash remains separate, uncollected protected loot recovers at entry');

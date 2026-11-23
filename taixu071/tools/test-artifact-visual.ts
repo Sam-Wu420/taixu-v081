@@ -1,0 +1,43 @@
+import assert from 'node:assert/strict';
+import './env';
+(globalThis as any).window = { innerWidth: 800, innerHeight: 600, devicePixelRatio: 1, addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: false }) };
+(globalThis as any).localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+const { artLook, ART_LOOK } = await import('../src/data/artlooks');
+const { artIconURL, artSprite } = await import('../src/gfx/artifact');
+const { itemIconURL } = await import('../src/ui/ItemIcon');
+const { ITEMS } = await import('../src/data/items');
+const { lookOf } = await import('../src/world/artacts');
+const { itemArtLook } = await import('../src/data/itemArtLook');
+const { CharState, HANLI_LOOK, drawCharacter } = await import('../src/gfx/character');
+const { createCanvas } = await import('@napi-rs/canvas');
+assert.deepEqual(artLook('art_qingfeng'), ART_LOOK.art_qingfeng);
+assert.equal(artLook('new', 'ring', '#123456').shape, 'ring');
+assert.equal(artLook('new', 'ring', '#123456').c1, '#123456');
+const bad = artLook('new', 'ring', 'bad', { shape: 'bad', c1: 'red', c2: '#nothex', glow: '999,1,1' } as any);
+assert.deepEqual(bad, { shape: 'ring', c1: '#c0c8c0', c2: '#6a5a40', glow: '220,230,220' });
+const custom = { shape: 'ding', c1: '#123456', c2: '#abcdef', glow: '20,100,230' } as const;
+const spec: any = { id: 'art_test_custom', name: '测试器', type: 'artifact', tier: 1, glyph: '器', art: { kind: 'ring', color: '#334455', look: custom } };
+ITEMS[spec.id] = spec;
+assert.deepEqual(lookOf(spec.id), custom);
+const u1 = itemIconURL(spec.id, 64); assert.ok(u1?.startsWith('data:image/png'));
+spec.art.look = { ...custom, shape: 'flame', c1: '#cc3322' };
+assert.equal(lookOf(spec.id).shape, 'flame');
+const u2 = itemIconURL(spec.id, 64); assert.notEqual(u1, u2, 'same id changed appearance must invalidate icon');
+const v1 = artIconURL('not-registered', 'ring', '#111111', 64), v2 = artIconURL('not-registered', 'sword', '#eeeeee', 64);
+assert.notEqual(v1, v2, 'different kind/color must not use stale cache');
+const l1 = { ...custom, glow: '20,100,230' }, l2 = { ...custom, glow: '230,100,20' };
+const s1 = artSprite(l1, 1), s2 = artSprite(l2, 1);
+assert.ok(s1 && s2); assert.notEqual(s1, s2); assert.notEqual(s1.toDataURL(), s2.toDataURL(), 'sprite glow changes its pixels');
+assert.equal(artSprite(l1, Infinity), null); assert.equal(artIconURL('x', 'ring', '#ffffff', Infinity), null); assert.equal(artIconURL('x', 'ring', '#ffffff', 10000), null);
+// 同一装备数据也驱动人物的遁具，真实绘制 8 个角度。
+spec.art.look = { shape: 'boat', c1: '#123456', c2: '#abcdef', glow: '20,100,230' };
+assert.equal(itemArtLook(spec.id).shape, 'boat');
+const canvas = createCanvas(400, 400), ctx = canvas.getContext('2d') as any;
+for (let i = 0; i < 8; i++) {
+  const st = new CharState(200, 280); st.t = 1; st.yaw = st.targetYaw = i * Math.PI / 4; st.lift = 30; st.setAction('fly');
+  ctx.clearRect(0, 0, 400, 400); drawCharacter(ctx, HANLI_LOOK, st, 1.5, 1 / 60, { mount: spec.id });
+  let ink = 0; const pixels = ctx.getImageData(0, 0, 400, 400).data; for (let j = 3; j < pixels.length; j += 4) if (pixels[j] > 5) ink++;
+  assert.ok(ink > 100, `mount angle ${i} missing`);
+}
+delete ITEMS[spec.id];
+console.log('artifact visuals: default compatibility, safe overrides, UI/action mapping, cache invalidation and pixel output passed');

@@ -1,0 +1,16 @@
+import './env';
+import assert from 'node:assert/strict';
+import {createCanvas} from './env';
+import {getLayout} from '../src/gfx/building';
+import {ALL_LOCATIONS} from '../src/data/world';
+import {drawLocationPieceFallback,renderLocationOutline,LocationOutlineCache} from '../src/gfx/locationLod';
+const original=getLayout(ALL_LOCATIONS.find(l=>l.type==='town')!);
+const tree:any={kind:'tree',x:0,y:0,seed:123,p:{sp:'peach',s:1}};
+const layout={...original,id:'winter-tree-test',gw:800,gh:800,ground:[],wet:undefined,pieces:[tree]};
+const c=createCanvas(500,500),g:any=c.getContext('2d');let fills=0,ellipses=0;const fill=g.fill.bind(g),ellipse=g.ellipse.bind(g);g.fill=(...a:any[])=>{fills++;return fill(...a)};g.ellipse=(...a:any[])=>{ellipses++;return ellipse(...a)};
+drawLocationPieceFallback(g,tree,layout,250,400,3);assert.equal(fills,0,'winter peach placeholder must consist of branches, not a solid canopy');assert.equal(ellipses,0);const pixels=g.getImageData(0,0,500,500).data;assert(pixels.some((v:number,i:number)=>i%4===3&&v>0));
+const winter=renderLocationOutline(layout,3), summer=renderLocationOutline(layout,1);
+assert.notDeepEqual(Buffer.from((winter.canvas as any).toBuffer('image/png')),Buffer.from((summer.canvas as any).toBuffer('image/png')),'season changes initial silhouette');
+const cache=new LocationOutlineCache();const s=cache.build(layout,1);cache.step(layout);cache.step(layout);assert(s.refined);const w=cache.build(layout,3);assert.notEqual(w,s);cache.step(layout);cache.step(layout);assert(w.refined);assert.notDeepEqual(Buffer.from((s.refined as any).toBuffer('image/png')),Buffer.from((w.refined as any).toBuffer('image/png')),'refined sprite uses current season');
+assert.equal(cache.get(layout,3),w);assert.equal(cache.get(layout,1),undefined,'previous season does not leak through cache');
+console.log('location trees: winter branch fallback, seasonal initial and refined sprites, cache invalidation');

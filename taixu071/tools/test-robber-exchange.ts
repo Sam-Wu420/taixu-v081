@@ -1,0 +1,15 @@
+import './env';
+import assert from 'node:assert/strict';
+import {Happen} from '../src/world/happen';
+import {Combat} from '../src/world/combat';
+import {updateWorldDrop} from '../src/world/combatDropSafety';
+import * as C from '../src/world/cultivation';
+const hero=C.newHero();hero.realm=1;hero.bag=[{id:'mat_lingshi',n:100}];const combat:any={enemies:[],loot:[]};combat.dropLoot=Combat.prototype.dropLoot.bind(combat);const notes:string[]=[];
+const g:any={hero,player:{x:0,y:0},ws:{rep:0},mijing:{active:false},combat,toast:(s:string)=>notes.push(s),concealed:false};const sys:any=new Happen(g);
+const make=()=>{const e:any={x:10,y:0,name:'劫修',realm:1,stage:0,dead:false,busy:true,aggro:false},x:any={id:1,kind:'robber',x:10,y:0,done:false,foes:[e],d:{engaged:true}};sys.haps=[x];combat.enemies=[e];return {e,x};};
+let {e,x}=make(),node=sys.robberNode(x),pay=node.options.find((v:any)=>v.label.includes('买路财')).act;
+hero.bag=[{id:'mat_lingshi',n:10}];assert.match(pay().text,/变化/);assert.equal(C.bagCount(hero,'mat_lingshi'),10);assert.equal(x.done,false);assert(combat.enemies.includes(e));
+hero.bag=[{id:'mat_lingshi',n:100}];g.player.x=1000;assert.match(pay().text,/变化/);g.player.x=0;const old=g.ws;g.ws={rep:0};assert.match(pay().text,/变化/);g.ws=old;assert.match(pay().text,/识时务/);assert.equal(C.bagCount(hero,'mat_lingshi'),80);assert.equal(x.done,true);assert.equal(e.aggro,false);assert.equal(e.flee,true);assert.equal((e as any).departing,true);assert.match(pay().text,/变化/);assert.equal(C.bagCount(hero,'mat_lingshi'),80);
+({e,x}=make());hero.realm=4;hero.bag=[{id:'mat_lingshi',n:Number.MAX_SAFE_INTEGER}];node=sys.robberNode(x);const tip=node.options[0].act;tip();assert.equal(x.done,true);assert.equal(g.ws.rep,-1);assert.equal(combat.loot.length,1);assert.equal(combat.loot[0].blocked,true);tip();assert.equal(combat.loot.length,1);hero.bag=[];const drop=combat.loot[0];assert.equal(updateWorldDrop(drop,g.player,false,1,(id,n)=>C.addItem(hero,id,n),()=>{}),false);assert(C.bagCount(hero,'mat_lingshi')>0);
+({e,x}=make());hero.realm=1;hero.bag=[{id:'mat_lingshi',n:100}];node=sys.robberNode(x);const fight=node.options.find((v:any)=>v.label==='动手').act;fight();assert.equal(e.aggro,true);const oldPay=node.options.find((v:any)=>v.label.includes('买路财')).act;assert.match(oldPay().text,/变化/);assert.equal(C.bagCount(hero,'mat_lingshi'),100);
+console.log('robber: atomic fee, old choices, combat state, full-bag protection and one-shot settlement');

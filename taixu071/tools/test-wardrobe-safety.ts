@@ -1,0 +1,13 @@
+import './env';import assert from 'node:assert/strict';import {createCanvas} from './env';
+(globalThis as any).window={innerWidth:800,innerHeight:600,devicePixelRatio:1,addEventListener(){},removeEventListener(){},matchMedia:()=>({matches:false})};(globalThis as any).localStorage={getItem:()=>null,setItem(){},removeItem(){}};
+const {normalizeWardrobe,dressLook,HANLI_LOOK,CharState,drawCharacter,resolveLook,DEFAULT_WARDROBE,OUTFITS,applyOutfit}=await import('../src/gfx/character');
+const bad:any={sex:'unknown',outfit:'__proto__',dye:NaN,hairStyle:'x',height:Infinity,build:-1,skin:{},hair:'bad',ribbon:'url(x)',pin:'bogus',face:{eye:'__proto__',brow:'x',eyeSize:NaN,mouth:900,iris:'invalid',mole:99},head:{size:Infinity,jaw:-20},body:{arm:500,chest:null},clothingColors:{robe:'red',inner:'#012345'},clothingStyle:{over:'banana',sleeve:'wide'}};
+const copy=structuredClone(bad),clean=normalizeWardrobe(bad);assert.deepEqual(bad,copy);assert.equal(clean.sex,'m');assert.equal(clean.outfit,'qingshan');assert.equal(clean.dye,0);assert.equal(clean.build,.82);assert.equal(clean.height,undefined);assert.equal(clean.face?.mouth,1.2);assert.equal(clean.head?.jaw,0);assert.equal(clean.body?.arm,1.06);assert.equal(clean.clothingStyle?.sleeve,'wide');assert.equal(clean.clothingColors?.inner,'#012345');assert.equal(clean.hair,undefined);assert.equal(clean.ribbon,undefined);
+for(const malformed of [null,undefined,[],bad,{sex:'f',outfit:'guangxiu',dye:1.5,face:{eyeSize:null},height:'bad'}]){
+ const look=dressLook(HANLI_LOOK,malformed as any);const r=resolveLook(look);for(const x of [...Object.values(r.face),...Object.values(r.head),...Object.values(r.body)])if(typeof x==='number')assert.ok(Number.isFinite(x));
+ for(let i=0;i<8;i++){const cv=createCanvas(240,260),g:any=cv.getContext('2d'),st=new CharState(120,200);st.yaw=st.targetYaw=i*Math.PI/4;st.update(1/60);assert.doesNotThrow(()=>drawCharacter(g,look,st,1,1/60))}
+}
+for(const o of OUTFITS){const sex=o.sex==='u'?'m':o.sex;for(let dye=0;dye<o.dyes.length;dye++){const w={...DEFAULT_WARDROBE[sex],outfit:o.id,dye};assert.equal(normalizeWardrobe(w).outfit,o.id);assert.equal(dressLook(HANLI_LOOK,w).dye,dye)}}
+assert.doesNotThrow(()=>applyOutfit(HANLI_LOOK,'qingshan',NaN));assert.equal(applyOutfit(HANLI_LOOK,'__proto__'),HANLI_LOOK);
+const {Game}=await import('../src/world/game');const game:any={hero:{},player:{}};Game.prototype.setWardrobe.call(game,bad);assert.equal(game.hero.wardrobe.sex,'m');assert.equal(game.player.look.build,.82);
+console.log('wardrobe safety: malformed values, enum/color/range validation, nonmutation, all outfits, 48 directional renders and game entry passed');

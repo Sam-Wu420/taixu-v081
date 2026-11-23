@@ -1,0 +1,18 @@
+import './env';
+import assert from 'node:assert/strict';
+import {NodeField} from '../src/world/nodes';
+import {senseSignals} from '../src/world/senseSignals';
+const field = new NodeField({} as any);
+const n=(id:number)=>({key:`${id}:0`,x:id*100,y:0,kind:'herb' as const,item:'secret-item',rare:true,seed:id});
+const a=n(10), b=n(12), c=n(30);
+field.rememberVisible(a);field.rememberVisible(b);field.rememberVisible(c);field.rememberVisible(a);
+field.harvested.set(b.key,20);
+const before=JSON.stringify(field.toSave());
+assert.deepEqual(field.knownSignals(0,0,2000,10),[{x:1000,y:0,kind:'灵物气息'}]);
+assert.equal(JSON.stringify(field.toSave()),before);
+assert.deepEqual(senseSignals([],[],0,0,500,2000,false,5,field.knownSignals(0,0,2000,20)),[{kind:'灵物气息',direction:'东',count:2,distance:1000,hostile:false}]);
+assert.equal(field.knownSignals(0,0,NaN,10).length,0);
+for(let i=100;i<100+NodeField.OBSERVED_LIMIT;i++)field.rememberVisible(n(i));
+assert.equal((field as any).observed.size,NodeField.OBSERVED_LIMIT);assert.equal((field as any).observed.has(a.key),false);
+field.fromSave([]);assert.equal((field as any).observed.size,0);assert.equal(field.knownSignals(0,0,999999,30).length,0);
+console.log('node awareness: observed only, bounded memory, no generation, depletion, respawn, aggregation and load reset passed');

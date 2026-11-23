@@ -1,0 +1,31 @@
+import './env';
+import assert from 'node:assert/strict';
+import {SiteSys} from '../src/world/sites';
+import {Events} from '../src/world/events';
+import {ACTIVE_MAP} from '../src/data/world';
+import {senseSignals} from '../src/world/senseSignals';
+const mkSite=(key:string,x:number)=>({key,x,y:0,kind:'corpse'});
+const a=mkSite('0,0',500), b=mkSite('1,0',1200), c=mkSite('2,0',1800);
+const ws:any={sites:{},caches:[{map:ACTIVE_MAP,x:700,y:0,done:false}]};let toasts=0,guards=0,bounds:number[]=[];
+const game:any={player:{x:0,y:0},senseRadius:2200,detailSenseRadius:1000,ws,day:0,combat:{enemies:[]},toast:()=>toasts++,hint:()=>{}};
+const sites:any=Object.create(SiteSys.prototype);Object.assign(sites,{game,guards:new Map(),known:new Map(),scanT:0,nestTick:()=>{},ensureGuard:()=>guards++,inRect:(...v:number[])=>{bounds=v;return [a,b,c]},seenText:()=>''});
+sites.update(.2);assert.equal(ws.sites[ACTIVE_MAP+'|0,0'].seen,1);assert.equal(ws.sites[ACTIVE_MAP+'|1,0'],undefined);assert.equal(ws.sites[ACTIVE_MAP+'|2,0'],undefined);assert.equal(ws.caches[0].found,undefined);assert.equal(toasts,1);assert.equal(guards,0);assert.equal(bounds[2],2970);
+// 敛息时旧作用范围小于精细圈：精细圈仍可发现，并且只在精细距离内标记。
+game.senseRadius=400;game.detailSenseRadius=1500;sites.scanT=0;sites.update(.2);assert.equal(ws.sites[ACTIVE_MAP+'|1,0'].seen,1);assert.equal(ws.sites[ACTIVE_MAP+'|2,0'],undefined);assert.equal(ws.caches[0].found,1);assert.equal(bounds[2],1980);
+const events:any=Object.create(Events.prototype);let et=0;const encs:any[]=[{x:500,y:0,seen:false,done:false,kind:'cave',t:0,data:{}},{x:1200,y:0,seen:false,done:false,kind:'cave',t:0,data:{}},{x:1700,y:0,seen:true,done:false,kind:'beast',t:0,data:{name:'secret'}},{x:1800,y:0,seen:true,done:true,kind:'cave',t:0,data:{}}];
+const eg:any={player:{x:0,y:0},senseRadius:2500,detailSenseRadius:1000,time:1,toast:()=>et++,combat:{safeAt:()=>true},sitting:false};Object.assign(events,{game:eg,enc:encs});
+events.encTick(.1);assert.equal(encs[0].seen,true);assert.equal(encs[1].seen,false);assert.equal(et,1);
+const before=JSON.stringify(events.enc);const signals=events.knownSignals();assert.equal(JSON.stringify(events.enc),before);assert.deepEqual(signals,[{x:500,y:0,kind:'奇遇气息'},{x:1700,y:0,kind:'奇遇气息'}]);
+assert.deepEqual(senseSignals([],[],0,0,1000,2500,false,5,signals),[{kind:'奇遇气息',direction:'东',count:1,distance:1700,hostile:false}]);
+eg.senseRadius=400;eg.detailSenseRadius=1500;events.encTick(.1);assert.equal(encs[1].seen,true);assert.equal(et,2);
+console.log('site and encounter discovery: detail radius, concealed cases, read-only known signals and no secret details passed');
+// 另一条野外事件管线：只改变发现提示的距离，不影响事件 tick 或生成半径。
+const {Happen}=await import('../src/world/happen');const hap:any=Object.create(Happen.prototype);
+let ticks=0,shown=0;
+const hg:any={player:{x:0,y:0,sitting:false},senseRadius:2200,detailSenseRadius:1000,time:1,toast:()=>shown++,combat:{safeAt:()=>true,enemies:[]}};
+const hx:any[]=[{x:500,y:0,seen:false,done:false,kind:'wager',t:0,d:{},foes:[]},{x:1200,y:0,seen:false,done:false,kind:'wager',t:0,d:{},foes:[]},{x:1700,y:0,seen:true,done:false,kind:'wager',t:0,d:{secret:'never exposed'},foes:[]}];
+Object.assign(hap,{game:hg,haps:hx,departingNpcs:[],obtain:{tick:()=>{}},great:{tick:()=>{}},tick:()=>ticks++,heraldTick:()=>{},bountyTick:()=>{}});
+hap.update(.1);assert.equal(ticks,3);assert.equal(shown,1);assert.equal(hx[1].seen,false);
+const hapBefore=JSON.stringify(hap.haps);assert.deepEqual(hap.knownSignals(),[{x:500,y:0,kind:'奇遇气息'},{x:1700,y:0,kind:'奇遇气息'}]);assert.equal(JSON.stringify(hap.haps),hapBefore);
+hg.senseRadius=400;hg.detailSenseRadius=1500;hap.update(.1);assert.equal(hx[1].seen,true);assert.equal(shown,2);assert.equal(ticks,6);
+console.log('secondary encounters: detail discovery, read-only signal and continuing event ticks passed');

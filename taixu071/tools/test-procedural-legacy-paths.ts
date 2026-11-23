@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import './env';
+const { paintedIcon, registerIcons } = await import('../src/gfx/icons');
+const { ITEMS } = await import('../src/data/items');
+const { warm53, v53, url53, loaded53 } = await import('../src/gfx/v053Tex');
+for (const id of Object.keys(ITEMS)) assert.ok(paintedIcon(id)?.startsWith('data:image/svg+xml'), id);
+assert.equal(paintedIcon('unknown-test-id'), null);
+registerIcons({ zf_pan1: 'data:image/png;base64,AA==' });
+assert.equal(paintedIcon('zf_pan1'), 'data:image/png;base64,AA==');
+warm53([]); warm53(['unknown-test-id']);
+assert.equal(v53('unknown-test-id'), null); assert.equal(url53('icon_zhenpan_1'), undefined); assert.equal(loaded53(), true);
+assert.ok(!readFileSync('src/gfx/icons.ts','utf8').includes("from './iconData'"));
+assert.ok(!readFileSync('src/gfx/v053Data.ts','utf8').includes('../assets/'));
+console.log('legacy image paths: procedural items, explicit override, missing image fallback and no legacy asset imports passed');

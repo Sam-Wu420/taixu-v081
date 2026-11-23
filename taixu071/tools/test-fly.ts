@@ -1,0 +1,30 @@
+// 炼气不可凭空御剑；装备飞行法器后可起飞；筑基后可原生御剑起落
+import assert from 'node:assert/strict';
+(globalThis as any).window = { innerWidth: 1280, innerHeight: 800, devicePixelRatio: 1, addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: false }) };
+(globalThis as any).localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+await import('./env');
+const { Terrain } = await import('../src/world/terrain');
+const { Game } = await import('../src/world/game');
+const t = new Terrain(); t.build();
+const g = new Game(t);
+assert.equal(g.canFly, false, '炼气无飞行法器时不可起飞');
+g.toggleFly();
+assert.equal(g.isFlying, false, '炼气按 F 不应起飞');
+g.hero.bag.push({ id: 'art_shenfeng', n: 1 });
+g.hero.equip.flight = 'art_shenfeng';
+assert.equal(g.canFly, true, '炼气装备神风舟后可乘舟飞行');
+g.toggleFly();
+assert.equal(g.isFlying, true, '炼气乘神风舟可起飞');
+g.toggleFly();
+assert.equal(g.isFlying, false);
+delete g.hero.equip.flight;
+
+g.hero.realm = 2; g.hero.stage = 0;
+for (let i = 0; i < 10; i++) g.update(1 / 30);
+console.log('after 筑基 flying?', g.isFlying, 'canFly', g.canFlyNative);
+g.toggleFly(); console.log('F ->', g.isFlying, 'speed', Math.round(g.speed));
+assert.equal(g.isFlying, true);
+g.toggleSit(); console.log('sit ->', g.player.sitting, 'flying', g.isFlying);
+assert.equal(g.isFlying, false);
+g.toggleSit(); g.toggleFly(); g.toggleFly(); console.log('land ->', g.isFlying, 'speed', Math.round(g.speed));
+assert.equal(g.isFlying, false);

@@ -1,0 +1,21 @@
+import './env';
+import { outPng } from './outPng';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createCanvas} from './env';
+import {setCanvasFactory} from '../src/core/canvas';
+import {MOOD_KEYS,moodImage} from '../src/gfx/moodProcedural';
+(globalThis as any).window={innerWidth:800,innerHeight:600,devicePixelRatio:1,addEventListener(){},removeEventListener(){},matchMedia:()=>({matches:false})};
+(globalThis as any).localStorage={getItem:()=>null,setItem(){},removeItem(){}};
+const {MoodLayer,setAtmo,setGrain}=await import('../src/world/mood');const {Scenery}=await import('../src/world/scenery');
+assert.equal(MOOD_KEYS.length,19);setCanvasFactory(()=>{throw Error('unavailable')});assert.equal(moodImage('moon_full'),null);setCanvasFactory((w,h)=>createCanvas(w,h) as any);assert.ok(moodImage('moon_full'));
+const hashes=new Set<string>();const sheet=createCanvas(1200,Math.ceil(MOOD_KEYS.length/5)*185),sg:any=sheet.getContext('2d');sg.fillStyle='#38464d';sg.fillRect(0,0,sheet.width,sheet.height);
+for(const [i,k] of MOOD_KEYS.entries()){const c:any=moodImage(k);assert.ok(c,k);assert.equal(c,moodImage(k));const p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;let vis=0;for(let j=3;j<p.length;j+=4)if(p[j]>2)vis++;assert.ok(vis>25,k);hashes.add(createHash('sha256').update(p).digest('hex'));const x=i%5*240,y=Math.floor(i/5)*185;sg.drawImage(c,x+15,y+5,200,125);sg.fillStyle='#fff';sg.font='14px sans-serif';sg.fillText(k,x+15,y+155)}
+assert.equal(hashes.size,19);assert.equal(moodImage('unknown'),null);assert.ok(!readFileSync('src/world/mood.ts','utf8').includes('../assets/mood/'));outPng('mood-check.png', sheet.toBuffer('image/png'));
+setAtmo(true);setGrain(true);const m=new MoodLayer(),canvas=createCanvas(800,600),g:any=canvas.getContext('2d'),seen:any[]=[],base=g.drawImage.bind(g);g.drawImage=(im:any,...p:any[])=>{seen.push(im);return base(im,...p)};
+const game:any={dayPhase:.25,night:0,weather:{kind:'clear',k:0,wind:.2},combat:{inCombat:false},player:{flying:false},cam:{zoom:1},season:0,time:1,day:15,life:{vis:()=>1}};m.update(.1,game,0,0);m.warm(800,600);m.drawBack(g,800,600,game,0,1,false,1);assert.ok(seen.length>0,'day backdrop');
+const count=seen.length;game.night=1;m.drawSky(g,800,600,game,1,0);assert.ok(seen.includes(moodImage('moon_full')));assert.ok(seen.length>count);game.day=2;m.drawSky(g,800,600,game,1,0);assert.ok(seen.includes(moodImage('moon_crescent')));
+game.weather={kind:'rain',k:.8,wind:.4};m.drawBack(g,800,600,game,0,1,true,2);assert.ok(seen.includes(moodImage('rain_veil')));m.drawPost(g,800,600,true);assert.ok(seen.includes(moodImage('paper_grain'))&&seen.includes(moodImage('ink_vignette')));
+const scenery:any=new Scenery();scenery.props=[{kind:'reed',x:250,y:300,s:1,flip:false},{kind:'lotus',x:350,y:300,s:1,flip:false},{kind:'plum',x:450,y:300,s:1,flip:false}];scenery.sails=[{x:550,y:300,vx:1,ph:0}];game.season=3;scenery.drawPoints(g,game,{left:0,top:0,right:800,bottom:600},1);for(const k of ['reed_marsh','lotus_withered','plum_branch','lone_sail','fishing_light'])assert.ok(seen.includes(moodImage(k)),k);
+console.log('procedural mood: 19 cached images, retry, day/night/rain/post and real lake scenery paths passed');

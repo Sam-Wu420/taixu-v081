@@ -1,0 +1,7 @@
+cloudstore/
+__pycache__/
+*.pyc
+# 测试脚本（含本地密钥），不发布
+_t_npc.py
+_local_*.py
+npc_keys.json

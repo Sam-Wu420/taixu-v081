@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f2420" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>太虚问道录 · 人界篇 v0.71 · 问道残卷</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <style>
+    html,body{margin:0;padding:0;height:100%;background:#161a17;overflow:hidden}
+    #boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:radial-gradient(120% 90% at 50% 18%,#2b382f 0%,#1b221d 46%,#121614 100%);
+      color:#e8dcc0;font-family:"STKaiti","KaiTi",serif;transition:opacity .55s ease;will-change:opacity;
+      -webkit-tap-highlight-color:transparent}
+    #boot.out{opacity:0;pointer-events:none}
+    #boot .seal{position:absolute;inset:0;opacity:.16;pointer-events:none;
+      background:radial-gradient(40% 30% at 50% 78%,rgba(120,150,120,.55),transparent 70%),
+                 radial-gradient(55% 26% at 50% 96%,rgba(70,95,80,.6),transparent 72%)}
+    #boot .t1{font-size:clamp(26px,7vw,44px);letter-spacing:.42em;text-indent:.42em;
+      text-shadow:0 2px 18px rgba(0,0,0,.7),0 0 1px rgba(255,236,190,.35);margin-bottom:10px}
+    #boot .t2{font-size:clamp(12px,3.2vw,15px);letter-spacing:.34em;text-indent:.34em;color:#b9ab8a;margin-bottom:38px}
+    #boot .bar{width:min(280px,62vw);height:3px;background:rgba(200,185,150,.22);border-radius:3px;overflow:hidden;
+      box-shadow:0 0 0 1px rgba(216,199,154,.10),0 0 18px rgba(216,199,154,.12) inset}
+    #boot .bar i{display:block;height:100%;width:42%;border-radius:3px;
+      background:linear-gradient(90deg,transparent,#f0e0b4 45%,#fff6da 55%,transparent);
+      box-shadow:0 0 10px rgba(240,224,180,.75);animation:sweep 1.45s ease-in-out infinite}
+    @keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(365%)}}
+    #boot .tip{margin-top:16px;font-size:12.5px;letter-spacing:.08em;color:#b3ad96;text-align:center;line-height:1.85;padding:0 24px}
+    #boot .tip b{color:#e2d5ae;font-weight:400}
+    #boot .wait{margin-top:10px;font-size:11.5px;color:#8f8a76;letter-spacing:.06em;min-height:1em}
+    @media (prefers-reduced-motion:reduce){#boot .bar i{animation:none;width:100%;opacity:.5}}
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="seal"></div>
+    <div class="t1">太虚问道录</div>
+    <div class="t2">人 界 篇</div>
+    <div class="bar"><i></i></div>
+    <div class="tip">正在载入人界……<br><b>首次进入需下载约 68 MB</b>，之后走缓存会快很多</div>
+    <div class="wait" id="wait"></div>
+  </div>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    (function () {
+      var boot = document.getElementById('boot');
+      var done = false;
+      function hide() {
+        if (done) return; done = true;
+        boot.className = 'out';
+        setTimeout(function () { boot.parentNode && boot.parentNode.removeChild(boot); }, 620);
+      }
+      var root = document.getElementById('root');
+      var mo = new MutationObserver(function () {
+        if (root.childElementCount > 0) { mo.disconnect(); setTimeout(hide, 260); }
+      });
+      mo.observe(root, { childList: true });
+      var w = document.getElementById('wait'), t0 = Date.now(), tk = null;
+      tk = setInterval(function () {
+        if (done) { clearInterval(tk); return; }
+        var sec = Math.round((Date.now() - t0) / 1000);
+        if (sec >= 6) {
+          w.textContent = sec >= 25
+            ? '已等待 ' + sec + ' 秒 · 网络较慢，请保持此页面打开'
+            : '已等待 ' + sec + ' 秒';
+        }
+      }, 1000);
+      setTimeout(hide, 110000);
+    })();
+  </script>
+</body>
+</html>

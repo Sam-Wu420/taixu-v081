@@ -1,0 +1,18 @@
+# 只忽略依赖、构建输出和大文件；美术资源与源码全部入库
+node_modules/
+desktop/node_modules/
+desktop/release/
+.DS_Store
+*.log
+tools/out/
+
+# 构建产物不入库
+dist/
+dist-slim/
+art-incoming/
+dist-mods/
+dist-modkit/
+dist-studio/
+
+# 打好的发布包不入库
+*.zip
