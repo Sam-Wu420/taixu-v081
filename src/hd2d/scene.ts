@@ -921,12 +921,13 @@ export class HdScene {
     const capacity = Math.max(0, MAX_BB - start.count);
     // 优化：复用数组，避免每帧 map 创建新对象
     const order = this._batchOrder;
-    order.length = requests.length;
+    if (order.length < requests.length) order.length = requests.length;
     for (let i = 0; i < requests.length; i++) {
       const r = requests[i];
-      if (i < order.length) { order[i].request = r; order[i].index = i; order[i].h = (r.b - r.t) * r.scale; }
+      if (order[i]) { order[i].request = r; order[i].index = i; order[i].h = (r.b - r.t) * r.scale; }
       else order[i] = { request: r, index: i, h: (r.b - r.t) * r.scale };
     }
+    order.length = requests.length;
     if (order.length > capacity) {
       // 优化：单次排序（合并优先级 + 高度），截断后不再二次排序
       order.sort((a, b) => b.request.priority - a.request.priority || b.h - a.h || a.request.seq - b.request.seq);
