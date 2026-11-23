@@ -831,6 +831,8 @@ export function drawCombatUI(g: G, c: Combat, t: number, z: number) {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   let uiMark = prof.t();
   const uiView = c.game.renderer?.viewRect() ?? null, uiPlayer = c.game.player, crowd = c.units.length > 150;
+  // 远景优化：zoom < 0.4 时，远处单位只显示简要血条（名牌太小看不见）
+  const farZoom = z < 0.4;
   for (const e of c.units) {
     if (e.dead) continue;
     // 屏幕外的单位不画名牌血条
@@ -841,7 +843,9 @@ export function drawCombatUI(g: G, c: Combat, t: number, z: number) {
     const arm = !!(e as { sbArm?: boolean }).sbArm;
     if (arm && c.lock !== e) continue;
     // 人多时（超过 150 个单位）只有近处、锁定目标、精英和首领显示完整名牌，其余只在受伤或交战时显示一条血条
-    const brief = crowd && c.lock !== e && !e.affix && !e.boss && Math.hypot(e.x - uiPlayer.x, e.y - uiPlayer.y) > 700;
+    const dist = Math.hypot(e.x - uiPlayer.x, e.y - uiPlayer.y);
+    const brief = (crowd && c.lock !== e && !e.affix && !e.boss && dist > 700)
+      || (farZoom && c.lock !== e && !e.boss && dist > 400);
     hdUi.at?.(g, e.x, e.y);
     if (!e.aggro && e.hp >= e.maxHp && c.lock !== e) {
       // 未交战：仅显示名牌（悬停般淡）
