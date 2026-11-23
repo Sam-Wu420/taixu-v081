@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <!-- 游戏里的立绘用相对路径（./art/…），这一页在 /tools/ 下，不设基准路径头像全是空的 -->
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>B 版真实场景性能验收</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#161a17}
+    #perf-panel{position:fixed;right:8px;top:8px;z-index:2147483647;width:330px;max-height:calc(100vh - 16px);overflow:auto;padding:10px 12px;background:rgba(19,28,25,.94);color:#eee6ce;border:1px solid #a5926b;border-radius:6px;font:13px/1.5 system-ui,sans-serif}
+    #perf-panel h1{font-size:15px;margin:0 0 4px} #perf-panel p{margin:4px 0} #perf-panel button{margin:2px;padding:5px 7px;border:1px solid #a5926b;background:#394b3d;color:#fff5d9;border-radius:3px;cursor:pointer} #perf-panel button:disabled{opacity:.5;cursor:default}
+    #perf-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:28vh;overflow:auto;background:#111a16;padding:6px;font:11px/1.4 monospace} #perf-status{color:#f2cc7c}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <aside id="perf-panel" aria-label="性能验收控制台">
+    <h1>B 版真实场景性能验收</h1>
+    <p id="perf-config"></p>
+    <p id="perf-status" role="status">等待正常游戏启动…</p>
+    <button id="run-all" disabled>全部场景</button><button id="stop" disabled>停止</button>
+    <div><button id="run-crowd" disabled>梁京来回</button><button id="run-battle" disabled>40 敌施法</button><button id="run-travel" disabled>长途飞行</button><button id="run-daily" disabled>跨日自动存档</button><button id="run-zoom" disabled>缩放扫描</button></div>
+    <div><button id="download" disabled>下载 JSON</button><button id="copy" disabled>复制 JSON</button><button id="cold">5 次启动页面</button></div>
+    <p>帧间隔含等待显示；CPU 为游戏更新和提交耗时。JS 堆、GPU 计时以浏览器支持为准。</p>
+    <pre id="perf-results">尚无结果</pre>
+  </aside>
+  <script type="module" src="/src/main.tsx"></script>
+  <script type="module" src="/tools/perf-acceptance.ts"></script>
+</body>
+</html>

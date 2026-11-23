@@ -1,0 +1,18 @@
+Before shared 64-unit topology, actual Node probe:
+node --import tsx tools/out/sense-depth-probe.mjs 251520 137300 251520 137300 0.6
+{
+  "position": [251520, 137300],
+  "camera": [251520, 137300],
+  "zoom": 0.6,
+  "radius": 761.1269837220809,
+  "triangleCount": 338,
+  "count": 156,
+  "front": 94,
+  "occluded": 62,
+  "flips": 0,
+  "noGround": 0,
+  "minDelta": -4.879202253439124,
+  "maxDelta": 4.948664686481046,
+  "examples": []
+}
+The probe sampled actual nontransparent sense-ring pixels against real HdGround mesh ray intersections. Adjacent-frame depth flips were not observed in these samples.

@@ -1,0 +1,147 @@
+/* 绝域：罗盘、小地图锁死、法力条旁的警示、泅水提示（ui/Compass.tsx）。动效只动 transform / opacity。 */
+.jy-host { position: absolute; inset: 0; pointer-events: none; }
+
+/* 小地图锁死：一层流动的墨雾盖住整张小地图 */
+.jy-mmlock { position: absolute; inset: 6px; border-radius: 50%; overflow: hidden; opacity: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 50%, rgba(28, 36, 40, 0.86), rgba(10, 14, 16, 0.96) 72%); }
+.jy-mmlock span { position: relative; font-family: var(--title-font); font-size: 17px; letter-spacing: 0.2em; color: #c9b7ec; text-shadow: 0 0 8px rgba(150, 90, 230, 0.8), 0 1px 2px #000; }
+.jy-swirl { position: absolute; inset: -20%; opacity: 0.7;
+  background: repeating-conic-gradient(from 0deg, rgba(120, 90, 170, 0.0) 0deg 18deg, rgba(120, 90, 170, 0.22) 26deg, rgba(20, 30, 34, 0.0) 40deg 60deg),
+              radial-gradient(circle, rgba(80, 60, 120, 0.25), transparent 60%); }
+
+/* 罗盘：小地图左边 */
+.jy-compass { position: absolute; right: calc(100% + 12px); top: 50%; width: 84px; transform: translateY(-50%); opacity: 0; display: flex; flex-direction: column; align-items: center; }
+.jy-face { position: relative; width: 84px; height: 84px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #3b352a, #1c1914 72%); border: 2px solid rgba(226, 201, 138, 0.75); box-shadow: 0 6px 16px rgba(10, 8, 5, 0.5), inset 0 0 0 5px rgba(226, 201, 138, 0.12); }
+.jy-face::before { content: ''; position: absolute; inset: 9px; border-radius: 50%; border: 1px dashed rgba(226, 201, 138, 0.35); }
+.jy-face i { position: absolute; font-style: normal; font-family: var(--title-font); font-size: 12px; color: rgba(243, 231, 201, 0.75); line-height: 1; }
+.jy-face i.n { top: 3px; left: 50%; transform: translateX(-50%); color: #e8775f; }
+.jy-face i.s { bottom: 3px; left: 50%; transform: translateX(-50%); }
+.jy-face i.e { right: 4px; top: 50%; transform: translateY(-50%); }
+.jy-face i.w { left: 4px; top: 50%; transform: translateY(-50%); }
+/* 「岸」：绕着盘面转的一个金色记号 */
+.jy-shore { position: absolute; inset: 0; transition: opacity 0.4s; }
+.jy-shore b { position: absolute; left: 50%; top: 13px; transform: translateX(-50%); width: 18px; height: 18px; border-radius: 50%; font-weight: 400; font-family: var(--title-font); font-size: 12px; line-height: 18px; text-align: center;
+  color: #2a2110; background: radial-gradient(circle at 40% 35%, #f6dfa0, #c49a48); box-shadow: 0 0 6px rgba(240, 200, 110, 0.75); }
+/* 指针：一头朱红指北，一头乌金 */
+.jy-needle { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.jy-needle span { position: absolute; left: -4px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; }
+.jy-needle .up { bottom: 0; border-bottom: 28px solid #d24a34; }
+.jy-needle .dn { top: 0; border-top: 24px solid #c9b98a; }
+.jy-pin { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #e2c98a; box-shadow: 0 0 0 2px #2a241a; }
+/* 绝域罡风：盘面外一圈白气 */
+.jy-gale { position: absolute; inset: -6px; border-radius: 50%; opacity: 0; border: 3px solid rgba(220, 235, 245, 0.55); }
+.jy-dist { margin-top: 3px; white-space: nowrap; font-size: 12px; color: #f3e7c9; text-shadow: 0 1px 2px #000, 0 0 4px rgba(0, 0, 0, 0.8); }
+.jy-band { white-space: nowrap; font-family: var(--title-font); font-size: 13px; color: #cdb8f2; text-shadow: 0 1px 2px #000; }
+
+/* 状态小牌（灵力流失 / 回复减半）：左上区（人物牌、增益行之后）的一行，排版管位置；没有警示时不占地方 */
+.jy-mpwarn { position: relative; display: none; align-self: flex-start; pointer-events: none; height: 22px; margin-left: 8px; padding: 0 9px 0 7px; align-items: center; gap: 5px; white-space: nowrap;
+  border-radius: 11px; font-size: 12px; font-weight: 700; color: #fbe9ff; background: rgba(70, 16, 74, 0.86); border: 1px solid rgba(214, 120, 240, 0.85); }
+.jy-mpwarn.on { display: flex; animation: hudIn 0.3s var(--lq-ease-out) both; }
+.jy-mpwarn.half { color: #fff3d8; background: rgba(78, 52, 14, 0.86); border-color: rgba(230, 180, 90, 0.85); }
+.jy-mpwarn-pulse { width: 8px; height: 8px; border-radius: 50%; background: #e36cff; box-shadow: 0 0 6px #e36cff; }
+.jy-mpwarn.half .jy-mpwarn-pulse { display: none; }
+
+/* 泅水：屏幕下方的状态提示 */
+.jy-swim { position: absolute; left: 50%; bottom: calc(196px + var(--safe-b)); transform: translateX(-50%); text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.35s, transform 0.35s; z-index: 12; }
+.jy-swim .t { font-family: var(--title-font); font-size: 30px; letter-spacing: 0.4em; color: #e6f4fb; text-shadow: 0 0 14px rgba(70, 160, 220, 0.95), 0 2px 4px rgba(0, 0, 0, 0.7); }
+.jy-swim .s { font-size: 13px; color: #e2eef3; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); margin-top: 2px; }
+
+/* 手机：小地图小，罗盘也小一号 */
+.game-root.touch .jy-compass { width: 58px; right: calc(100% + 8px); }
+.game-root.touch .jy-face { width: 58px; height: 58px; }
+.game-root.touch .jy-face i { font-size: 10px; }
+.game-root.touch .jy-shore b { top: 8px; width: 14px; height: 14px; font-size: 10px; line-height: 14px; }
+.game-root.touch .jy-needle .up { border-bottom-width: 19px; }
+.game-root.touch .jy-needle .dn { border-top-width: 16px; }
+.game-root.touch .jy-dist { font-size: 10px; }
+.game-root.touch .jy-band { font-size: 11px; }
+.game-root.touch .jy-mmlock span { font-size: 12px; letter-spacing: 0.1em; }
+.game-root.touch .jy-swim { bottom: calc(150px + var(--safe-b)); }
+.game-root.touch .jy-swim .t { font-size: 22px; }
+.game-root.touch .jy-swim .s { font-size: 11px; max-width: 80vw; }
+@media (max-width: 900px) {
+  .jy-compass { width: 64px; }
+  .jy-face { width: 64px; height: 64px; }
+}
+/* 矮屏（手机横屏）：画面中间是消息和人物，泅水提示挪到顶上正中（人物牌和日期之间的空当） */
+@media (max-height: 520px) {
+  .jy-swim { bottom: auto; top: calc(6px + var(--safe-t)); }
+  .jy-swim .t { font-size: 20px; letter-spacing: 0.3em; }
+  .jy-swim .s { font-size: 11px; max-width: 44vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px auto 0; }
+  .jy-compass { width: 60px; }
+  .jy-face { width: 60px; height: 60px; }
+  .jy-face i { font-size: 10px; }
+  .jy-shore b { top: 8px; width: 14px; height: 14px; font-size: 10px; line-height: 14px; }
+  .jy-dist, .jy-band { font-size: 10px; }
+}
+
+/* —— 海兽（收官 B2） */
+/* 覆海玄鲸的方位：盘面上一枚青色的「鲸」，跟着方向转 */
+.jy-whale { position: absolute; inset: 0; opacity: 0; }
+.jy-whale b { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); width: 16px; height: 16px; border-radius: 50%; font-weight: 400; font-family: var(--title-font); font-size: 11px; line-height: 16px; text-align: center;
+  color: #0f2a28; background: radial-gradient(circle at 40% 35%, #b6f0e2, #4fa79a); box-shadow: 0 0 6px rgba(120, 230, 210, 0.75); }
+.jy-whaletxt { white-space: nowrap; font-size: 11px; color: #bfeee4; text-shadow: 0 1px 2px #000; }
+/* 水下有东西：罗盘底下一行暗红的小字，一明一暗 */
+.jy-lurk { margin-top: 2px; white-space: nowrap; opacity: 0; font-family: var(--title-font); font-size: 13px; letter-spacing: 0.08em; color: #ffb1a0; text-shadow: 0 0 8px rgba(200, 40, 30, 0.85), 0 1px 2px #000; }
+/* 血腥连锁：屏幕下半部正中一条收紧的血线（上方是首领血条和消息，不和它们挤） */
+.jy-blood { position: absolute; left: 50%; bottom: calc(300px + var(--safe-b)); transform: translateX(-50%); opacity: 0; z-index: 13; pointer-events: none; text-align: center; }
+.jy-blood .txt { font-family: var(--title-font); font-size: 16px; letter-spacing: 0.06em; color: #ffd2c4; text-shadow: 0 0 10px rgba(190, 20, 20, 0.95), 0 1px 3px #000; white-space: nowrap; }
+.jy-blood .track { margin: 5px auto 0; width: 300px; height: 6px; border-radius: 3px; background: rgba(30, 6, 6, 0.7); border: 1px solid rgba(220, 70, 50, 0.6); overflow: hidden; }
+.jy-blood .bar { width: 100%; height: 100%; background: linear-gradient(90deg, #6e0b0b, #e0412c 60%, #ffb08a); transform-origin: 50% 50%; }
+/* 被触须缠住 */
+.jy-held { position: absolute; left: 50%; bottom: calc(250px + var(--safe-b)); transform: translateX(-50%); opacity: 0; z-index: 13; pointer-events: none; white-space: nowrap;
+  padding: 6px 16px; border-radius: 18px; font-size: 15px; font-weight: 700; color: #f6e6ff; background: rgba(54, 16, 70, 0.88); border: 1px solid rgba(200, 120, 255, 0.9); }
+.game-root.touch .jy-whale b { top: 2px; width: 12px; height: 12px; font-size: 9px; line-height: 12px; }
+.game-root.touch .jy-lurk, .game-root.touch .jy-whaletxt { font-size: 10px; }
+.game-root.touch .jy-held { bottom: calc(190px + var(--safe-b)); font-size: 12px; }
+@media (max-height: 520px) {
+  .jy-blood { bottom: calc(118px + var(--safe-b)); }
+  .jy-blood .txt { font-size: 12px; }
+  .jy-blood .track { width: 220px; height: 5px; }
+  .jy-held { bottom: auto; top: calc(90px + var(--safe-t)); font-size: 12px; }
+  .jy-lurk, .jy-whaletxt { font-size: 10px; }
+}
+
+/* —— 收官 B3：灵舟、海渊、奇遇。动效只动 transform / opacity。 */
+/* 盘面上奇遇的记号：鬼（幽灵古船，鬼火绿）、潮（祭坛，青）、遗（打听到的遗迹，紫）、墟（水下感应到的遗迹，紫） */
+.jy-qy { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s; }
+.jy-qy b { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); width: 15px; height: 15px; border-radius: 50%; font-weight: 400; font-family: var(--title-font); font-size: 10px; line-height: 15px; text-align: center; }
+.jy-qy.ghost b { color: #062418; background: radial-gradient(circle at 40% 35%, #b8ffd8, #3fcf8e); box-shadow: 0 0 7px rgba(90, 255, 170, 0.9); }
+.jy-qy.altar b { color: #062226; background: radial-gradient(circle at 40% 35%, #c8fbff, #46b8c4); box-shadow: 0 0 6px rgba(110, 230, 240, 0.85); top: 6px; }
+.jy-qy.rumor b, .jy-qy.ruin b { color: #1d0d2e; background: radial-gradient(circle at 40% 35%, #e8d0ff, #9a62e0); box-shadow: 0 0 6px rgba(180, 120, 255, 0.85); top: 10px; }
+.jy-qytxt { max-width: 168px; text-align: center; font-size: 11px; color: #cfeee4; text-shadow: 0 1px 2px #000; line-height: 1.35; }
+
+/* 灵舟、下潜、上浮：放进主界面现成的按钮区（Hud.tsx 的小钮一排、手机右侧一列），这里只补耐久条 */
+.round-btn.sea-boat { position: relative; }
+.round-btn .sea-hp { position: absolute; left: 18%; right: 18%; bottom: -5px; height: 4px; border-radius: 2px; background: rgba(10, 14, 14, 0.8); overflow: hidden; }
+.round-btn .sea-hp b { position: absolute; inset: 0; transform-origin: left center; background: linear-gradient(90deg, #6fe0c4, #c9f6e8); }
+.round-btn .sea-hp.low b { background: linear-gradient(90deg, #e05a3a, #f2a65a); }
+.ctx-pill.warn { color: #ffe6dc; background: rgba(80, 20, 30, 0.86); border-color: rgba(240, 120, 110, 0.85); }
+
+/* 海渊：顶上一块 */
+.jy-abyss { position: absolute; right: calc(16px + var(--safe-r, 0px)); top: calc(300px + var(--safe-t)); opacity: 0; transition: opacity 0.5s, transform 0.5s; z-index: 12; pointer-events: none;
+  min-width: 240px; padding: 8px 14px 9px; border-radius: 10px; background: linear-gradient(180deg, rgba(6, 22, 32, 0.82), rgba(4, 12, 20, 0.72)); border: 1px solid rgba(120, 200, 230, 0.45); color: #dff2f7; text-align: center; }
+.jy-abyss .hd { display: flex; justify-content: center; align-items: baseline; gap: 10px; }
+.jy-abyss .hd b { font-family: var(--title-font); font-weight: 400; font-size: 17px; letter-spacing: 0.25em; color: #9fe6ff; text-shadow: 0 0 10px rgba(80, 180, 255, 0.7); }
+.jy-abyss .hd span { font-size: 14px; font-weight: 700; }
+.jy-abyss .sub { font-size: 11px; color: #9fc2cc; margin: 1px 0 5px; }
+.jy-abyss .row { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.jy-abyss .lb { flex: 0 0 auto; width: 118px; text-align: left; font-size: 11px; white-space: nowrap; }
+.jy-abyss .track { position: relative; flex: 1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.jy-abyss .track i { position: absolute; inset: 0; transform-origin: left center; background: linear-gradient(90deg, #48b8e0, #a8f0ff); }
+.jy-abyss .track.air i { background: linear-gradient(90deg, #6a7ee8, #b8c8ff); }
+.jy-abyss .track i.bad { background: linear-gradient(90deg, #d84a3a, #f0a060); }
+.jy-abyss .track em { position: absolute; left: 0; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: #ffd27a; box-shadow: 0 0 4px #ffb84a; }
+.jy-abyss .warn { margin-top: 4px; font-size: 12px; font-weight: 700; color: #ffb0a0; opacity: 0; }
+
+
+.game-root.touch .jy-abyss { top: calc(200px + var(--safe-t)); right: calc(8px + var(--safe-r, 0px)); min-width: 200px; padding: 6px 10px 7px; }
+.game-root.touch .jy-abyss .lb { width: 104px; font-size: 10px; }
+@media (max-height: 520px) {
+  /* 手机横屏：右边是一列圆钮，挪到左边任务列下面、摇杆上面 */
+  .jy-abyss, .game-root.touch .jy-abyss { top: calc(176px + var(--safe-t)); left: calc(8px + var(--safe-l, 0px)); right: auto; min-width: 180px; padding: 4px 10px 5px; }
+  .jy-abyss .sub { display: none; }
+  .jy-abyss .hd b { font-size: 14px; }
+  .jy-qytxt { display: none; }
+}

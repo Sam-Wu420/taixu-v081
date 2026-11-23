@@ -1,0 +1,75 @@
+/* 恩怨重做：热度血印（顶栏）、人脉录「恩怨」页、队伍框小血印。只动 opacity / transform。 */
+
+/* ---------- 顶栏血印 ---------- */
+.feud-hud { display: flex; align-items: center; gap: 8px; padding: 3px 12px 3px 8px; border-radius: 3px; pointer-events: none;
+  background: linear-gradient(90deg, rgba(20, 8, 6, 0.0), rgba(28, 10, 8, 0.72) 18%, rgba(28, 10, 8, 0.72) 82%, rgba(20, 8, 6, 0)); animation: feudIn 0.45s cubic-bezier(.2, .9, .25, 1) both; }
+.feud-hud .fh-seals { display: flex; gap: 2px; flex: 0 0 auto; }   /* 顶栏挤的时候（手机横屏）空的 <i> 会被压成 0 宽：不许收缩 */
+.feud-hud .fh-seals img, .fp-seals img { flex: 0 0 auto; }   /* 用 <img>：手机上带背景图的空 <i> 画不出来 */
+.feud-hud .fh-seals img { display: block; width: 26px; height: 26px; object-fit: contain; opacity: 0.13; transform: rotate(-8deg) scale(0.86); }
+.feud-hud .fh-seals img:nth-child(even) { transform: rotate(7deg) scale(0.86); }
+.feud-hud .fh-seals img.on { opacity: 0.55; transform: rotate(-8deg) scale(1); }
+.feud-hud .fh-seals img.on:nth-child(even) { transform: rotate(7deg) scale(1); }
+.feud-hud.lv3 .fh-seals img.on, .feud-hud.lv4 .fh-seals img.on { opacity: 0.8; }
+.feud-hud.lv5 .fh-seals img.on, .feud-hud.lv6 .fh-seals img.on { opacity: 1; }
+.feud-hud .fh-txt { display: flex; flex-direction: column; line-height: 1.15; color: #f1dccb; font-size: 12px; white-space: nowrap; }
+.feud-hud .fh-txt b { font-family: var(--title-font); font-size: 17px; font-weight: normal; color: #ff9a84; letter-spacing: 0.12em; }
+.feud-hud.lv1 .fh-txt b, .feud-hud.lv2 .fh-txt b { color: #e8b8a4; }
+.feud-hud .fh-txt span { opacity: 0.85; max-width: 11em; overflow: hidden; text-overflow: ellipsis; }
+@keyframes feudIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.hz-top > .feud-hud { pointer-events: none; }
+/* 手机：一行更矮；844×390 这种横屏顶栏很挤，字只留级别 */
+.game-root.touch .feud-hud { gap: 5px; padding: 1px 8px 1px 5px; }
+.game-root.touch .feud-hud .fh-seals img { width: 18px; height: 18px; }
+.game-root.touch .feud-hud .fh-txt { font-size: 10.5px; }
+.game-root.touch .feud-hud .fh-txt b { font-size: 14px; }
+@media (max-height: 430px) { .game-root.touch .feud-hud .fh-txt span { display: none; } .game-root.touch .feud-hud .fh-seals img { width: 16px; height: 16px; } }
+
+/* ---------- 人脉录「恩怨」页 ---------- */
+.feud-page { display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 8px; overflow-y: auto; min-height: 0; flex: 1; }
+.feud-page .fp-head { font-size: 13px; color: #5a4632; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.feud-page .fp-dis { color: #1d5a4a; background: rgba(60, 140, 110, 0.12); padding: 1px 8px; border-radius: 3px; font-weight: normal; }
+.fp-card { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 16px 22px 14px 16px; min-height: 108px; cursor: pointer;
+  background: center / 100% 100% no-repeat; color: #2a1d12; transition: transform 0.15s; }
+.fp-card:hover { transform: translateY(-1px); }
+.fp-card.hunt::after { content: ''; position: absolute; inset: 6px; border: 1px solid rgba(180, 40, 30, 0.45); border-radius: 3px; pointer-events: none; }
+.fp-stamp { flex: 0 0 auto; width: 62px; height: 62px; background: center / contain no-repeat; display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); margin-top: 4px; }
+.fp-stamp span { font-family: var(--title-font); font-size: 22px; line-height: 1; writing-mode: vertical-rl; letter-spacing: 0.05em; }
+.fp-stamp.first span { color: #b3261a; }
+.fp-stamp.def span { color: #1f5e52; }
+.fp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.fp-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fp-name b { font-family: var(--title-font); font-size: 22px; font-weight: normal; }
+.fp-name small { font-size: 12px; color: #6a5440; }
+.fp-seals { display: inline-flex; gap: 1px; margin-left: auto; }
+.fp-seals img { display: block; width: 18px; height: 18px; object-fit: contain; opacity: 0.12; }
+.fp-seals img.on { opacity: 0.9; }
+.fp-why { font-size: 13.5px; color: #7a1e14; }
+.fp-meta { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 12px; color: #4a3a2a; }
+.fp-meta .bad { color: #9a2a1a; } .fp-meta .good { color: #2a6a4a; }
+.fp-ways { font-size: 12px; color: #5a4a36; opacity: 0.9; }
+.fp-warrant { margin-top: 4px; width: 240px; aspect-ratio: 3 / 4; flex: 0 0 auto; padding: 46px 26px 40px 26px; box-sizing: border-box; background: center / 100% 100% no-repeat; color: #3a2414; display: flex; flex-direction: column; gap: 6px; align-self: center; }
+.fp-warrant em { font-style: normal; font-size: 12px; color: #7a1a10; }
+.fp-warrant b { font-family: var(--title-font); font-size: 20px; font-weight: normal; color: #7a1a10; }
+.fp-warrant span { font-size: 13px; line-height: 1.7; }
+.game-root.touch .fp-card, .touch .fp-card { padding: 12px 16px 10px 12px; min-height: 92px; }
+.touch .fp-stamp { width: 48px; height: 48px; } .touch .fp-stamp span { font-size: 17px; }
+.touch .fp-name b { font-size: 18px; }
+
+/* ---------- 队伍框小血印 ---------- */
+.pf-feud { position: absolute; right: 8px; top: 6px; width: 22px; height: 22px; z-index: 3; pointer-events: none; transform: rotate(-10deg); }
+.pf-feud img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.pf-feud b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff3e8; text-shadow: 0 0 2px #4a0a05; }
+.pf-feud.n1 { opacity: 0.6; } .pf-feud.n2 { opacity: 0.85; } .pf-feud.n3 { opacity: 1; }
+
+/* ---------- 第三批：恩怨页的搭档栏 ---------- */
+.fp-dazi { margin-top: 6px; padding: 10px 14px; border-radius: 8px; background: rgba(255, 248, 230, 0.55); border: 1px solid rgba(122, 26, 16, 0.25); color: #3a2414; display: flex; flex-direction: column; gap: 6px; }
+.fp-dazi > b { font-family: var(--title-font); font-size: 18px; font-weight: normal; color: #7a1a10; }
+.fp-dz-tip { font-size: 12.5px; line-height: 1.6; opacity: 0.85; }
+.fp-dz-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.fp-dz-row i { font-style: normal; font-size: 12px; padding: 0 6px; border-radius: 8px; background: rgba(122, 26, 16, 0.12); color: #7a1a10; }
+.fp-dz-row em { font-style: normal; font-weight: 700; }
+.fp-dz-row small { opacity: 0.75; }
+.fp-dz-row.on em { color: #1f6e42; }
+.fp-dz-row button { margin-left: auto; font-size: 12px; padding: 2px 10px; border-radius: 6px; border: 1px solid rgba(122, 26, 16, 0.45); background: rgba(255, 250, 238, 0.9); color: #7a1a10; cursor: pointer; }
+.fp-dz-row button + button { margin-left: 0; }
+.fp-dz-row button:disabled { opacity: 0.45; cursor: default; }

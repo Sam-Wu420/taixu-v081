@@ -1,0 +1,1 @@
+(() => { const g = window.__game, I = g.indoor; return { inside: I.inside?.id, fade: +I.fade.toFixed(2), focus: I.focus?.seat.title, p: [Math.round(g.player.x), Math.round(g.player.y)], gl: g.renderer?.indoorGl?.stats, modal: g.modal?.kind, halted: g.halted }; })()

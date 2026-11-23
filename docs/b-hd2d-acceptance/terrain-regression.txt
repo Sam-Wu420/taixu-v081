@@ -1,0 +1,134 @@
+Final terrain, movement, save and NPC day regression — 2026-11-13T02:14:57.8723193-05:00
+MAP=tiannan node --import tsx tools/test-surface.ts
+surface tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-surface-mesh.ts
+road: 1500 samples, max height error 6.004086117172847e-13
+slope: 1500 samples, max height error 6.785683126508957e-13
+surface mesh tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-terrain-movement.ts
+movement tests passed; loaded player moved 160 units to stable ground; 20 NPCs navigated the slope
+EXIT 0
+MAP=tiannan node --import tsx tools/test-hd-ground.ts
+HD ground tests passed: 441 vertical and 589 angled real slope samples, height span 252.41, shared chunk meshes and real building occlusion
+EXIT 0
+MAP=tiannan node --import tsx tools/test-fly.ts
+after 筑基 flying? false canFly true
+F -> true speed 540
+sit -> true flying false
+land -> false speed 300
+EXIT 0
+MAP=tiannan node --import tsx tools/test-npc-day-scheduler.ts
+npc day scheduler tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-npc-day.ts
+{"population":1160,"syncWithoutBagPrewarmMs":106.22,"syncBagPrewarmedMs":134.87,"batchCount":20,"batchP95Ms":12.26,"batchMaxMs":13.11,"rngIsolationSlices":3483,"seclusionDays":30}
+npc day integration tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-renderer-lifecycle.ts
+WebGL2 不可用，回退 Canvas2D Error: webgl2 is not supported
+    at GLStage.create (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\gl\stage.ts:265:21)
+    at new Renderer (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\world\render.ts:124:26)
+    at Game.attach (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\world\game.ts:814:21)
+    at <anonymous> (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\tools\test-renderer-lifecycle.ts:49:6) {
+  code: 'InvalidArg'
+}
+WebGL2 不可用，回退 Canvas2D Error: webgl2 is not supported
+    at GLStage.create (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\gl\stage.ts:265:21)
+    at new Renderer (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\world\render.ts:124:26)
+    at Game.attach (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\world\game.ts:814:21)
+    at <anonymous> (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\tools\test-renderer-lifecycle.ts:68:6) {
+  code: 'InvalidArg'
+}
+Renderer lifecycle tests passed: real Game attach/detach/recreate, resize listener and observer
+EXIT 0
+MAP=tiannan node --import tsx tools/test-surface-map.ts
+qixuan: 5 actual routes, 2863 land/walk samples, plateau 360.00
+huangfeng: 4 actual routes, 3668 land/walk samples, plateau 420.00
+tiannan: 34439 segments, max grade 0.354; 470 crossings, max junction grade 0.078
+surface map tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-terrain-bake.ts
+{"map":"tiannan","fourSeasonsAndAreas":24,"workerMap":"tiannan","initializedCopyMs":15.83,"discardedOldSeason":1,"wideVisible":169,"cachedAfterNarrow":90}
+WebGL2 不可用，回退 Canvas2D Error: webgl2 is not supported
+    at GLStage.create (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\gl\stage.ts:265:21)
+    at new Renderer (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\src\world\render.ts:124:26)
+    at <anonymous> (D:\太虚问道录-v0.57-完整源码含skill-仅自用勿外传\重构v0.57\B-HD2D\tools\test-terrain-bake.ts:122:41) {
+  code: 'InvalidArg'
+}
+{"realCanvasRenderFrames":20,"mainThreadFullBakes":0,"workerCompleted":12,"walked":145.8}
+terrain background bake tests passed
+EXIT 0
+MAP=dajin node --import tsx tools/test-surface-map.ts
+dajin: 41755 segments, max grade 0.225; 514 crossings, max junction grade 0.108
+surface map tests passed
+EXIT 0
+MAP=dajin node --import tsx tools/test-terrain-bake.ts
+{"map":"dajin","fourSeasonsAndAreas":24,"workerMap":"tiannan","initializedCopyMs":17.02,"discardedOldSeason":1,"wideVisible":169,"cachedAfterNarrow":90}
+terrain background bake tests passed
+EXIT 0
+MAP=luanxing node --import tsx tools/test-surface-map.ts
+luanxing: 0 segments, max grade 0.000; 0 crossings, max junction grade 0.000
+surface map tests passed
+EXIT 0
+MAP=luanxing node --import tsx tools/test-terrain-bake.ts
+{"map":"luanxing","fourSeasonsAndAreas":16,"workerMap":"tiannan","initializedCopyMs":6.88,"discardedOldSeason":1,"wideVisible":169,"cachedAfterNarrow":90}
+terrain background bake tests passed
+EXIT 0
+MAP=tiannan node --import tsx tools/test-world-acceptance.ts
+青玄门登山: 37 points, 4490 units, 357 frames, save/load and reverse passed
+青霞谷登山: 38 points, 4514 units, 360 frames, save/load and reverse passed
+镜州建筑: 2 points, 480 units, 53 frames, save/load and reverse passed
+EXIT 0
+MAP=dajin node --import tsx tools/test-world-acceptance.ts
+叶家城墙门洞: 2 points, 700 units, 77 frames, save/load and reverse passed
+EXIT 0
+ALL CHECKS PASSED — 2026-11-13T02:16:24.3310151-05:00
+MAP=tiannan node --import tsx tools/test-combat-terrain.ts
+PASS 地面行走、冲撞、飞行、跃击、闪现、土遁、玩家遁术/符箓与闪避
+EXIT 0
+MAP=tiannan node --import tsx tools/test-world-generation.ts
+{
+  "world": [
+    300000,
+    210000
+  ],
+  "anchors": [
+    {
+      "x": 294000,
+      "y": 6000
+    },
+    {
+      "x": 294000,
+      "y": 19000
+    },
+    {
+      "x": 287000,
+      "y": 6000
+    },
+    {
+      "x": 287000,
+      "y": 19000
+    },
+    {
+      "x": 287000,
+      "y": 32000
+    },
+    {
+      "x": 280000,
+      "y": 6000
+    }
+  ],
+  "nodeCount": 114,
+  "decoCount": 7,
+  "grassCount": 1865
+}
+PASS 远端真实地形/资源/装饰重建、采集存档和相邻坐标散列
+EXIT 0
+SUPPLEMENTAL CHECKS PASSED — 2026-11-13T02:16:43.0478325-05:00
+
+Scope notes:
+- Node Renderer checks intentionally use Canvas2D when WebGL2 is unavailable; they are not GPU or visual acceptance.
+- The four automated route tests complete the outward route, save/load partway through, then verify the start of the reverse route for 30 frames.
+- NPC day timing above is an uncontrolled regression run while other tasks were active; it is not a controlled performance comparison.

@@ -1,0 +1,1 @@
+(() => { const h = window.__modHost, g = window.__game; return { game: !!g, mods: (h?.mods ?? []).map((m) => `${m.st.id}@${m.st.version}:${m.st.state}:err${m.st.errors}${m.st.error ? ':' + m.st.error : ''}`), modBtns: [...document.querySelectorAll('.round-btn.mod-btn, .dock-item')].length, slots: document.querySelectorAll('.mod-hud').length, modal: g?.modal?.kind ?? null }; })()

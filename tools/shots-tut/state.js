@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; if (!g) return 'no game'; const T = g.tutorial; return { step: T.step, view: T.getView() && { title: T.getView().title, text: T.getView().text, target: T.getView().target && T.getView().target.kind }, tut: g.ws.tut, panel: T.panel, err: document.querySelectorAll('.coach-bub').length }; })()

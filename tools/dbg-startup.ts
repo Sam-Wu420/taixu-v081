@@ -1,0 +1,20 @@
+// 临时：测一下每个测试进程的固定开销（世界构建）花在哪
+const CW = 1280, CH = 800;
+(globalThis as any).window = { innerWidth: CW, innerHeight: CH, devicePixelRatio: 1, addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: false }) };
+(globalThis as any).localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
+const t0 = performance.now();
+await import('./env');
+const t1 = performance.now();
+const { Terrain } = await import('../src/world/terrain');
+const t2 = performance.now();
+const terrain = new Terrain();
+const t3 = performance.now();
+terrain.build();
+const t4 = performance.now();
+const { Game } = await import('../src/world/game');
+const t5 = performance.now();
+const g: any = new Game(terrain);
+const t6 = performance.now();
+g.reset();
+const t7 = performance.now();
+console.log('env', (t1 - t0).toFixed(0), 'import-terrain', (t2 - t1).toFixed(0), 'new-terrain', (t3 - t2).toFixed(0), 'terrain.build', (t4 - t3).toFixed(0), 'import-game', (t5 - t4).toFixed(0), 'new-game', (t6 - t5).toFixed(0), 'reset', (t7 - t6).toFixed(0), 'TOTAL', (t7 - t0).toFixed(0));

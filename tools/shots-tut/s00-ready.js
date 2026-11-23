@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; for (let i = 0; i < 6 && g.modal; i++) { g.closeModal(true); await new Promise(r => setTimeout(r, 200)); } g.tutorial.jump('move'); await new Promise(r => setTimeout(r, 900)); return g.tutorial.step; })()

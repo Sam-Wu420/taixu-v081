@@ -1,0 +1,2967 @@
+[
+  {
+    "scenario": "crowd",
+    "name": "梁京来回",
+    "run": 1,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.25,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 11678,
+    "fps": 193.84,
+    "frameIntervalMs": {
+      "p50": 3.7,
+      "p95": 7.7,
+      "max": 25,
+      "avg": 5.16
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.4,
+        "max": 4,
+        "avg": 0.27
+      },
+      "renderSubmitMs": {
+        "p50": 2.9,
+        "p95": 4.9,
+        "max": 18.8,
+        "avg": 3.21
+      },
+      "updateAndRenderMs": {
+        "p50": 3.2,
+        "p95": 5.2,
+        "max": 19.1,
+        "avg": 3.47
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.23,
+        "p95": 0.25,
+        "max": 2.5,
+        "avg": 0.23
+      },
+      "hdSamples": 11676,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.61,
+        "p95": 0.87,
+        "max": 1.15,
+        "avg": 0.65
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.009890618157214266,
+        "世界层上传": 0.04581108441704289,
+        "特效泛光": 0.45728916525708313,
+        "后期": 0.269149812330506
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 423858802,
+        "total": 490692426,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 482260020,
+        "total": 613000720,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 581151433,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 230899.5685745784,
+        "y": 133520.94870922327
+      },
+      "endPoint": {
+        "x": 230898.3500518091,
+        "y": 132923.12454175754
+      },
+      "movementUnits": 22514,
+      "turns": 5,
+      "pathPoints": 10,
+      "enemyLive": {
+        "p50": 9,
+        "p95": 11,
+        "max": 11,
+        "avg": 7.58
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 30.02,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 6.5,
+          "ok": true,
+          "day": 73.5311975000028
+        },
+        {
+          "slot": 0,
+          "ms": 6.2,
+          "ok": true,
+          "day": 83.53341250000497
+        }
+      ],
+      "npcTotal": 1162,
+      "npcActive": 3
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.15,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.8,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.26,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 0.24,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.18,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.12,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.05,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "crowd",
+    "name": "梁京来回",
+    "run": 2,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.08,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 11414,
+    "fps": 189.99,
+    "frameIntervalMs": {
+      "p50": 3.8,
+      "p95": 7.6,
+      "max": 39.3,
+      "avg": 5.26
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.4,
+        "max": 1.3,
+        "avg": 0.23
+      },
+      "renderSubmitMs": {
+        "p50": 3,
+        "p95": 4.6,
+        "max": 27.1,
+        "avg": 3.2
+      },
+      "updateAndRenderMs": {
+        "p50": 3.3,
+        "p95": 4.8,
+        "max": 27.3,
+        "avg": 3.43
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.22,
+        "p95": 0.25,
+        "max": 1.15,
+        "avg": 0.23
+      },
+      "hdSamples": 11411,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.62,
+        "p95": 0.89,
+        "max": 1.11,
+        "avg": 0.66
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.016256596008283507,
+        "世界层上传": 0.045220631379536254,
+        "特效泛光": 0.3937345732531985,
+        "后期": 0.28541472582160043
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 385986594,
+        "total": 617183690,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 480317744,
+        "total": 626277336,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 572181645,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 230899.42017285977,
+        "y": 133524.9155648769
+      },
+      "endPoint": {
+        "x": 230899.2417999742,
+        "y": 133006.35755441478
+      },
+      "movementUnits": 22502,
+      "turns": 5,
+      "pathPoints": 10,
+      "enemyLive": {
+        "p50": 9,
+        "p95": 14,
+        "max": 15,
+        "avg": 8.98
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 29.91,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 3.1,
+          "ok": true,
+          "day": 73.46651749999637
+        },
+        {
+          "slot": 0,
+          "ms": 3.2,
+          "ok": true,
+          "day": 83.06474249999252
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 1
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.2,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.79,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.26,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 0.24,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.18,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.12,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 0.05,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "crowd",
+    "name": "梁京来回",
+    "run": 3,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.05,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 10309,
+    "fps": 171.67,
+    "frameIntervalMs": {
+      "p50": 6.8,
+      "p95": 10.7,
+      "max": 25.1,
+      "avg": 5.82
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.4,
+        "max": 1.4,
+        "avg": 0.22
+      },
+      "renderSubmitMs": {
+        "p50": 3.4,
+        "p95": 4.9,
+        "max": 12.7,
+        "avg": 3.51
+      },
+      "updateAndRenderMs": {
+        "p50": 3.6,
+        "p95": 5.1,
+        "max": 12.8,
+        "avg": 3.73
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.23,
+        "p95": 0.25,
+        "max": 2.4,
+        "avg": 0.23
+      },
+      "hdSamples": 10307,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.61,
+        "p95": 0.93,
+        "max": 1.48,
+        "avg": 0.65
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.010870657694626763,
+        "世界层上传": 0.03198949492276874,
+        "特效泛光": 0.21231307823220483,
+        "后期": 0.2587617885673321
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 415315420,
+        "total": 630809804,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 535373850,
+        "total": 614209614,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 573663059,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 230899.46575079468,
+        "y": 133524.99383697388
+      },
+      "endPoint": {
+        "x": 230899.38930952782,
+        "y": 133021.74363824245
+      },
+      "movementUnits": 22401,
+      "turns": 5,
+      "pathPoints": 10,
+      "enemyLive": {
+        "p50": 7,
+        "p95": 8,
+        "max": 8,
+        "avg": 6
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 29.87,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 3.6,
+          "ok": true,
+          "day": 73.53434999999935
+        },
+        {
+          "slot": 0,
+          "ms": 3.1,
+          "ok": true,
+          "day": 83.5362374999993
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.47,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.82,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.25,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 0.23,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.17,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.11,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.05,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "battle",
+    "name": "40 敌连续施法",
+    "run": 1,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.16,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 7521,
+    "fps": 125.02,
+    "frameIntervalMs": {
+      "p50": 7.2,
+      "p95": 14.2,
+      "max": 42.9,
+      "avg": 8
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.5,
+        "p95": 0.8,
+        "max": 2.6,
+        "avg": 0.52
+      },
+      "renderSubmitMs": {
+        "p50": 4.6,
+        "p95": 7.6,
+        "max": 39.7,
+        "avg": 4.95
+      },
+      "updateAndRenderMs": {
+        "p50": 5.1,
+        "p95": 8.1,
+        "max": 40.2,
+        "avg": 5.47
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.25,
+        "p95": 0.48,
+        "max": 3.35,
+        "avg": 0.28
+      },
+      "hdSamples": 7519,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.88,
+        "p95": 1.58,
+        "max": 1.96,
+        "avg": 0.98
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.00010798241881312305,
+        "世界层上传": 0.05903364001571042,
+        "特效泛光": 0.30403614868298845,
+        "后期": 0.27822194386061216
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 408640577,
+        "total": 616759865,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 440690406,
+        "total": 589291682,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 517557168,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 236390.8675386587,
+        "y": 129638.39282828545
+      },
+      "endPoint": {
+        "x": 234436.22504768628,
+        "y": 129602.86755177041
+      },
+      "movementUnits": 2013,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 40,
+        "p95": 40,
+        "max": 40,
+        "avg": 40
+      },
+      "spawnedDuringMeasurement": 57,
+      "castAttempts": 119,
+      "successfulCasts": 104,
+      "spells": {
+        "fengren": 30,
+        "huodan": 30,
+        "bingzhui": 30,
+        "huoshe": 14
+      },
+      "gameDaysElapsed": 24.58,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 2.9,
+          "ok": true,
+          "day": 72.89315750000294
+        },
+        {
+          "slot": 0,
+          "ms": 3.1,
+          "ok": true,
+          "day": 83.11935750000525
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·特效关键图血条",
+          "ms": 1.45,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 1.41,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.74,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.37,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.33,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.24,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.23,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.05,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "battle",
+    "name": "40 敌连续施法",
+    "run": 2,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.01,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 6695,
+    "fps": 111.56,
+    "frameIntervalMs": {
+      "p50": 7.2,
+      "p95": 14.3,
+      "max": 71.4,
+      "avg": 8.96
+    },
+    "longFramesOver50ms": 1,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.5,
+        "p95": 0.8,
+        "max": 23,
+        "avg": 0.54
+      },
+      "renderSubmitMs": {
+        "p50": 5.2,
+        "p95": 8.2,
+        "max": 69.8,
+        "avg": 5.54
+      },
+      "updateAndRenderMs": {
+        "p50": 5.7,
+        "p95": 8.8,
+        "max": 70.8,
+        "avg": 6.09
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.26,
+        "p95": 0.5,
+        "max": 3.04,
+        "avg": 0.3
+      },
+      "hdSamples": 6695,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.8,
+        "p95": 1.2,
+        "max": 1.37,
+        "avg": 0.85
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.002313740539361752,
+        "世界层上传": 0.12291663056169615,
+        "特效泛光": 0.4482266722023508,
+        "后期": 0.4014710893261487
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 390448751,
+        "total": 547266459,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 374562219,
+        "total": 534756287,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 517942194,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 236360,
+        "y": 129600
+      },
+      "endPoint": {
+        "x": 235965.0857157208,
+        "y": 129566.45548977178
+      },
+      "movementUnits": 1583,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 40,
+        "p95": 40,
+        "max": 40,
+        "avg": 40
+      },
+      "spawnedDuringMeasurement": 74,
+      "castAttempts": 119,
+      "successfulCasts": 104,
+      "spells": {
+        "fengren": 30,
+        "huodan": 30,
+        "bingzhui": 30,
+        "huoshe": 14
+      },
+      "gameDaysElapsed": 23.88,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 3.7,
+          "ok": true,
+          "day": 72.9100650000023
+        },
+        {
+          "slot": 0,
+          "ms": 2.8,
+          "ok": true,
+          "day": 83.01505750000447
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 3
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.73,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 1.62,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.75,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.39,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.38,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.25,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.25,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.05,
+          "n": 1
+        }
+      ],
+      "recentSpikes": [
+        {
+          "ms": 71,
+          "top": [
+            {
+              "k": "R·全量绘制",
+              "ms": 3.3
+            },
+            {
+              "k": "R·特效关键图血条",
+              "ms": 3.3
+            },
+            {
+              "k": "U·战斗",
+              "ms": 1
+            }
+          ],
+          "at": 327
+        }
+      ]
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "battle",
+    "name": "40 敌连续施法",
+    "run": 3,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.25,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 6433,
+    "fps": 106.77,
+    "frameIntervalMs": {
+      "p50": 7.4,
+      "p95": 14.3,
+      "max": 50.1,
+      "avg": 9.37
+    },
+    "longFramesOver50ms": 1,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.5,
+        "p95": 0.8,
+        "max": 31.9,
+        "avg": 0.53
+      },
+      "renderSubmitMs": {
+        "p50": 5.4,
+        "p95": 8.4,
+        "max": 45.7,
+        "avg": 5.73
+      },
+      "updateAndRenderMs": {
+        "p50": 5.9,
+        "p95": 9,
+        "max": 46.7,
+        "avg": 6.26
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.26,
+        "p95": 0.5,
+        "max": 3.39,
+        "avg": 0.3
+      },
+      "hdSamples": 6431,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.95,
+        "p95": 1.41,
+        "max": 1.9,
+        "avg": 0.98
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.010485272436351792,
+        "世界层上传": 0.0375823070070332,
+        "特效泛光": 0.3077235729029337,
+        "后期": 0.26280208259923393
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 424583268,
+        "total": 536260028,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 458710966,
+        "total": 518082630,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 491621640,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 236360,
+        "y": 129600
+      },
+      "endPoint": {
+        "x": 236680.8432875609,
+        "y": 129338.63489521995
+      },
+      "movementUnits": 2504,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 40,
+        "p95": 40,
+        "max": 40,
+        "avg": 40
+      },
+      "spawnedDuringMeasurement": 90,
+      "castAttempts": 119,
+      "successfulCasts": 104,
+      "spells": {
+        "fengren": 30,
+        "huodan": 30,
+        "bingzhui": 30,
+        "huoshe": 14
+      },
+      "gameDaysElapsed": 22.68,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 2.9,
+          "ok": true,
+          "day": 72.8185275000023
+        },
+        {
+          "slot": 0,
+          "ms": 4.4,
+          "ok": true,
+          "day": 82.90971000000424
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.77,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 1.76,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.73,
+          "n": 1
+        },
+        {
+          "k": "U·战斗",
+          "ms": 0.39,
+          "n": 1
+        },
+        {
+          "k": "R·GL特效批次",
+          "ms": 0.39,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 0.27,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.25,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 0.06,
+          "n": 1
+        }
+      ],
+      "recentSpikes": [
+        {
+          "ms": 50,
+          "top": [
+            {
+              "k": "R·特效关键图血条",
+              "ms": 5.7
+            },
+            {
+              "k": "R·全量绘制",
+              "ms": 2.1
+            },
+            {
+              "k": "U·战斗",
+              "ms": 1
+            }
+          ],
+          "at": 403
+        }
+      ]
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "travel",
+    "name": "长途飞行",
+    "run": 1,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.08,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 7212,
+    "fps": 120.04,
+    "frameIntervalMs": {
+      "p50": 7.1,
+      "p95": 22.1,
+      "max": 103.5,
+      "avg": 8.33
+    },
+    "longFramesOver50ms": 2,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.5,
+        "max": 1.8,
+        "avg": 0.2
+      },
+      "renderSubmitMs": {
+        "p50": 4,
+        "p95": 19.4,
+        "max": 46.5,
+        "avg": 5.89
+      },
+      "updateAndRenderMs": {
+        "p50": 4.1,
+        "p95": 19.6,
+        "max": 46.7,
+        "avg": 6.09
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.22,
+        "p95": 0.25,
+        "max": 1.32,
+        "avg": 0.22
+      },
+      "hdSamples": 7212,
+      "compositeGpuSmoothedMs": {
+        "p50": 0.71,
+        "p95": 3.28,
+        "max": 3.35,
+        "avg": 1.28
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.07704991863933272,
+        "世界层上传": 1.320465775533679,
+        "特效泛光": 0.10187904931930755,
+        "后期": 0.17562332735828226
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 380224252,
+        "total": 576206308,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 378775199,
+        "total": 536670207,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 637145856,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 235664.691,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 283428.317400005,
+        "y": 130000
+      },
+      "movementUnits": 47755,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 2,
+        "p95": 5,
+        "max": 5,
+        "avg": 2.1
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 30.04,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 3.1,
+          "ok": true,
+          "day": 73.57180000000064
+        },
+        {
+          "slot": 0,
+          "ms": 3.1,
+          "ok": true,
+          "day": 83.5975500000012
+        }
+      ],
+      "npcTotal": 1164,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·全量绘制",
+          "ms": 1.39,
+          "n": 1
+        },
+        {
+          "k": "R·意境空气层",
+          "ms": 1.3,
+          "n": 1
+        },
+        {
+          "k": "M┊雨幕",
+          "ms": 1.29,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 1.14,
+          "n": 1
+        },
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 1,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 0.83,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.29,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.14,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.13,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        }
+      ],
+      "recentSpikes": [
+        {
+          "ms": 100,
+          "top": [
+            {
+              "k": "R·全量绘制",
+              "ms": 2.2
+            },
+            {
+              "k": "R·HD2D 场景",
+              "ms": 1.3
+            },
+            {
+              "k": "R·GL合成(地表+上传)",
+              "ms": 0.4
+            }
+          ],
+          "at": 418
+        },
+        {
+          "ms": 57,
+          "top": [
+            {
+              "k": "M┊雨幕",
+              "ms": 13.5
+            },
+            {
+              "k": "R·意境空气层",
+              "ms": 13.5
+            },
+            {
+              "k": "R·GL合成(地表+上传)",
+              "ms": 7.9
+            }
+          ],
+          "at": 461
+        }
+      ]
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "travel",
+    "name": "长途飞行",
+    "run": 2,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.23,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 3377,
+    "fps": 56.07,
+    "frameIntervalMs": {
+      "p50": 17.8,
+      "p95": 25,
+      "max": 42.8,
+      "avg": 17.83
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.7,
+        "max": 2.6,
+        "avg": 0.26
+      },
+      "renderSubmitMs": {
+        "p50": 15.3,
+        "p95": 21.6,
+        "max": 41.9,
+        "avg": 15.73
+      },
+      "updateAndRenderMs": {
+        "p50": 15.6,
+        "p95": 21.9,
+        "max": 42.2,
+        "avg": 15.99
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.19,
+        "p95": 0.23,
+        "max": 0.69,
+        "avg": 0.19
+      },
+      "hdSamples": 3377,
+      "compositeGpuSmoothedMs": {
+        "p50": 3.07,
+        "p95": 3.31,
+        "max": 3.6,
+        "avg": 2.72
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.04224959247664578,
+        "世界层上传": 2.9319593963597175,
+        "特效泛光": 0.13396395167749212,
+        "后期": 0.2786517822553695
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 408625828,
+        "total": 490610500,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 379250603,
+        "total": 506978135,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 458640559,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 235721.43959999978,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 283614.231300003,
+        "y": 130000
+      },
+      "movementUnits": 47875,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 3,
+        "p95": 8,
+        "max": 8,
+        "avg": 3.24
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 30.11,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 2.8,
+          "ok": true,
+          "day": 73.61645000000252
+        },
+        {
+          "slot": 0,
+          "ms": 3.3,
+          "ok": true,
+          "day": 83.61670000000456
+        }
+      ],
+      "npcTotal": 1164,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 12.51,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 12.22,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 1.23,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.92,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.23,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.17,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.17,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 0.12,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·准备",
+          "ms": 0.06,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "travel",
+    "name": "长途飞行",
+    "run": 3,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.07,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 3388,
+    "fps": 56.4,
+    "frameIntervalMs": {
+      "p50": 17.8,
+      "p95": 25,
+      "max": 42.8,
+      "avg": 17.73
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.7,
+        "max": 13.5,
+        "avg": 0.25
+      },
+      "renderSubmitMs": {
+        "p50": 15.1,
+        "p95": 21.3,
+        "max": 40,
+        "avg": 15.64
+      },
+      "updateAndRenderMs": {
+        "p50": 15.4,
+        "p95": 21.6,
+        "max": 40.1,
+        "avg": 15.89
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.2,
+        "p95": 0.25,
+        "max": 0.68,
+        "avg": 0.2
+      },
+      "hdSamples": 3388,
+      "compositeGpuSmoothedMs": {
+        "p50": 3.14,
+        "p95": 3.31,
+        "max": 3.39,
+        "avg": 3.02
+      },
+      "compositeSegmentsMs": {
+        "地表": 0.043532347525116005,
+        "世界层上传": 2.7090421529380224,
+        "特效泛光": 0.14221672954275452,
+        "后期": 0.2918006936590363
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 368298286,
+        "total": 496022722,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 561816919,
+        "total": 623382707,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 568050674,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 235784.21460000033,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 283555.69530000363,
+        "y": 130000
+      },
+      "movementUnits": 47760,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 2,
+        "p95": 7,
+        "max": 8,
+        "avg": 2.73
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 30.04,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 4.6,
+          "ok": true,
+          "day": 73.66465000000244
+        },
+        {
+          "slot": 0,
+          "ms": 2.8,
+          "ok": true,
+          "day": 83.65600000000444
+        }
+      ],
+      "npcTotal": 1164,
+      "npcActive": 0
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 12.39,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 12.1,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 1.3,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.94,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.27,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊地表更新(含于合成)",
+          "ms": 0.17,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.16,
+          "n": 1
+        },
+        {
+          "k": "A┊云影/雾块",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·氛围层",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·特效关键图血条",
+          "ms": 0.07,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "daily",
+    "name": "跨日与自动存档",
+    "run": 1,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.2,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 2534,
+    "fps": 42.1,
+    "frameIntervalMs": {
+      "p50": 24.9,
+      "p95": 28.6,
+      "max": 53.6,
+      "avg": 23.75
+    },
+    "longFramesOver50ms": 1,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.7,
+        "max": 21.2,
+        "avg": 0.33
+      },
+      "renderSubmitMs": {
+        "p50": 21.9,
+        "p95": 26.2,
+        "max": 49.2,
+        "avg": 22.24
+      },
+      "updateAndRenderMs": {
+        "p50": 22.2,
+        "p95": 26.9,
+        "max": 49.7,
+        "avg": 22.58
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.22,
+        "p95": 0.28,
+        "max": 0.54,
+        "avg": 0.23
+      },
+      "hdSamples": 2534,
+      "compositeGpuSmoothedMs": {
+        "p50": 1.56,
+        "p95": 3.2,
+        "max": 3.5,
+        "avg": 1.77
+      },
+      "compositeSegmentsMs": {
+        "地表": 1.5309010345804217e-25,
+        "世界层上传": 1.0550136680103537,
+        "特效泛光": 0.22597130355930065,
+        "后期": 0.2116305115807545
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 580350766,
+        "total": 641697778,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 410273919,
+        "total": 485707015,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 625882539,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "movementUnits": 0,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 0,
+        "p95": 0,
+        "max": 0,
+        "avg": 0
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 90.29,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 6,
+          "ok": true,
+          "day": 100.89779999999895
+        },
+        {
+          "slot": 0,
+          "ms": 6,
+          "ok": true,
+          "day": 130.93079999999753
+        }
+      ],
+      "npcTotal": 1158,
+      "npcActive": 18
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 17.29,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 17.17,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 3.73,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.57,
+          "n": 1
+        },
+        {
+          "k": "U·NPC",
+          "ms": 0.12,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "R·准备",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "U·界面刷新",
+          "ms": 0.04,
+          "n": 0.1
+        }
+      ],
+      "recentSpikes": [
+        {
+          "ms": 54,
+          "top": [
+            {
+              "k": "R·GL合成(地表+上传)",
+              "ms": 16.2
+            },
+            {
+              "k": "R·GL┊世界层上传",
+              "ms": 16
+            },
+            {
+              "k": "R·全量绘制",
+              "ms": 3.3
+            }
+          ],
+          "at": 625
+        }
+      ]
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "daily",
+    "name": "跨日与自动存档",
+    "run": 2,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.04,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 2447,
+    "fps": 40.76,
+    "frameIntervalMs": {
+      "p50": 25,
+      "p95": 28.6,
+      "max": 49.3,
+      "avg": 24.53
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.6,
+        "max": 7.7,
+        "avg": 0.26
+      },
+      "renderSubmitMs": {
+        "p50": 22.9,
+        "p95": 25.4,
+        "max": 46.4,
+        "avg": 23.16
+      },
+      "updateAndRenderMs": {
+        "p50": 23.2,
+        "p95": 25.6,
+        "max": 47.4,
+        "avg": 23.42
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.22,
+        "p95": 0.24,
+        "max": 0.53,
+        "avg": 0.22
+      },
+      "hdSamples": 2447,
+      "compositeGpuSmoothedMs": {
+        "p50": 1.52,
+        "p95": 1.69,
+        "max": 1.72,
+        "avg": 1.52
+      },
+      "compositeSegmentsMs": {
+        "地表": 1.5760802478557806e-16,
+        "世界层上传": 1.172933878514599,
+        "特效泛光": 0.1594093337146783,
+        "后期": 0.21370916056123926
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 380189699,
+        "total": 483372911,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 361558783,
+        "total": 484131975,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 433743086,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "movementUnits": 0,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 0,
+        "p95": 0,
+        "max": 0,
+        "avg": 0
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 90.07,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 2.4,
+          "ok": true,
+          "day": 100.8707999999973
+        },
+        {
+          "slot": 0,
+          "ms": 2.8,
+          "ok": true,
+          "day": 130.88774999999535
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 14
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 17.83,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 17.73,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 3.88,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.75,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.16,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.09,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "U·NPC",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "U·生灵",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.04,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  },
+  {
+    "scenario": "daily",
+    "name": "跨日与自动存档",
+    "run": 3,
+    "requestedSeconds": 60,
+    "durationSeconds": 60.24,
+    "warmupSeconds": 5,
+    "valid": true,
+    "interrupted": false,
+    "viewport": {
+      "width": 1920,
+      "height": 1080,
+      "dpr": 1,
+      "canvasWidth": 1920,
+      "canvasHeight": 1080
+    },
+    "frames": 2379,
+    "fps": 39.49,
+    "frameIntervalMs": {
+      "p50": 25,
+      "p95": 28.7,
+      "max": 50,
+      "avg": 25.31
+    },
+    "longFramesOver50ms": 0,
+    "backgroundPauses": 0,
+    "backgroundSeconds": 0,
+    "frameErrors": [],
+    "cpu": {
+      "updateMs": {
+        "p50": 0.2,
+        "p95": 0.6,
+        "max": 1.7,
+        "avg": 0.25
+      },
+      "renderSubmitMs": {
+        "p50": 23.7,
+        "p95": 26.2,
+        "max": 48.6,
+        "avg": 23.92
+      },
+      "updateAndRenderMs": {
+        "p50": 24,
+        "p95": 26.5,
+        "max": 49.1,
+        "avg": 24.17
+      },
+      "logicalProcessors": 16,
+      "note": "JS 主线程实际计时，不是系统 CPU 占用率"
+    },
+    "gpu": {
+      "hdTimerSupported": true,
+      "hdRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "hdGpuMs": {
+        "p50": 0.23,
+        "p95": 0.25,
+        "max": 0.55,
+        "avg": 0.23
+      },
+      "hdSamples": 2379,
+      "compositeGpuSmoothedMs": {
+        "p50": 1.52,
+        "p95": 1.74,
+        "max": 1.8,
+        "avg": 1.55
+      },
+      "compositeSegmentsMs": {
+        "地表": 1.197262141365409e-9,
+        "世界层上传": 1.0687606687321693,
+        "特效泛光": 0.1724393029085969,
+        "后期": 0.21674431459496699
+      },
+      "compositeRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "software": false
+    },
+    "memory": {
+      "heapStart": {
+        "used": 388297829,
+        "total": 485328385,
+        "limit": 4395630592
+      },
+      "heapEnd": {
+        "used": 387687873,
+        "total": 483427641,
+        "limit": 4395630592
+      },
+      "usedHeapSampleMaxBytes": 421903025,
+      "note": "仅浏览器暴露的 JS 堆，不含进程总内存和显存"
+    },
+    "workload": {
+      "startPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "endPoint": {
+        "x": 231360,
+        "y": 130000
+      },
+      "movementUnits": 0,
+      "turns": 0,
+      "pathPoints": 0,
+      "enemyLive": {
+        "p50": 0,
+        "p95": 0,
+        "max": 0,
+        "avg": 0
+      },
+      "spawnedDuringMeasurement": 0,
+      "castAttempts": 0,
+      "successfulCasts": 0,
+      "spells": {},
+      "gameDaysElapsed": 90.37,
+      "autoSaves": 2,
+      "saves": [
+        {
+          "slot": 0,
+          "ms": 2.8,
+          "ok": true,
+          "day": 100.98854999999747
+        },
+        {
+          "slot": 0,
+          "ms": 2.6,
+          "ok": true,
+          "day": 131.00009999999568
+        }
+      ],
+      "npcTotal": 1167,
+      "npcActive": 13
+    },
+    "profiler": {
+      "top": [
+        {
+          "k": "R·GL合成(地表+上传)",
+          "ms": 18.31,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊世界层上传",
+          "ms": 18.2,
+          "n": 1
+        },
+        {
+          "k": "R·全量绘制",
+          "ms": 4.11,
+          "n": 1
+        },
+        {
+          "k": "R·HD2D 场景",
+          "ms": 0.79,
+          "n": 1
+        },
+        {
+          "k": "R·草",
+          "ms": 0.15,
+          "n": 1
+        },
+        {
+          "k": "R·地点(含城镇地面)",
+          "ms": 0.1,
+          "n": 1
+        },
+        {
+          "k": "R·GL神识灯火",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·GL┊特效+后期提交(含于合成)",
+          "ms": 0.08,
+          "n": 1
+        },
+        {
+          "k": "R·收集山树",
+          "ms": 0.07,
+          "n": 1
+        },
+        {
+          "k": "U·NPC",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "R·天空飞禽",
+          "ms": 0.06,
+          "n": 1
+        },
+        {
+          "k": "U·生灵",
+          "ms": 0.05,
+          "n": 1
+        },
+        {
+          "k": "R·收集单位",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "R·排序",
+          "ms": 0.04,
+          "n": 1
+        },
+        {
+          "k": "R·粒子四季飘物",
+          "ms": 0.04,
+          "n": 1
+        }
+      ],
+      "recentSpikes": []
+    },
+    "host": {
+      "os": {
+        "Caption": "Microsoft Windows 11 专业版",
+        "Version": "10.0.26300",
+        "TotalVisibleMemorySize": 16586160
+      },
+      "gpu": [
+        {
+          "Name": "Zako Display Adapter",
+          "DriverVersion": "100.0.16.2"
+        },
+        {
+          "Name": "NVIDIA GeForce RTX 3070",
+          "DriverVersion": "32.0.16.2101"
+        }
+      ],
+      "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+      "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+      "cpu": [
+        {
+          "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+          "NumberOfCores": 10,
+          "NumberOfLogicalProcessors": 16,
+          "MaxClockSpeed": 3700
+        }
+      ]
+    }
+  }
+]

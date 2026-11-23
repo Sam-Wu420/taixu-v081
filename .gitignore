@@ -1,0 +1,22 @@
+# 只忽略依赖、构建输出和大文件；美术资源与源码全部入库
+node_modules/
+desktop/node_modules/
+desktop/release/
+.DS_Store
+*.log
+tools/out/
+.vite-cache/
+
+# 构建产物不入库
+dist/
+dist-slim/
+art-incoming/
+dist-mods/
+dist-modkit/
+dist-studio/
+
+tools/shots-hs/gen/
+
+# 安卓包：构建输出和签名钥匙不入库
+android/build/
+android/keystore/

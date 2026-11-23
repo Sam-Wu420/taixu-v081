@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; g.hero.hotbar[8] = 'pill:pill_huiqi'; g.onPanel('bag', false); await new Promise(r => setTimeout(r, 400)); const n = g.hero.bag.find(x => x.id === 'pill_huiqi'); g.usePill('pill_huiqi'); await new Promise(r => setTimeout(r, 1500)); return [g.tutorial.step, g.tutorial.getView()?.text]; })()

@@ -1,0 +1,704 @@
+/* 收官 H3：主界面重排与手机适配（GameView + ui/Hud.tsx）。
+   .hud 是一张 CSS 网格，分成几个区（.hz，data-hz）；区里的东西按内容竖排，谁也压不到谁：
+     电脑          "tl top tr" / "lc top tr" / "bl bc br"
+     手机横屏      同上，但左下是摇杆、右下是「侧边一列 + 拇指弧线上的法诀盘」
+     手机竖屏      "tl tr" / "top top" / "lc lc" / "bc bc" / "bl br"
+   每区 zoom: var(--hud-scale)（设置里的「界面大小」）——zoom 参与排版，放大后各区照样互不重叠。
+   新画风：乌木漆底、鎏金细线、朱印；动效只动 transform / opacity；点击目标 ≥ 36px（触屏 ≥ 40px）；四边安全区。
+   旧类名（.char-card .bar .quest-tracker .sect-tracker .loc-card .talk-tip .gather-tip .sit-banner .action-bar .btn-grid .round-btn
+   .joystick .hotbar .hb-slot .toast .help-tip .dock-*）照挂，清界皮肤认它们。 */
+
+.game-root { --hud-scale: 1; --pad-w: 200px; }
+
+/* ================= 网格 ================= */
+.game-root .hud { position: absolute; inset: 0; pointer-events: none; display: grid; gap: 10px 14px;
+  padding: calc(12px + var(--safe-t)) calc(14px + var(--lq-safe-r)) calc(12px + var(--safe-b)) calc(14px + var(--lq-safe-l));
+  grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: 'tl top tr' 'lc top tr' 'bl bc br'; }
+.game-root .hud > .hz { pointer-events: none; }   /* 区本身不挡点击（下面是画布），区里的东西才接；.hud 下直接挂的近战按钮、抽屉照旧能点 */
+.game-root .hud > .hz { zoom: var(--hud-scale); min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.hz > * { pointer-events: auto; }
+.hz-tl { grid-area: tl; align-items: flex-start; }
+.hz-lc { grid-area: lc; align-items: flex-start; overflow: hidden; }
+.hz-top { grid-area: top; align-items: center; gap: 6px; }
+.hz-tr { grid-area: tr; align-items: flex-end; gap: 10px; }
+.hz-bl { grid-area: bl; align-self: end; align-items: flex-start; }
+.hz-bc { grid-area: bc; align-self: end; align-items: center; position: relative; gap: 6px; }
+.hz-br { grid-area: br; align-self: end; justify-self: end; }
+/* HUD 依次浮现 */
+@keyframes hudIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes hudUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.hz-tl > * { animation: hudIn 0.5s 0.05s var(--lq-ease-out) both; }
+.hz-tr > * { animation: hudIn 0.5s 0.15s var(--lq-ease-out) both; }
+.hz-lc > * { animation: hudIn 0.5s 0.25s var(--lq-ease-out) both; }
+.hz-bc > .hotbar, .hz-br > * { animation: hudUp 0.5s 0.3s var(--lq-ease-out) both; }
+.hz-bl > * { animation: hudUp 0.5s 0.4s var(--lq-ease-out) both; }
+
+/* 漆牌通用底：乌木、鎏金细双线 */
+.char-card, .date-box, .target-frame, .qc-item, .toast, .realm-hud, .hotbar:not(.pad), .hh-card, .more-drawer, .dock-sheet, .xukong-read, .loc-card {
+  --lq-plate: radial-gradient(ellipse 80% 70% at 50% 0%, rgba(150, 96, 40, 0.26), transparent 70%), linear-gradient(180deg, rgba(40, 27, 17, 0.9), rgba(18, 12, 7, 0.92)); }
+
+/* ================= 左上：人物牌 ================= */
+.hz .char-card { position: relative; display: flex; align-items: center; gap: 12px; padding: 9px 16px 9px 9px; border-radius: 46px 5px 5px 46px; color: var(--lq-ink-on-dark);
+  background: var(--lq-plate); border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.32), 0 8px 22px rgba(0, 0, 0, 0.38); }
+.hz .char-portrait { flex: none; width: 66px; height: 66px; border-radius: 50%; background: #2a241c center 12% / 170% no-repeat;
+  box-shadow: 0 0 0 2px #1b120c, 0 0 0 4px var(--lq-gold), 0 0 0 5px #1b120c, 0 4px 10px rgba(0, 0, 0, 0.5); }
+.hz .char-info { min-width: 196px; }
+.hz .char-name { display: flex; align-items: center; gap: 8px; line-height: 1; }
+.hz .cn-t { font-family: var(--title-font); font-size: 25px; letter-spacing: 0.08em; background: linear-gradient(180deg, #fff1c4, #e7c06a 55%, #b07a30); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hz .realm-badge { font-family: var(--body-font); font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 2px; color: #fbf3e2;
+  background: var(--rc, var(--lq-jade)); box-shadow: inset 0 0 0 1px rgba(255, 236, 200, 0.3); white-space: nowrap; }
+.hz .realm-badge.hurt { background: #9e2a24; cursor: help; }
+.hz .char-sub { margin-top: 5px; font-size: 11.5px; color: var(--lq-ink-on-dark-2); letter-spacing: 0.04em; white-space: nowrap; }
+/* 条：scaleX + 残影（不动 width） */
+.hz .bar { position: relative; height: 6px; margin-top: 5px; border-radius: 3px; overflow: hidden; background: rgba(0, 0, 0, 0.55); box-shadow: inset 0 0 0 1px rgba(216, 180, 101, 0.18); }
+.hz .bar.hp { height: 8px; margin-top: 7px; }
+.hz .bar > i, .hz .bar > div { position: absolute; inset: 0; border-radius: inherit; transform-origin: left center; }
+.hz .bar .bar-fill { transition: transform 0.35s var(--lq-ease-out); }
+.hz .bar .bar-ghost { background: rgba(255, 214, 130, 0.72); transition: transform 0.6s ease-in; }   /* r11-lock：残影条淡金 */
+.hz .bar.hp > div { background: linear-gradient(180deg, #e0604a, #a82a1e 60%, #7a1a12); }
+.hz .bar.mp > div { background: linear-gradient(180deg, #6aa8e8, #2e6aa8 60%, #1e4a7a); }
+.hz .bar.exp > div { background: linear-gradient(180deg, #c8d878, #7a9a3a 60%, #4e6a22); }
+.hz .bar.exp.full > div { background: linear-gradient(180deg, #ffe08a, #d0a030 60%, #9a6a10); animation: barGlow 1.6s ease-in-out infinite alternate; }
+@keyframes barGlow { from { opacity: 0.7; } to { opacity: 1; } }
+
+/* 增益 / 减益 */
+.buff-row { display: flex; flex-wrap: wrap; gap: 5px; max-width: 300px; padding: 2px 0 0 8px; }
+.buff { position: relative; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 3px; cursor: help;
+  font-family: var(--title-font); font-size: 17px; color: #e6fff4; background: linear-gradient(180deg, #2f5a4c, #16261f); border: 1px solid rgba(143, 224, 192, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); animation: buffIn 0.35s calc(var(--i, 0) * 40ms) var(--lq-ease-pop) both; }
+.buff.bad { color: #ffe0d6; background: linear-gradient(180deg, #6a1e16, #2a0c08); border-color: rgba(255, 140, 110, 0.7); }
+.buff b { font-weight: 400; }
+.buff small { position: absolute; right: -4px; bottom: -6px; padding: 0 3px; border-radius: 2px; font-family: var(--body-font); font-size: 9.5px; font-weight: 700; line-height: 13px;
+  color: #f4e6c8; background: rgba(10, 8, 6, 0.88); font-variant-numeric: tabular-nums; }
+@keyframes buffIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+
+/* ================= 左中：队伍框、任务列 ================= */
+.hz-lc .pf-col { position: relative; left: auto; top: auto; }
+.quest-col { display: flex; flex-direction: column; gap: 6px; width: 290px; max-width: 100%; pointer-events: none; }
+.quest-col > * { pointer-events: auto; }
+.qc-item { position: relative; padding: 7px 12px 8px 14px; border-radius: 3px; color: var(--lq-ink-on-dark); background: var(--lq-plate);
+  border: 1px solid rgba(216, 180, 101, 0.28); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); user-select: none; animation: hudIn 0.4s var(--lq-ease-out) both; }
+.qc-item::before { content: ''; position: absolute; left: -1px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--qc, var(--lq-gold)); }
+.qc-item.clickable { cursor: pointer; transition: transform var(--lq-t-fast); }
+.qc-item.clickable:hover { transform: translateX(3px); }
+.qc-item.clickable:active { transform: scale(0.98); }
+.quest-tracker.qc-item { --qc: #d8a040; }
+.sect-tracker.qc-item { --qc: var(--lq-jade-hi); }
+.mod-tracker.qc-item { --qc: #b8a0e8; }
+.qc-slot.k-guide { --qc: var(--lq-zhu); border-color: rgba(232, 120, 90, 0.5); }
+.qt-ch { font-size: 11px; color: var(--lq-ink-on-dark-2); letter-spacing: 2px; }
+.qt-title { font-family: var(--title-font); font-size: 19px; line-height: 1.25; color: var(--lq-gold-hi); }
+.qt-text { font-size: 12.5px; line-height: 1.5; }
+.qt-dir { margin-top: 3px; font-size: 12px; color: #e8c890; display: flex; align-items: center; gap: 6px; }
+.qt-arrow { display: inline-block; color: var(--lq-gold); font-size: 14px; }
+.sect-tracker .st-head { font-size: 11px; color: var(--lq-jade-hi); letter-spacing: 2px; }
+.sect-tracker .st-row { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; padding: 4px 0; min-height: 36px; cursor: pointer; border-top: 1px dashed rgba(216, 180, 101, 0.2); }
+.sect-tracker .st-row:first-child { border-top: none; }
+.sect-tracker .st-row:hover b { color: var(--lq-gold-hi); }
+.sect-tracker .st-row b { font-size: 13px; font-weight: 500; }
+.sect-tracker .st-row span { font-size: 12px; color: var(--lq-jade-hi); font-variant-numeric: tabular-nums; }
+.sect-tracker .st-row em { grid-column: 1 / -1; font-style: normal; font-size: 11.5px; color: var(--lq-ink-on-dark-2); overflow-wrap: anywhere; line-height: 1.35; }
+.sect-tracker .st-row.done b, .sect-tracker .st-row.done span { color: #8fe0a0; }
+.qs-head { display: flex; align-items: baseline; gap: 8px; } .qs-head b { font-family: var(--title-font); font-size: 17px; font-weight: 400; color: #ffd8c8; } .qs-head span { margin-left: auto; font-size: 12px; }
+.qs-text { font-size: 12px; line-height: 1.5; color: var(--lq-ink-on-dark-2); }
+.qc-more { display: none; align-self: flex-start; min-height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid var(--lq-gold-line); background: rgba(20, 13, 8, 0.82); color: var(--lq-gold-hi); font-size: 12px; cursor: pointer; }
+.hz .mod-hud { position: relative; left: auto; top: auto; right: auto; bottom: auto; transform: none; }
+
+/* ================= 顶栏堆叠 ================= */
+.hz-top > * { max-width: 100%; }
+.hz-top > .region-banner, .hz-top > .toasts, .hz-top > .xukong-read, .hz-top > .boss-hud, .hz-top > .pursuit { pointer-events: none; }
+.xukong-read { text-align: center; padding: 6px 28px 7px; border-radius: 3px; color: #f3e6c4; background: var(--lq-plate); border: 1px solid rgba(200, 170, 255, 0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xk-where { font-family: var(--title-font); font-size: 24px; letter-spacing: 0.24em; color: #e8d8ff; }
+.xk-sub { font-size: 13px; opacity: 0.92; }
+/* 妖王血条 */
+.boss-hud { position: relative; width: min(620px, 100%); z-index: 1; color: #f4e6c8; animation: hudIn 0.6s var(--lq-ease-out) both; }
+.bh-head { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; }
+.bh-name { font-family: var(--title-font); font-size: 24px; letter-spacing: 0.35em; color: #ffd9a0; text-shadow: 0 0 10px rgba(255, 140, 60, 0.75), 0 2px 3px #000; }
+.bh-rank { font-size: 13px; color: #e8c8a8; letter-spacing: 0.15em; text-shadow: 0 1px 2px #000; overflow: hidden; text-overflow: ellipsis; }
+.bh-pct { margin-left: auto; font-size: 13px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px #000; }
+.bh-bar { position: relative; height: 12px; margin-top: 5px; background: rgba(10, 6, 4, 0.75); border: 1px solid rgba(220, 180, 120, 0.55); border-radius: 2px; }
+.bh-lag, .bh-fill { position: absolute; inset: 0; transform-origin: left center; }
+.bh-lag { background: linear-gradient(180deg, rgba(255, 228, 160, 0.8), rgba(220, 176, 90, 0.7)); }   /* r11-lock：残影条淡金 */
+.bh-fill { background: linear-gradient(180deg, #e2563a, #8a1810 60%, #5a0c08); transition: transform 0.1s linear; }
+.bh-orn { position: absolute; top: 50%; width: 10px; height: 10px; margin-top: -5px; background: #d8b070; transform: rotate(45deg); }
+.bh-orn.l { left: -7px; } .bh-orn.r { right: -7px; }
+.bh-notch { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: rgba(255, 230, 180, 0.85); }
+.bh-phase { font-size: 13px; letter-spacing: 0.3em; font-weight: bold; text-shadow: 0 0 8px rgba(255, 80, 40, 0.9), 0 1px 2px #000; }
+.bh-phase.p1 { color: #ffb070; } .bh-phase.p2 { color: #ff5040; animation: barGlow 0.8s ease-in-out infinite alternate; }
+.bh-bar.p1 .bh-fill { background: linear-gradient(180deg, #f07a3a, #a83010 60%, #6a1808); }
+.bh-bar.p2 .bh-fill { background: linear-gradient(180deg, #ff4a2a, #b81008 55%, #600404); }
+.bh-ult { margin: 6px auto 0; width: 60%; text-align: center; font-size: 13px; letter-spacing: 0.2em; color: #ffe0a0; text-shadow: 0 0 8px rgba(255, 150, 60, 0.9), 0 1px 2px #000; opacity: 0; transition: opacity 0.15s; }
+.bh-ult-bar { position: relative; height: 5px; margin-top: 3px; background: rgba(10, 6, 4, 0.7); border: 1px solid rgba(255, 200, 120, 0.5); overflow: hidden; }
+.bh-ult-fill { position: absolute; inset: 0; transform-origin: left center; transform: scaleX(0); background: linear-gradient(90deg, #ffd27a, #ff6a2a); }
+/* r11-lock：锁定目标的大血条（同首领条一套）；首领也在打、锁的又不是首领时，首领条收窄排在上面 */
+.boss-hud.mini .bh-name { font-size: 16px; letter-spacing: 0.24em; }
+.boss-hud.mini .bh-rank, .boss-hud.mini .bh-pct { font-size: 11.5px; }
+.boss-hud.mini .bh-bar { height: 7px; margin-top: 3px; }
+.boss-hud.mini .bh-ult { margin-top: 3px; font-size: 12px; }
+.lock-hud { animation: lkPop 0.34s var(--lq-ease-pop) both; }
+@keyframes lkPop { 0% { opacity: 0; transform: translateY(-6px) scale(0.94); } 60% { opacity: 1; transform: scale(1.02); } 100% { opacity: 1; transform: none; } }
+.lock-hud .bh-head { align-items: center; gap: 9px; }
+.lock-hud .bh-name { font-size: 21px; letter-spacing: 0.22em; overflow: hidden; text-overflow: ellipsis; }
+.lock-hud.k-neutral .bh-name { color: #ffe6a8; text-shadow: 0 0 10px rgba(255, 196, 70, 0.7), 0 2px 3px #000; }
+.lock-hud.k-ally .bh-name { color: #c8fbff; text-shadow: 0 0 10px rgba(70, 220, 240, 0.7), 0 2px 3px #000; }
+.lock-hud.k-neutral .bh-fill { background: linear-gradient(180deg, #f2c25a, #a2741c 60%, #5e400c); }
+.lock-hud.k-ally .bh-fill { background: linear-gradient(180deg, #6ae0e8, #1e8a96 60%, #0c4a52); }
+.lock-hud.k-neutral .bh-bar { border-color: rgba(240, 200, 110, 0.6); }
+.lock-hud.k-ally .bh-bar { border-color: rgba(110, 220, 235, 0.6); }
+.lk-seal { flex: none; align-self: center; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 3px; font-family: var(--title-font); font-size: 16px; line-height: 1;
+  color: #fff4e0; background: #b8321e; box-shadow: 0 0 0 1px rgba(255, 220, 180, 0.55), 0 0 10px rgba(255, 80, 40, 0.55); animation: lkSeal 0.36s var(--lq-ease-pop) both; }
+.lk-seal.k-neutral { background: #a87a1c; box-shadow: 0 0 0 1px rgba(255, 236, 180, 0.6), 0 0 10px rgba(255, 196, 70, 0.55); }
+.lk-seal.k-ally { background: #187a86; box-shadow: 0 0 0 1px rgba(200, 250, 255, 0.6), 0 0 10px rgba(70, 220, 240, 0.55); }
+@keyframes lkSeal { 0% { opacity: 0; transform: scale(1.9) rotate(-12deg); } 70% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
+.lk-mode { flex: none; font-size: 11px; letter-spacing: 0.2em; padding: 1px 6px; border-radius: 2px; color: #f4e2c0; border: 1px solid rgba(230, 200, 140, 0.45); background: rgba(16, 10, 6, 0.55); }
+.lock-hud.manual .lk-mode { color: #fff0d0; border-color: rgba(255, 220, 150, 0.85); }
+.lk-danger { flex: none; font-family: var(--title-font); font-size: 14px; color: #ff7a5a; text-shadow: 0 0 8px rgba(255, 60, 30, 0.9), 0 1px 2px #000; }
+.lk-sub { display: flex; align-items: center; gap: 10px; margin-top: 5px; min-height: 18px; }
+.lk-poise { flex: 0 1 46%; display: flex; align-items: center; gap: 6px; font-size: 11px; color: #ffe2a8; text-shadow: 0 1px 2px #000; }
+.lk-pbar { position: relative; flex: 1; height: 5px; overflow: hidden; border-radius: 2px; background: rgba(10, 6, 4, 0.7); box-shadow: inset 0 0 0 1px rgba(255, 220, 150, 0.3); }
+.lk-pbar > i { position: absolute; inset: 0; transform-origin: left center; background: linear-gradient(90deg, #c88a2c, #ffd98a); transition: transform 0.15s linear; }
+.lk-poise.broken .lk-pbar > i { background: linear-gradient(90deg, #6a6a6a, #b8b0a0); }
+.lk-poise em { font-style: normal; min-width: 2.4em; text-align: right; font-variant-numeric: tabular-nums; }
+.lk-tags { display: flex; gap: 4px; margin-left: auto; flex-wrap: nowrap; overflow: hidden; }
+.lk-tag { flex: none; position: relative; display: inline-flex; align-items: center; gap: 2px; height: 18px; padding: 0 4px; border-radius: 2px; font-size: 12px; color: #d8f0ff;
+  border: 1px solid rgba(150, 200, 240, 0.6); background: rgba(14, 10, 6, 0.72); }
+.lk-tag.bad { color: #ffc8a8; border-color: rgba(240, 120, 80, 0.7); }
+.lk-tag b { font-family: var(--title-font); font-weight: 400; }
+.lk-tag small { font-size: 10px; font-variant-numeric: tabular-nums; opacity: 0.9; }
+/* 追杀条：一层红光只动 opacity（原来 box-shadow 脉冲） */
+.pursuit { position: relative; width: min(560px, 100%); padding: 8px 14px 9px; border-radius: 4px; color: #f4e2d6; overflow: hidden;
+  background: linear-gradient(180deg, rgba(40, 6, 8, 0.86), rgba(40, 6, 8, 0.66)); border: 1px solid rgba(220, 70, 60, 0.6); animation: hudIn 0.4s var(--lq-ease-out) both; }
+.pu-glow { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, rgba(255, 50, 30, 0.45), transparent 70%); }
+.pursuit.near .pu-glow { animation: puGlow 0.9s ease-in-out infinite alternate; }
+@keyframes puGlow { from { opacity: 0.15; } to { opacity: 1; } }
+.pu-head { position: relative; display: flex; align-items: baseline; gap: 12px; font-size: 14px; white-space: nowrap; }
+.pu-head em { font-style: normal; font-family: var(--title-font); font-size: 20px; color: #ff7a6a; letter-spacing: 0.3em; }
+.pu-head span { overflow: hidden; text-overflow: ellipsis; }
+.pu-dist { margin-left: auto; color: #ffd0b0; font-variant-numeric: tabular-nums; flex: none; }
+.pu-bar { position: relative; height: 16px; margin-top: 6px; background: rgba(0, 0, 0, 0.45); border-radius: 3px; overflow: hidden; }
+.pu-fill { position: absolute; inset: 0; transform-origin: left center; transition: transform 0.15s linear; }
+.pu-fill.lock { background: linear-gradient(90deg, #6a0c10, #e0302a 70%, #ff9a7a); }
+.pu-fill.free { background: linear-gradient(90deg, #1f5a48, #4fc29a 70%, #c8ffe8); }
+.pu-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; letter-spacing: 0.15em; text-shadow: 0 1px 2px #000; }
+.pu-tips { position: relative; margin-top: 5px; font-size: 12px; color: #e8cfc0; opacity: 0.85; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pu-arrow { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 41; pointer-events: none; }
+.pu-arrow i { position: absolute; left: -18px; top: -14px; width: 0; height: 0; border-left: 30px solid #ff4a3a; border-top: 14px solid transparent; border-bottom: 14px solid transparent; animation: puArrow 0.8s ease-in-out infinite; }
+@keyframes puArrow { 50% { transform: translateX(-6px); } }
+/* 目标框：锁定对象换了轻轻一弹 */
+.target-frame { width: min(380px, 100%); padding: 6px 12px 8px; border-radius: 3px; color: var(--lq-ink-on-dark); background: var(--lq-plate); border: 1px solid var(--lq-gold-lo);
+  box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.3), 0 6px 16px rgba(0, 0, 0, 0.35); animation: tfPop 0.34s var(--lq-ease-pop) both; pointer-events: none; }
+.target-frame.danger { border-color: #8a2418; box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(220, 90, 70, 0.45), 0 6px 16px rgba(0, 0, 0, 0.35); }
+@keyframes tfPop { 0% { opacity: 0; transform: translateY(-6px) scale(0.92); } 60% { opacity: 1; transform: scale(1.03); } 100% { transform: none; } }
+.tf-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.tf-seal { flex: none; width: 20px; height: 20px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-size: 14px; color: #fbecd0; background: var(--lq-zhu); }
+.tf-name { font-family: var(--title-font); font-size: 18px; font-weight: 400; letter-spacing: 0.08em; color: var(--lq-gold-hi); overflow: hidden; text-overflow: ellipsis; }
+.tf-rank { font-size: 12px; color: var(--lq-ink-on-dark-2); overflow: hidden; text-overflow: ellipsis; }
+.tf-pct { margin-left: auto; font-size: 12px; font-variant-numeric: tabular-nums; }
+.target-frame .bar { margin-top: 5px; height: 8px; }
+.tf-poise { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11px; color: #ffe2a8; }
+.tf-poise .bar { flex: 1; height: 5px; margin: 0; }
+.tf-poise .bar > div { background: linear-gradient(90deg, #c88a2c, #ffd98a); }
+.tf-poise.broken .bar > div { background: linear-gradient(90deg, #6a6a6a, #b8b0a0); }
+.tf-poise em { font-style: normal; min-width: 2.4em; text-align: right; font-variant-numeric: tabular-nums; }
+/* 消息 */
+.hz-top .toasts { display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
+.hz-top .toast { max-width: min(560px, 100%); padding: 7px 18px 8px; border-radius: 3px; color: #f1e6cc; font-size: 14px; line-height: 1.55; background: var(--lq-plate);
+  border: 1px solid rgba(216, 180, 101, 0.3); border-left: 3px solid var(--lq-jade-hi); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); animation: toastIn 0.32s var(--lq-ease-out) both; }
+.hz-top .toast.warn { border-left-color: #e0703a; } .hz-top .toast.good { border-left-color: var(--lq-gold); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
+.hz-top .toast-more { padding: 1px 12px 2px; border-radius: 10px; font-size: 12px; color: var(--lq-ink-on-dark-2); background: rgba(18, 12, 7, 0.72); border: 1px solid rgba(216, 180, 101, 0.25); animation: toastIn 0.25s var(--lq-ease-out) both; }
+/* r14-toast：「讯」角标（左上人物牌下面）、手机单行消息、消息记录。动效只动 transform / opacity */
+.hz .msg-strip { position: relative; z-index: 6; display: flex; align-items: center; gap: 6px; height: 24px; pointer-events: none; }
+.hz .msg-strip > * { pointer-events: auto; }
+.msg-badge { position: relative; flex: none; width: 24px; height: 24px; padding: 0; border-radius: 50%; cursor: pointer; font-family: var(--title-font); font-size: 13px; line-height: 22px; text-align: center;
+  color: var(--lq-ink-on-dark-2); background: rgba(18, 12, 7, 0.7); border: 1px solid rgba(216, 180, 101, 0.32); opacity: 0.72; }
+.msg-badge.has { color: var(--lq-gold-hi); opacity: 1; border-color: rgba(216, 180, 101, 0.6); }
+.msg-badge i { position: absolute; top: -7px; right: -7px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; font: 700 9.5px/15px var(--body-font); font-style: normal; color: #fbf3e2; background: #9e3a24; box-shadow: 0 0 0 1px rgba(18, 12, 7, 0.8); }
+.msg-strip.open .msg-badge { color: var(--lq-gold-hi); opacity: 1; }
+/* 手机：一条单行，挨着角标往右；绝对定位，不撑宽左上这一栏 */
+.msg-line { position: absolute; left: 34px; top: 1px; width: max-content; max-width: min(52vw, 420px); padding: 3px 10px 3px 9px; border-radius: 3px; cursor: pointer;
+  font-size: 11.5px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #f1e6cc;
+  background: rgba(22, 15, 9, 0.86); border: 1px solid rgba(216, 180, 101, 0.22); border-left: 2px solid var(--lq-jade-hi); animation: msgIn 0.24s var(--lq-ease-out) both; }
+.msg-line.good { border-left-color: var(--lq-gold); } .msg-line.warn { border-left-color: #e0703a; } .msg-line.urgent { color: #ffe2c8; background: rgba(60, 18, 10, 0.88); }
+@keyframes msgIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+@media (orientation: portrait) { .msg-line { max-width: 60vw; } }
+/* 手机：角标大一点好点（28px） */
+.hz .msg-strip.touch { height: 28px; }
+.msg-strip.touch .msg-badge { width: 28px; height: 28px; font-size: 14px; line-height: 26px; }
+.msg-strip.touch .msg-line { top: 3px; }
+.msg-strip.touch .msg-log { top: 34px; }
+/* 消息记录：角标下面展开 */
+.msg-log { position: absolute; left: 0; top: 30px; width: min(340px, 82vw); max-height: min(48vh, 380px); display: flex; flex-direction: column; border-radius: 4px; color: var(--lq-ink-on-dark);
+  background: rgba(22, 15, 9, 0.95); border: 1px solid rgba(216, 180, 101, 0.4); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); animation: msgDrop 0.2s var(--lq-ease-out) both; }
+@keyframes msgDrop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.msg-log-head { display: flex; align-items: baseline; gap: 8px; padding: 6px 8px 5px 12px; border-bottom: 1px solid rgba(216, 180, 101, 0.2); font-family: var(--title-font); font-size: 15px; color: var(--lq-gold-hi); }
+.msg-log-head small { flex: 1; font-family: var(--body-font); font-size: 10.5px; color: var(--lq-ink-on-dark-2); }
+.msg-log-x { flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--lq-ink-on-dark-2); font-size: 18px; line-height: 22px; cursor: pointer; }
+.msg-log-list { overflow-y: auto; padding: 4px 0 6px; overscroll-behavior: contain; }
+.msg-log-item { padding: 4px 12px 4px 10px; font-size: 12px; line-height: 1.5; border-left: 2px solid transparent; }
+.msg-log-item + .msg-log-item { border-top: 1px solid rgba(216, 180, 101, 0.08); }
+.msg-log-item.good { border-left-color: var(--lq-gold); } .msg-log-item.warn { border-left-color: #e0703a; }
+.msg-log-item.quiet { color: var(--lq-ink-on-dark-2); }
+.msg-log-item b { display: inline-block; margin-right: 6px; padding: 0 4px; border-radius: 2px; font-size: 10px; font-weight: 700; line-height: 15px; color: #fbf3e2; background: #6a5a3a; vertical-align: 1px; }
+.msg-log-item.urgent b { background: #9e3a24; }
+
+/* ================= 右上：日期、小地图、秘境图 ================= */
+.hz .date-box { display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 7px; border-radius: 3px; color: var(--lq-ink-on-dark); background: var(--lq-plate);
+  border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.28), 0 6px 16px rgba(0, 0, 0, 0.3); }
+.hz .date-season { flex: none; width: 36px; height: 36px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-size: 22px; color: #fbf3e2;
+  box-shadow: inset 0 0 0 1px rgba(255, 236, 200, 0.35); }
+.hz .date-text { font-family: var(--title-font); font-size: 19px; line-height: 1.1; color: var(--lq-gold-hi); white-space: nowrap; }
+.hz .date-text small { display: block; margin-top: 3px; font-family: var(--body-font); font-size: 11px; letter-spacing: 0.06em; color: var(--lq-ink-on-dark-2); }
+.hz .minimap-wrap { position: relative; flex: none; width: 168px; height: 168px; border-radius: 50%; padding: 6px; cursor: pointer;
+  background: radial-gradient(circle at 40% 30%, #3a2a1a, #140d08 75%); box-shadow: 0 8px 22px rgba(10, 6, 3, 0.5), inset 0 0 0 2px var(--lq-gold), inset 0 0 0 4px #1b120c; }
+.hz .minimap-wrap canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.hz .minimap-n { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); font-family: var(--title-font); font-size: 16px; color: var(--lq-gold-hi); text-shadow: 0 1px 2px #000; pointer-events: none; }
+.hz .minimap-region { position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 2px 14px 1px; border-radius: 2px; pointer-events: none;
+  font-family: var(--title-font); font-size: 15px; letter-spacing: 0.15em; color: var(--lq-gold-hi); background: #1b120c; border: 1px solid var(--lq-gold-lo); }
+.hz .mm-zoom { position: absolute; z-index: 2; width: 28px; height: 28px; padding: 0; border-radius: 50%; cursor: pointer; font-family: var(--title-font); font-size: 16px; line-height: 26px;
+  color: var(--lq-gold-hi); background: radial-gradient(circle at 40% 30%, #3a2a1a, #140d08 75%); border: 1px solid var(--lq-gold-line); transition: transform var(--lq-t-fast); }
+.hz .mm-zoom::before { content: ''; position: absolute; inset: -4px; }
+.hz .mm-zoom:hover:not(:disabled) { transform: scale(1.1); } .hz .mm-zoom:active:not(:disabled) { transform: scale(0.92); }
+.hz .mm-zoom:disabled { opacity: 0.4; cursor: default; }
+.hz .mm-zoom.in { left: -8px; bottom: 16px; } .hz .mm-zoom.out { left: -8px; bottom: -14px; }
+.hz .realm-hud { position: relative; top: auto; right: auto; width: 240px; padding: 8px 10px 9px; border-radius: 3px; color: #efe2c4; background: var(--lq-plate); border: 1px solid rgba(200, 160, 255, 0.4); pointer-events: none; }
+.rh-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rh-title b { font-family: var(--title-font); font-size: 21px; font-weight: normal; letter-spacing: 0.1em; color: #e8d0ff; margin-right: 6px; }
+.rh-title small { font-size: 11px; color: #c8b8a0; }
+.rh-line { font-size: 12px; margin: 3px 0 6px; color: #e0d4b8; }
+.rh-map { display: block; width: 100%; image-rendering: pixelated; border-radius: 4px; }
+.rh-tip { font-size: 11px; color: #a89c84; margin-top: 4px; }
+/* 模组 HUD（声明式内容） */
+.mod-hud { z-index: 13; max-width: 300px; padding: 6px 10px; border-radius: 3px; background: rgba(250, 244, 230, 0.88); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); font-size: 13px; pointer-events: auto; }
+.mod-hud .mui-text { line-height: 1.4; }
+.mod-hud.pos-center { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); }
+
+/* ================= 底部：情境提示、遁光读数、快捷栏 ================= */
+.ctx-stack { position: absolute; left: 50%; bottom: calc(100% + 10px); translate: -50% 0; display: flex; flex-direction: column-reverse; align-items: center; gap: 8px;
+  width: max-content; max-width: min(560px, calc(100vw - 32px)); pointer-events: none; z-index: 3; }
+.ctx-item { pointer-events: auto; animation: ctxIn 0.32s var(--lq-ease-out) both; max-width: 100%; }
+@keyframes ctxIn { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+.hud:has(.bx-clash) .ctx-stack { opacity: 0; pointer-events: none; }
+.ctx-pill { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 18px; border-radius: 19px; cursor: pointer; white-space: nowrap; font-family: var(--body-font); font-size: 14.5px;
+  color: #f3e7c9; background: var(--lq-plate, rgba(28, 20, 12, 0.9)); background: linear-gradient(180deg, rgba(40, 27, 17, 0.92), rgba(18, 12, 7, 0.94)); border: 1px solid var(--lq-gold-line);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); transition: transform var(--lq-t-fast); }
+.ctx-pill:hover { transform: translateY(-1px); } .ctx-pill:active { transform: scale(0.96); }
+.ctx-pill kbd { min-width: 22px; padding: 0 6px; border-radius: 3px; font-size: 12px; line-height: 20px; text-align: center; color: #2a1a08; background: var(--lq-gold); font-family: var(--body-font); }
+.talk-tip.ctx-pill { border-color: rgba(255, 190, 210, 0.7); background: linear-gradient(180deg, rgba(64, 30, 40, 0.94), rgba(34, 16, 22, 0.94)); }
+.talent-alert.ctx-pill { font-family: var(--title-font); font-size: 18px; letter-spacing: 0.12em; color: #ffe7b0; border-color: #f0c850; animation: ctxIn 0.32s var(--lq-ease-out) both, talentGlow 1.6s ease-in-out infinite alternate; }
+@keyframes talentGlow { from { opacity: 0.82; } to { opacity: 1; } }
+.gather-tip .gp { position: relative; display: inline-block; width: 90px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); overflow: hidden; }
+.gather-tip .gp i { position: absolute; inset: 0; transform-origin: left center; background: linear-gradient(90deg, #6ad0a0, #e8f0a0); }
+.sit-banner { text-align: center; pointer-events: none; }
+.sit-banner .sb-t { font-family: var(--title-font); font-size: 30px; color: #f3ead6; letter-spacing: 0.4em; text-shadow: 0 0 14px rgba(60, 200, 160, 0.9), 0 2px 4px rgba(0, 0, 0, 0.6); }
+.sit-banner .sb-s { font-size: 13px; color: #e6f3ea; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); margin-top: 2px; }
+/* 地点卡：宣纸漆框 */
+.loc-card { position: relative; width: min(540px, calc(100vw - 40px)); padding: 12px 18px 12px; border-radius: 3px; color: var(--lq-ink-0);
+  background: linear-gradient(180deg, rgba(250, 244, 230, 0.97), rgba(236, 224, 198, 0.97)); border: 2px solid #5e431b; box-shadow: inset 0 0 0 4px rgba(250, 244, 230, 0.6), inset 0 0 0 5px rgba(176, 138, 64, 0.5), 0 10px 28px rgba(0, 0, 0, 0.4); }
+.loc-head { display: flex; align-items: center; gap: 10px; }
+.loc-seal { flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-family: var(--title-font); font-size: 22px; color: #f7eedb; transform: rotate(-4deg); }
+.loc-name { font-family: var(--title-font); font-size: 28px; line-height: 1; letter-spacing: 0.08em; white-space: nowrap; }
+.loc-type { font-size: 12px; color: var(--lq-ink-2); border: 1px solid rgba(94, 67, 27, 0.4); padding: 1px 8px; border-radius: 2px; white-space: nowrap; }
+.loc-desc { margin: 8px 0 8px; font-size: 13.5px; line-height: 1.7; color: #3a352c; }
+.loc-actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+.loc-actions .ink-btn { min-height: 38px; padding: 0 20px; border-radius: 3px; border: 1px solid #6a1e16; font-size: 18px; letter-spacing: 0.16em; color: var(--lq-zhu-paper);
+  background: linear-gradient(180deg, var(--lq-zhu-hi), var(--lq-zhu-mid) 60%, var(--lq-zhu-lo)); transition: transform var(--lq-t-fast); }
+.loc-actions .ink-btn:hover { transform: translateY(-1px); } .loc-actions .ink-btn:active { transform: scale(0.96); }
+.loc-actions .hint { font-size: 12px; color: var(--lq-ink-3); }
+.loc-card .later { font-size: 13px; opacity: 0.8; letter-spacing: 0; }
+/* 遁光读数 */
+.fly-hud { display: flex; align-items: baseline; gap: 10px; padding: 3px 14px; border-radius: 12px; background: rgba(12, 20, 18, 0.55); color: #e4f4ec; font-size: 12px; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 2px #000; }
+.fly-hud b { font-family: var(--title-font); font-size: 16px; color: #bff0dc; font-weight: 400; }
+.fly-hud i { font-style: normal; opacity: 0.65; }
+.fly-hud.boost.thunder b { color: #c8d4ff; } .fly-hud.boost.blood b { color: #ff9a9a; } .fly-hud.boost.light b { color: #d8fff0; }
+/* 快捷栏：乌木托盘 */
+.hz .hotbar:not(.pad) { position: relative; left: auto; bottom: auto; display: flex; gap: 6px; padding: 6px 8px; border-radius: 4px; background: var(--lq-plate);
+  border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.25), 0 8px 20px rgba(0, 0, 0, 0.4); }
+.hb-slot { transition: transform var(--lq-t-fast); }
+.hb-slot:hover:not(.empty) { transform: translateY(-2px); }
+.hb-cd { transform-origin: bottom center; }
+.hotbar img.hb-glyph.sk-ico { width: 42px; height: 42px; }
+@media (max-width: 1100px) { .hz .hotbar:not(.pad) .hb-slot { width: 46px; height: 52px; } .hz .hotbar:not(.pad) .hb-name { display: none; } }
+/* 近战：罡气条挪到快捷栏正上方居中（原来贴着左下，会压任务列）；收尾大字挪到顶栏下面 */
+/* 第五轮：电脑的罡气条、架势提示是底部这一区里的一行（GameView 把它排在遁光读数、快捷栏上面），情境提示再在它们上面——同一时刻上下排开，不再叠 */
+.hz-bc > .bx-hud:not(.touch) { position: relative; left: auto; bottom: auto; translate: none; align-items: center; max-width: 100%; pointer-events: none; }
+.hz-bc > .bx-hud:not(.touch) .bx-tip { white-space: normal; text-align: center; max-width: min(860px, 100%); }
+.game-root:not(.touch) .bx-fin:not(.touch) { top: 34%; }
+.game-root.touch .bx-fin.touch { top: 38%; }
+
+/* ================= 右下：常用键一圈 + 更多抽屉 ================= */
+.action-bar.ring { position: relative; width: 236px; height: 236px; pointer-events: none; }
+.action-bar.ring > * { pointer-events: auto; }
+.hz .round-btn { color: #f3e7c9; background: radial-gradient(circle at 40% 30%, #4a3622, #1b120c 72%); box-shadow: 0 6px 14px rgba(10, 6, 3, 0.45), inset 0 0 0 1px #1b120c, inset 0 0 0 2px rgba(216, 180, 101, 0.6);
+  transition: transform 0.18s var(--lq-ease-pop); }
+.hz .round-btn:hover { transform: scale(1.06); }
+.hz .round-btn:active { transform: scale(0.9); }
+.hz .round-btn.active { background: radial-gradient(circle at 40% 30%, #4f8f7c, #173a32 72%); }
+.hz .round-btn.glow::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #f0c850; pointer-events: none; animation: barGlow 1s ease-in-out infinite alternate; }
+.hz .round-btn small { white-space: nowrap; }
+.btn-badge { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--lq-zhu); color: #fff; font-family: var(--body-font); font-size: 11px; font-style: normal; line-height: 17px; text-align: center; box-shadow: 0 0 0 2px #1b120c; }
+.btn-dot { position: absolute; top: 1px; right: 1px; width: 10px; height: 10px; border-radius: 50%; background: var(--lq-zhu); box-shadow: 0 0 0 2px #1b120c; }
+.ring-slot { position: absolute; width: var(--bs); height: var(--bs); right: calc(39px - var(--bs) / 2); bottom: calc(39px - var(--bs) / 2);
+  translate: calc(cos(var(--a)) * var(--r)) calc(sin(var(--a)) * var(--r)); animation: ringIn 0.5s calc(var(--i, 0) * 45ms + 0.3s) var(--lq-ease-spring) backwards; transition: opacity 0.2s; }
+.ring-slot.inner { --r: 90px; --bs: 54px; } .ring-slot.outer { --r: 154px; --bs: 46px; }
+.ring-slot .round-btn { width: 100%; height: 100%; }
+@keyframes ringIn { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: none; } }
+.ring-core { position: absolute !important; right: 6px; bottom: 6px; width: 66px !important; height: 66px !important; z-index: 3;
+  background: radial-gradient(circle at 40% 30%, var(--lq-zhu-hi), var(--lq-zhu-mid) 55%, var(--lq-zhu-lo)) !important; box-shadow: 0 8px 18px rgba(10, 6, 3, 0.5), inset 0 0 0 1px #3a0c06, inset 0 0 0 3px rgba(243, 213, 140, 0.7) !important; }
+.ring-core small { color: #fbecd0; opacity: 0.9; }
+.rc-ico { position: relative; width: 22px; height: 16px; display: block; }
+.rc-ico i { position: absolute; left: 0; right: 0; height: 2px; border-radius: 1px; background: #fbecd0; transition: transform 0.3s var(--lq-ease-spring), opacity 0.2s; }
+.rc-ico i:nth-child(1) { top: 1px; } .rc-ico i:nth-child(2) { top: 7px; } .rc-ico i:nth-child(3) { top: 13px; }
+.drawer-open .rc-ico i:nth-child(1) { transform: translateY(6px) rotate(45deg); } .drawer-open .rc-ico i:nth-child(2) { opacity: 0; } .drawer-open .rc-ico i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.ring-core.alert::after { content: ''; position: absolute; top: 2px; right: 2px; width: 12px; height: 12px; border-radius: 50%; background: #ffd060; box-shadow: 0 0 0 2px #3a0c06; animation: barGlow 0.9s ease-in-out infinite alternate; }
+.ring-mini { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 6px; }
+/* 总审：海上御剑时这一列有五六颗（放大、缩小、舟 / 潜、升、降），往下排会压住一圈里最左下那颗——多出来的往上长 */
+.ring-mini:has(> :nth-child(5)) { top: -44px; }
+.ring-mini:has(> :nth-child(6)) { top: -88px; }
+.ring-mini .round-btn.small { width: 38px; height: 38px; font-size: 18px; }
+.ring-mini .round-btn.mini { width: 32px; height: 32px; font-size: 17px; }
+.ring-mini .round-btn small { font-size: 8.5px; }
+/* 更多抽屉：从右下角弹开，只动 transform / opacity */
+.more-drawer { position: absolute; right: 0; bottom: calc(100% + 6px); z-index: 4; width: 318px; padding: 10px 14px 14px; border-radius: 4px; color: var(--lq-ink-on-dark);
+  background: var(--lq-plate); border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.32), 0 18px 40px rgba(0, 0, 0, 0.55);
+  transform-origin: 85% 100%; opacity: 0; transform: translateY(18px) scale(0.86); pointer-events: none; transition: transform 0.24s ease-in, opacity 0.2s; }
+.drawer-open .more-drawer { opacity: 1; transform: none; pointer-events: auto; transition: transform 0.42s var(--lq-ease-spring), opacity 0.18s; }
+.drawer-open .ring-slot.outer { opacity: 0.25; }
+.md-head { display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-family: var(--title-font); font-size: 18px; letter-spacing: 0.3em; color: var(--lq-gold-hi); }
+.md-head span { padding: 0 14px 2px; border-bottom: 1px solid var(--lq-gold-lo); }
+.more-drawer .btn-grid { display: grid; grid-template-columns: repeat(5, 46px); gap: 10px 12px; justify-content: center; }
+.more-drawer .round-btn.small { width: 46px; height: 46px; font-size: 21px; }
+.more-drawer .round-btn.mod-btn { background: radial-gradient(circle at 40% 30%, #5a2a24, #251210 72%); }
+.drawer-open .more-drawer .btn-grid > * { animation: ringIn 0.35s var(--lq-ease-spring) both; }
+
+/* ================= 左下：键位提示（开局展开几秒，之后收成「？」） ================= */
+.help-hint { position: relative; }
+.hh-btn { width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-family: var(--title-font); font-size: 20px; color: var(--lq-gold-hi); padding: 0;
+  background: radial-gradient(circle at 40% 30%, #4a3622, #1b120c 72%); border: 1px solid var(--lq-gold-line); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); transition: transform 0.18s var(--lq-ease-pop); }
+.hh-btn:hover { transform: scale(1.08); } .hh-btn:active { transform: scale(0.9); }
+.help-tip.hh-card { position: absolute; left: 0; bottom: calc(100% + 8px); width: max-content; max-width: min(560px, calc(100vw - 40px)); padding: 10px 16px 10px; border-radius: 4px; white-space: normal;
+  color: var(--lq-ink-on-dark); background: var(--lq-plate); border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.3), 0 12px 28px rgba(0, 0, 0, 0.45);
+  transform-origin: 0 100%; opacity: 0; transform: translateY(10px) scale(0.94); pointer-events: none; transition: transform 0.25s ease-in, opacity 0.2s; }
+.help-hint.open .hh-card { opacity: 1; transform: none; pointer-events: auto; transition: transform 0.42s var(--lq-ease-spring), opacity 0.2s; }
+.hh-t { font-family: var(--title-font); font-size: 16px; letter-spacing: 0.2em; color: var(--lq-gold-hi); margin-bottom: 4px; }
+.hh-grid { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 18px; font-size: 12.5px; }
+.hh-grid span { white-space: nowrap; }
+.hh-grid kbd, .hh-card kbd { display: inline-block; min-width: 20px; margin: 0 2px; padding: 0 5px; border-radius: 3px; font-family: var(--body-font); font-size: 11.5px; line-height: 18px; text-align: center; color: #2a1a08; background: #e8d3a0; }
+.hh-foot { margin-top: 6px; font-size: 11px; color: var(--lq-ink-on-dark-2); }
+
+/* ================= 手机（触屏）================= */
+.game-root.touch { --pad-w: 200px; }
+.game-root.touch .hud { gap: 6px 8px; padding: calc(8px + var(--safe-t)) calc(8px + var(--lq-safe-r)) calc(8px + var(--safe-b)) calc(8px + var(--lq-safe-l)); }
+.game-root.touch .hz { gap: 6px; }
+/* 紧凑人物牌 */
+.game-root.touch .hz .char-card { gap: 8px; padding: 5px 12px 5px 5px; border-radius: 30px 4px 4px 30px; }
+.game-root.touch .hz .char-portrait { width: 44px; height: 44px; }
+.game-root.touch .hz .char-info { min-width: 150px; }
+.game-root.touch .hz .cn-t { font-size: 18px; }
+.game-root.touch .hz .realm-badge { font-size: 10px; padding: 1px 6px; }
+.game-root.touch .hz .char-sub { font-size: 10px; margin-top: 3px; }
+.game-root.touch .hz .char-sub .sense-range { display: none; }
+.game-root.touch .hz .bar { height: 5px; margin-top: 3px; } .game-root.touch .hz .bar.hp { height: 6px; margin-top: 5px; }
+.game-root.touch .buff { width: 26px; height: 26px; font-size: 15px; }
+.game-root.touch .buff-row { padding-left: 4px; max-width: 220px; }
+/* 队伍框缩小 */
+.game-root.touch .hz-lc .pf-col { zoom: 0.68; }
+/* 任务列紧凑 */
+.game-root.touch .quest-col { width: 230px; }
+.game-root.touch .qc-item { padding: 5px 9px 6px 11px; }
+.game-root.touch .qt-title { font-size: 15px; } .game-root.touch .qt-text { font-size: 11px; } .game-root.touch .qt-ch { font-size: 10px; }
+.game-root.touch .sect-tracker .st-row b { font-size: 12px; } .game-root.touch .sect-tracker .st-row em { font-size: 10.5px; }
+/* 右上：小地图缩小，日期条紧凑 */
+.game-root.touch .hz .minimap-wrap { width: 92px; height: 92px; padding: 4px; }
+.game-root.touch .hz .minimap-n { font-size: 12px; }
+.game-root.touch .hz .minimap-region, .game-root.touch .hz .mm-zoom { display: none; }
+.game-root.touch .hz .date-box { gap: 6px; padding: 3px 9px 3px 4px; }
+.game-root.touch .hz .date-season { width: 26px; height: 26px; font-size: 16px; }
+.game-root.touch .hz .date-text { font-size: 14px; }
+.game-root.touch .hz .date-text small { font-size: 9.5px; letter-spacing: 0.02em; margin-top: 1px; }
+.game-root.touch .hz .realm-hud { width: 180px; }
+/* 顶栏堆叠：消息字小一号、最多两条（r14-toast：手机已不在顶上弹消息，挪到左上 .msg-line；这几条留给模组皮肤） */
+.game-root.touch .hz-top .toast { font-size: 12.5px; line-height: 1.45; padding: 4px 12px 5px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.game-root.touch .hz-top .toasts { gap: 3px; }
+.game-root.touch .hz-top .toast-more { font-size: 11px; padding: 0 10px 1px; }
+.game-root.touch .boss-hud .bh-name { font-size: 18px; letter-spacing: 0.2em; }
+.game-root.touch .lock-hud .bh-name { font-size: 16px; letter-spacing: 0.14em; } .game-root.touch .boss-hud.mini .bh-name { font-size: 14px; }
+.game-root.touch .lk-seal { width: 20px; height: 20px; font-size: 14px; } .game-root.touch .lk-sub { margin-top: 3px; min-height: 16px; } .game-root.touch .lk-tag { height: 16px; font-size: 11px; }
+.game-root.touch .pu-tips { display: none; }
+.game-root.touch .target-frame { padding: 4px 10px 6px; } .game-root.touch .tf-name { font-size: 15px; }
+/* 摇杆 */
+.joystick { position: relative; width: 124px; height: 124px; border-radius: 50%; touch-action: none; background: radial-gradient(circle, rgba(30, 22, 14, 0.25), rgba(30, 22, 14, 0.5));
+  border: 2px solid rgba(216, 180, 101, 0.55); transition: opacity 0.2s; }
+.joystick::after { content: ''; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid rgba(243, 213, 140, 0.95); opacity: 0; transition: opacity 0.18s; pointer-events: none; }
+.joystick.fast::after { opacity: 1; }
+.joystick-knob { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 40% 30%, #5a4632, #1b120c 75%); border: 2px solid rgba(216, 180, 101, 0.8); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+.joystick-hint { position: absolute; left: 50%; top: -21px; transform: translateX(-50%); font-family: var(--title-font); font-size: 13px; letter-spacing: 0.28em; text-indent: 0.28em; color: #f4d896;
+  opacity: 0; transition: opacity 0.15s; pointer-events: none; text-shadow: 0 0 10px rgba(0, 0, 0, 0.7); }
+.joystick.fast .joystick-hint { opacity: 1; }
+/* 右下：侧边一列 + 拇指弧线上的法诀盘 */
+.game-root.touch .hz-br { flex-direction: row; align-items: flex-end; gap: 8px; }
+.touch-side { display: flex; flex-direction: column; gap: 7px; }
+.game-root.touch .touch-side .round-btn { width: 44px; height: 44px; font-size: 18px; }
+.game-root.touch .touch-side .round-btn small { font-size: 8.5px; margin-top: 0; letter-spacing: 0; }
+.game-root.touch .dock-main { background: radial-gradient(circle at 40% 30%, #6a4a24, #2a1a0c 72%); }
+.game-root.touch .dodge-btn { background: radial-gradient(circle at 40% 30%, #8a4a2a, #3a1a10 72%); }
+.game-root.touch .talk-btn.on { background: radial-gradient(circle at 40% 30%, #c98a3a, #3a2410 72%); animation: talkBeat 1.8s ease-in-out infinite; }
+@keyframes talkBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+/* r13-lockbtn：「锁」（侧边一列，「闪」上面）。点按区不小于 44（横屏矮屏里同列别的钮是 40，它照样 44，整列居中对齐）；
+   锁着目标：朱红印章底 + 金边，锁上那一下盖印似的一顿；附近没有能锁的：变灰；按住（锁着时）：外圈一道金环收拢，收到底即取消锁定。只动 transform / opacity */
+.game-root.touch .touch-side { align-items: center; }
+.game-root.touch .touch-side .round-btn.lock-btn { width: 44px; height: 44px; font-size: 19px; }
+.game-root.touch .lock-btn { -webkit-touch-callout: none; user-select: none; touch-action: none; background: radial-gradient(circle at 40% 30%, #4a3a2c, #1b120c 72%); }
+.game-root.touch .lock-btn.on { color: #fff3dc; background: radial-gradient(circle at 40% 30%, var(--lq-zhu-hi), var(--lq-zhu-mid) 55%, var(--lq-zhu-lo));
+  box-shadow: 0 0 0 2px rgba(243, 213, 140, 0.92), 0 0 14px rgba(255, 90, 60, 0.6), inset 0 0 0 1px #3a0c06; animation: lockStamp 0.34s var(--lq-ease-pop); }
+.game-root.touch .lock-btn.on small { opacity: 0.95; }
+.game-root.touch .lock-btn.none { color: rgba(214, 206, 190, 0.42); background: radial-gradient(circle at 40% 30%, #3a3833, #191816 72%); box-shadow: 0 4px 10px rgba(10, 6, 3, 0.35), inset 0 0 0 1px #141210, inset 0 0 0 2px rgba(160, 150, 130, 0.3); }   /* 变灰只改底色和字色，不动 opacity / filter：旁边那句短提示是它的子元素，不能跟着淡 */
+.game-root.touch .lock-btn::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid #f3d58c; pointer-events: none; opacity: 0; transform: scale(1.4); }
+.game-root.touch .lock-btn.holding::before { opacity: 1; transform: scale(1); transition: transform 0.45s linear, opacity 0.1s; }
+/* 横屏矮屏：多了「锁」，再带上「侣」「宠」（海上还有「舟」「潜」「浮」）时一列有七颗以上，顶到小地图——这些不常按的挪到左边第二列，常用的五颗照旧一列贴着法诀盘 */
+@media (max-height: 520px) and (min-aspect-ratio: 1/1) {
+  .game-root.touch .touch-side:has(> :nth-child(7)) { display: grid; grid-auto-flow: row dense; grid-template-columns: auto auto; gap: 6px; align-content: end; align-items: center; justify-items: center; }
+  .game-root.touch .touch-side:has(> :nth-child(7)) > * { grid-column: 2; }
+  .game-root.touch .touch-side:has(> :nth-child(7)) > :is(.lover-btn, .pet-btn, .sea-boat, .sea-dive, .sea-rise) { grid-column: 1; }
+}
+/* 「锁」旁的短提示（附近没有能锁的、只有这一个）：横屏在按钮左边，竖屏在按钮上方；浮起、停一下、淡出 */
+.game-root.touch .lock-tip { position: absolute; z-index: 6; right: calc(100% + 8px); top: 50%; translate: 0 -50%; padding: 4px 10px 5px; border-radius: 4px; white-space: nowrap; pointer-events: none;
+  font-family: var(--body-font); font-size: 12px; line-height: 1.3; letter-spacing: 0.04em; color: var(--lq-ink-on-dark); background: linear-gradient(180deg, rgba(40, 27, 17, 0.95), rgba(18, 12, 7, 0.96)); border: 1px solid var(--lq-gold-lo);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45); animation: lockTip 1.8s ease both; }
+@media (max-aspect-ratio: 1/1) { .game-root.touch .lock-tip { right: auto; left: 50%; top: auto; bottom: calc(100% + 8px); translate: -50% 0; } }
+@keyframes lockTip { 0% { opacity: 0; transform: translateY(6px) scale(0.92); } 12% { opacity: 1; transform: none; } 80% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-4px); } }
+@keyframes lockStamp { 0% { transform: scale(1.25); } 55% { transform: scale(0.92); } 100% { transform: none; } }
+/* 法诀盘：第一格（默认的普通攻击）最大、贴着角；内弧三格、外弧五格，拇指一转就够得着 */
+.game-root.touch .hotbar.pad { --c: 38px; --ri: 80px; --ro: 140px; --s: 48px; --s1: 64px;
+  position: relative; display: block; width: var(--pad-w); height: var(--pad-w); padding: 0; background: none; box-shadow: none; border: none; }
+.game-root.touch .hotbar.pad .hb-slot { position: absolute; width: var(--s); height: var(--s); border-radius: 50%; right: calc(var(--c) - var(--s) / 2); bottom: calc(var(--c) - var(--s) / 2);
+  translate: calc(cos(var(--a)) * var(--r)) calc(sin(var(--a)) * var(--r)); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(1) { --s: var(--s1); --a: 0deg; --r: 0px; }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(2) { --a: 180deg; --r: var(--ri); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(3) { --a: 225deg; --r: var(--ri); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(4) { --a: 270deg; --r: var(--ri); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(5) { --a: 180deg; --r: var(--ro); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(6) { --a: 202.5deg; --r: var(--ro); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(7) { --a: 225deg; --r: var(--ro); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(8) { --a: 247.5deg; --r: var(--ro); }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(9) { --a: 270deg; --r: var(--ro); }
+.game-root.touch .hotbar.pad .hb-glyph { font-size: 21px; }
+.game-root.touch .hotbar.pad img.hb-glyph.art-ico { width: 30px; height: 30px; }
+.game-root.touch .hotbar.pad img.hb-glyph.sk-ico { width: 34px; height: 34px; }
+.game-root.touch .hotbar.pad .hb-slot:nth-child(1) img.hb-glyph.sk-ico { width: 46px; height: 46px; }
+html.brawl-stance .game-root.touch .hotbar.pad { visibility: hidden; pointer-events: none; }
+/* 近战四个大按钮、架势按钮：跟着法诀盘的大小（BrawlHUD 读 --pad-w） */
+.game-root.touch .bx-pad { right: calc(8px + var(--lq-safe-r)); bottom: calc(8px + var(--safe-b)); }
+.game-root.touch .bx-stance { right: calc(8px + var(--lq-safe-r)); }
+/* 开着面板、对话时，底部操作区淡出 */
+.game-root:has(.modal-mask) .joystick, .game-root:has(.modal-mask) .hotbar, .game-root:has(.modal-mask) .touch-side, .game-root:has(.modal-mask) .flight-pad, .game-root:has(.modal-mask) .action-bar { opacity: 0.18; transition: opacity 0.2s; }
+
+/* 手机功能抽屉：乌木漆底，弹簧开合 */
+.dock-mask { position: absolute; inset: 0; z-index: 42; display: flex; align-items: flex-end; justify-content: flex-end; pointer-events: auto; touch-action: auto;
+  padding: 0 calc(10px + var(--lq-safe-r)) calc(10px + var(--safe-b)) calc(10px + var(--lq-safe-l)); background: rgba(10, 8, 5, 0.5); animation: lqFade 0.16s ease both; }
+.dock-sheet { width: min(372px, 92vw); max-height: 76vh; max-height: 76dvh; overflow-y: auto; touch-action: pan-y; padding: 10px 14px 14px; border-radius: 4px; color: var(--lq-ink-on-dark);
+  background: var(--lq-plate); border: 1px solid var(--lq-gold-lo); box-shadow: inset 0 0 0 2px #1b120c, inset 0 0 0 3px rgba(216, 180, 101, 0.32), 0 18px 46px rgba(0, 0, 0, 0.6);
+  transform-origin: 85% 100%; animation: dockIn 0.42s var(--lq-ease-spring) both; }
+@keyframes dockIn { from { opacity: 0; transform: translateY(24px) scale(0.88); } to { opacity: 1; transform: none; } }
+.dock-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dock-title { font-family: var(--title-font); font-size: 19px; letter-spacing: 0.24em; color: var(--lq-gold-hi); }
+.dock-head .close-btn { width: 40px; height: 40px; border-radius: 50%; color: #eadfc2; border: 1px solid var(--lq-gold-line); background: rgba(30, 20, 12, 0.8); font-size: 18px; }
+.dock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.dock-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; padding: 8px 2px 6px; border-radius: 4px; cursor: pointer;
+  color: #f3e7c9; font-family: var(--body-font); border: 1px solid rgba(216, 180, 101, 0.32); background: radial-gradient(circle at 50% 18%, #3d2c1c, #160e08 86%);
+  animation: ringIn 0.32s calc(var(--i, 0) * 18ms) var(--lq-ease-spring) both; transition: transform var(--lq-t-fast); }
+.dock-item:active { transform: scale(0.93); }
+.dock-item.on { border-color: var(--lq-jade-hi); }
+.dock-item.glow { border-color: #f0c850; }
+.di-t { font-family: var(--title-font); font-size: 22px; line-height: 1; }
+.di-n { font-size: 10px; opacity: 0.85; white-space: nowrap; }
+.dock-item .btn-badge { top: 3px; right: 5px; }
+
+/* —— 手机横屏（矮屏）：网格同电脑，各块收一档 —— */
+@media (max-height: 520px) {
+  .game-root.touch { --pad-w: 176px; }
+  .game-root.touch .hotbar.pad { --c: 32px; --ri: 68px; --ro: 122px; --s: 42px; --s1: 56px; }
+  .game-root.touch .hz-tl .char-card .char-sub { display: none; }
+  .game-root.touch .hz .minimap-wrap { width: 74px; height: 74px; }
+  .game-root.touch .hz-tr { flex-direction: row-reverse; align-items: flex-start; }
+  .game-root.touch .hz .date-text small { display: none; }
+  .game-root.touch .joystick { width: 108px; height: 108px; }
+  .game-root.touch .joystick-knob { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+  .game-root.touch .touch-side { gap: 6px; }
+  .game-root.touch .touch-side .round-btn { width: 40px; height: 40px; font-size: 16px; }
+  /* 任务列：只留最上面一块，其余折起（点「展开任务」看全） */
+  .game-root.touch .quest-col { width: 210px; }
+  .game-root.touch .quest-col:not(.open) > .qc-item ~ .qc-item { display: none; }
+  .game-root.touch .quest-col:not(.open) .qt-text, .game-root.touch .quest-col:not(.open) .st-row em { display: none; }
+  .game-root.touch .quest-col:has(> .qc-item ~ .qc-item) .qc-more, .game-root.touch .quest-col.open .qc-more { display: block; }
+  .game-root.touch .hz-lc .pf-col { zoom: 0.56; }
+  .game-root.touch .hz-top { gap: 4px; }
+  .game-root.touch .boss-hud { width: min(440px, 100%); }
+  .game-root.touch .xk-where { font-size: 18px; }
+  .game-root.touch .loc-card { width: min(330px, 100%); padding: 6px 10px 7px; display: flex; align-items: center; gap: 8px; }
+  .game-root.touch .loc-card .loc-head { flex: 1; min-width: 0; }
+  .game-root.touch .loc-card .loc-desc { display: none; }
+  .game-root.touch .loc-name { font-size: 19px; }
+  .game-root.touch .loc-seal { width: 26px; height: 26px; font-size: 16px; }
+  .game-root.touch .loc-actions .ink-btn { min-height: 36px; font-size: 15px; padding: 0 12px; }
+  .game-root.touch .sit-banner .sb-t { font-size: 20px; } .game-root.touch .sit-banner .sb-s { font-size: 11px; }
+  .game-root.touch .ctx-pill { font-size: 13px; min-height: 36px; }
+  .dock-sheet { width: min(470px, 70vw); max-height: 90dvh; }
+  .dock-grid { grid-template-columns: repeat(6, 1fr); }
+  .dock-item { min-height: 50px; }
+  .di-t { font-size: 18px; }
+}
+/* —— 手机竖屏：上面一行人物牌 + 小地图，顶栏堆叠单独一行，底下是摇杆和法诀盘 —— */
+@media (max-aspect-ratio: 1/1) {
+  .game-root.touch .hud { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'tl tr' 'top top' 'lc lc' 'bc bc' 'bl br'; }
+  .game-root.touch .hz-tl .char-card { max-width: 100%; }
+  .game-root.touch .hz .char-info { min-width: 0; }
+  /* 日期条只留年月（时辰、天气、地名在小地图和地名横幅里都有），给左边的人物牌让出宽度 */
+  .game-root.touch .hz .date-text small { display: none; }
+  .game-root.touch .hz .date-text { font-size: 13px; }
+  .game-root.touch .hz-tr { gap: 6px; }
+  .game-root.touch .hz .minimap-wrap { width: 88px; height: 88px; }
+  .game-root.touch .hz-br { flex-direction: column; align-items: flex-end; }
+  /* 侧边按钮在竖屏排成一行，放在法诀盘上方；右边让出「架势」钮的位置 */
+  .game-root.touch .touch-side { flex-direction: row; margin-right: 64px; }
+  .game-root.touch .hz-bc { min-height: 0; }
+  .game-root.touch .ctx-stack { max-width: calc(100vw - 20px); }
+  .game-root.touch .loc-card { width: min(360px, calc(100vw - 24px)); }
+  .game-root.touch .loc-card .loc-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; margin: 4px 0; }
+  .game-root.touch .loc-name { font-size: 21px; }
+}
+/* 第五轮：竖屏任务列默认收成一行（第一条的标题 + 「展开」），点开才看全；以前它和消息、地点卡、引导气泡一起把上半屏盖了一大半 */
+@media (max-aspect-ratio: 1/1) {
+  .game-root.touch .quest-col { width: min(340px, 100%); }
+  .game-root.touch .quest-col:not(.open) { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .game-root.touch .quest-col:not(.open) > .qc-item ~ .qc-item { display: none; }
+  .game-root.touch .quest-col:not(.open) > .qc-item { flex: 1 1 0; min-width: 0; padding: 3px 10px 4px 12px; }
+  .game-root.touch .quest-col:not(.open) :is(.qt-text, .qt-ch, .qt-dir, .qs-text, .st-row) { display: none; }
+  .game-root.touch .quest-col:not(.open) :is(.qt-title, .qs-head, .st-head) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .game-root.touch .quest-col:not(.open) .qs-head b { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .game-root.touch .quest-col:not(.open) .qt-title, .game-root.touch .quest-col:not(.open) .qs-head b { font-size: 14px; }
+  .game-root.touch .quest-col:not(.open) > :not(.qc-item):not(.qc-more) { flex-basis: 100%; order: 2; }
+  .game-root.touch .quest-col .qc-more { order: 1; }
+  .game-root.touch .quest-col:has(> .qc-item) .qc-more { display: block; }
+}
+.game-root.touch .qc-more { min-height: 36px; }
+/* 常用键一圈的底：一片四分之一圆的淡墨，外缘一道金线，让一圈按钮看得出是一组 */
+/* 圆心放在屏幕角外一点（盒子伸出屏幕的部分被 .game-root 裁掉），渐变半径写死——原来用默认的「最远角」半径，四分之一圆画成了带直边的方块，右边还留一条缝 */
+.action-bar.ring::before { content: ''; position: absolute; right: -30px; bottom: -30px; width: 300px; height: 300px; pointer-events: none;
+  background: radial-gradient(circle 300px at 100% 100%, rgba(18, 12, 7, 0.5) 0%, rgba(18, 12, 7, 0.36) 72%, rgba(18, 12, 7, 0.14) 86%, rgba(18, 12, 7, 0) 96%); animation: lqFade 0.6s 0.2s both; }
+.action-bar.ring::after { content: ''; position: absolute; right: calc(39px - 122px); bottom: calc(39px - 122px); width: 244px; height: 244px; border-radius: 50%; pointer-events: none;
+  border: 1px solid rgba(216, 180, 101, 0.28); clip-path: inset(0 50% 50% 0); }
+
+/* —— 右下这一块（常用键一圈 / 法诀盘）不进网格的行高计算：它很高，进了网格会把整条底行撑高、左边的队伍框和任务列就被挤矮了。
+      绝对定位贴在右下角；它上方是右列（日期、小地图），右列内容不会长到这么低。竖屏除外（竖屏底下两行本来就是给它的）。 */
+.game-root .hud > .hz-br { position: absolute; right: calc(14px + var(--lq-safe-r)); bottom: calc(12px + var(--safe-b)); }
+.game-root.touch .hud > .hz-br { right: calc(8px + var(--lq-safe-r)); bottom: calc(8px + var(--safe-b)); }
+/* 手机：左中这一列放不下时能上下滑（队伍框 + 任务列），底部淡出 */
+.game-root.touch .hz-lc { overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none;
+  -webkit-mask: linear-gradient(180deg, #000 calc(100% - 18px), transparent); mask: linear-gradient(180deg, #000 calc(100% - 18px), transparent); }
+.game-root.touch .hz-lc::-webkit-scrollbar { display: none; }
+/* 手机：秘境小图收小（标题一行、图 130） */
+.game-root.touch .hz .realm-hud { width: 150px; padding: 5px 7px 6px; }
+.game-root.touch .rh-title b { font-size: 15px; } .game-root.touch .rh-title small { display: none; }
+.game-root.touch .rh-line { font-size: 10px; margin: 1px 0 3px; }
+.game-root.touch .rh-tip { display: none; }
+@media (max-height: 520px) { .game-root.touch .hz .realm-hud { width: 132px; } }
+@media (max-aspect-ratio: 1/1) { .game-root.touch .hud > .hz-br { position: relative; right: auto; bottom: auto; } }
+/* 竖屏：摇杆和右下那块共用最底下一整行（一个靠左一个靠右），不让右下那块的宽度决定第二列，把人物牌挤窄 */
+@media (max-aspect-ratio: 1/1) {
+  .game-root.touch .hud > .hz-bl { grid-area: 5 / 1 / 6 / 3; justify-self: start; }
+  .game-root.touch .hud > .hz-br { grid-area: 5 / 1 / 6 / 3; justify-self: end; }
+}
+/* 竖屏：情境提示进网格（「bc」那一行跟着它高），任务列让出地方往上收、能滑；近战的罡气条挪到侧边按钮那一行上方（原来压在摇杆上） */
+@media (max-aspect-ratio: 1/1) {
+  .game-root.touch .ctx-stack { position: static; translate: none; margin: 0 auto; }
+  .game-root.touch .bx-hud.touch { bottom: calc(var(--safe-b) + var(--pad-w) + 74px); }
+  .game-root.touch .hud:has(.bx-hud.touch) > .hz-bc { padding-bottom: 60px; }
+}
+
+/* r15-touchctl：手机的飞行一竖排——「剑」（御剑 / 落地）在最下，飞着（御剑、虚空）时「升」「降」（按住）出在它上面，「剑」自己不挪地方。
+   横屏：右下那块（行排）的最左边、侧边一列的左边，「剑」和「闪」差不多高——右手拇指从法诀盘往左一挪就按到；
+   竖屏：右下那块（列排）里在侧边那一行上方、靠右，「剑」正好在「架」上面。
+   「降」和「剑」之间多空一点，按「降」不至于误点落地。按着时缩一点、外圈亮（只动 transform / opacity）。 */
+.game-root.touch .hz-br > .flight-pad { display: flex; flex-direction: column; align-items: center; gap: 14px; align-self: flex-end; margin-bottom: 46px; pointer-events: none; }
+.flight-pad > * { pointer-events: auto; }
+.climb-pad { display: flex; flex-direction: column; gap: 10px; touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; animation: climbIn 0.22s var(--lq-ease-out) both; }
+@keyframes climbIn { from { opacity: 0; transform: translateY(12px) scale(0.9); } to { opacity: 1; transform: none; } }
+.game-root.touch .flight-pad .round-btn { width: 50px; height: 50px; font-size: 20px; touch-action: none; }
+.game-root.touch .flight-pad .round-btn small { font-size: 9px; margin-top: 1px; letter-spacing: 0; }
+.climb-pad .round-btn.up { background: radial-gradient(circle at 40% 30%, #3f6a5e, #142824 72%); }
+.climb-pad .round-btn.dn { background: radial-gradient(circle at 40% 30%, #4a3a2c, #1b120c 72%); }
+.climb-pad .round-btn::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(170, 245, 220, 0.9); opacity: 0; transform: scale(1.15); transition: opacity 0.12s, transform 0.12s; pointer-events: none; }
+.climb-pad .round-btn.held { transform: scale(0.92); }
+.climb-pad .round-btn.held::after { opacity: 1; transform: none; }
+@media (max-height: 520px) {
+  .game-root.touch .hz-br > .flight-pad { gap: 12px; margin-bottom: 40px; }
+  .climb-pad { gap: 8px; }
+  .game-root.touch .flight-pad .round-btn { width: 46px; height: 46px; font-size: 19px; }
+}
+/* 很矮的横屏（2000×900、像素比 2.6–3 的手机折成 CSS 只有 300–346 高）：侧边一列五颗再收一档，不顶到小地图；飞行一竖排也收一点。
+   地点卡被挤窄时裁在自己框里，不伸到「剑」底下 */
+@media (max-height: 360px) and (min-aspect-ratio: 1/1) {
+  .game-root.touch .touch-side { gap: 4px; }
+  .game-root.touch .touch-side .round-btn, .game-root.touch .touch-side .round-btn.lock-btn { width: 36px; height: 36px; font-size: 15px; }
+  .game-root.touch .hz-br > .flight-pad { gap: 10px; margin-bottom: 34px; }
+  .game-root.touch .flight-pad .round-btn { width: 44px; height: 44px; font-size: 18px; }
+  .game-root.touch .loc-card { overflow: hidden; }
+}
+/* 竖屏：侧边那一行的右头让给了「架」（70 像素），这一竖排就站在「架」上面 */
+@media (max-aspect-ratio: 1/1) { .game-root.touch .hz-br > .flight-pad { margin: 0 3px 4px 0; } }
+
+/* r15-touchctl：「剑」御剑 / 落地。没飞：青黛底；飞着：青玉亮底 + 金绿描边，外圈一道虚线光环慢慢转 */
+.game-root.touch .fly-btn { -webkit-touch-callout: none; user-select: none; touch-action: none; background: radial-gradient(circle at 40% 30%, #3a4e4a, #141c1a 72%); }
+.game-root.touch .fly-btn.flying { color: #f4fffa; background: radial-gradient(circle at 40% 30%, #7fdcc0, #23705d 55%, #0c2a22);
+  box-shadow: 0 0 0 2px rgba(170, 245, 220, 0.95), 0 0 16px rgba(90, 225, 185, 0.7), inset 0 0 0 1px #0c2a22; }
+.game-root.touch .fly-btn.flying small { opacity: 1; }
+.fly-btn .fly-aura { position: absolute; inset: -7px; border-radius: 50%; border: 2px dashed rgba(180, 250, 228, 0.9); pointer-events: none; opacity: 0; transform: scale(0.8); transition: opacity 0.2s, transform 0.25s var(--lq-ease-pop); }
+.fly-btn.flying .fly-aura { opacity: 1; transform: none; animation: flyAura 3.6s linear infinite; }
+@keyframes flyAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ================= 第五轮：「界面大小」两端都不破版 ================= */
+/* 各区是 zoom 缩放的：区里写 100vw 的宽度会跟着放大、伸出屏幕——除回去 */
+.ctx-stack { max-width: min(560px, calc((100vw - 32px) / var(--hud-scale))); }
+.loc-card { width: min(540px, calc((100vw - 40px) / var(--hud-scale))); }
+.help-tip.hh-card { max-width: min(560px, calc((100vw - 40px) / var(--hud-scale))); }
+@media (max-aspect-ratio: 1/1) {
+  .game-root.touch .ctx-stack { max-width: calc((100vw - 20px) / var(--hud-scale)); }
+  .game-root.touch .loc-card { width: min(360px, calc((100vw - 24px) / var(--hud-scale))); }
+}
+/* 手机横屏：右下那块（侧边一列 + 法诀盘，绝对定位不进网格）在网格里占住宽度，情境提示（地点卡）就不会伸到它底下压住「闪」「谈」 */
+@media (max-height: 520px) {
+  .game-root.touch .hud { grid-template-columns: auto minmax(0, 1fr) calc((var(--pad-w) + 116px) * var(--hud-scale)); }   /* r15-touchctl：多了「剑」那一竖排（+56） */
+  .game-root.touch .ctx-stack { max-width: 100%; }
+  .game-root.touch .loc-card { width: min(330px, 100%); }
+}
+/* 手机：「架」和近战四个大钮跟着界面大小一起缩放（以前只有法诀盘缩放，「架」按没缩放的法诀盘高度定位，放大后压在法诀盘上） */
+.game-root.touch .bx-stance, .game-root.touch .bx-pad { zoom: var(--hud-scale); }
+.game-root.touch .bx-stance { width: 52px; height: 52px; right: calc(10px + var(--lq-safe-r) / var(--hud-scale)); bottom: calc(var(--pad-w) + 18px + var(--safe-b) / var(--hud-scale)); }
+@media (max-aspect-ratio: 1/1) {
+  /* 竖屏：「架」放在侧边那一行的右头（那一行给它让出 70 像素） */
+  .game-root.touch .touch-side { margin-right: 70px; }
+  /* r13-lockbtn：多了「锁」，再带上「侣」「宠」时一行放不下——往上折一行（靠右），不伸出屏幕 */
+  .game-root.touch .touch-side { flex-wrap: wrap-reverse; justify-content: flex-end; max-width: calc((100vw - 16px) / var(--hud-scale) - 70px); }
+  .game-root.touch .bx-stance { bottom: calc(var(--pad-w) + 6px + (8px + var(--safe-b)) / var(--hud-scale)); }
+  .game-root.touch .bx-hud.touch { bottom: calc(var(--safe-b) + (var(--pad-w) + 74px) * var(--hud-scale)); }
+}
+
+/* ================= r11-lock 血条打击感（ui/hpfx.ts） ================= */
+/* 碎玉、滴血、回血光点画在这张画布上：盖住界面、不接点击；没东西在动时是空的 */
+.game-root .hpfx-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+/* 重击：血条轻震（只动 transform） */
+.hpfx-shake { animation: hpShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+@keyframes hpShake { 10%, 90% { transform: translate(-1px, 0); } 20%, 80% { transform: translate(2px, -1px); } 30%, 50%, 70% { transform: translate(-3px, 1px); } 40%, 60% { transform: translate(3px, 0); } }
+/* 濒死（低于 25%）：边缘一圈缓缓呼吸的红墨（阴影是死的，只动 opacity） */
+.hz .bar > .bar-dying { background: none; box-shadow: inset 0 0 3px 1px rgba(90, 0, 0, 0.95), inset 0 0 0 1px rgba(255, 60, 40, 0.6); opacity: 0; transform: none; }
+.hz .bar.dying > .bar-dying { animation: hpBreath 1.5s ease-in-out infinite alternate; }
+.bh-bar::after { content: ''; position: absolute; inset: -3px; border-radius: 3px; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 10px 3px rgba(150, 10, 4, 0.85), inset 0 0 6px 2px rgba(120, 0, 0, 0.9); }
+.bh-bar.dying::after { animation: hpBreath 1.5s ease-in-out infinite alternate; }
+.hz .char-card:has(.bar.hp.dying)::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 14px 2px rgba(150, 10, 4, 0.75); animation: hpBreath 1.5s ease-in-out infinite alternate; }
+@keyframes hpBreath { from { opacity: 0.15; } to { opacity: 1; } }

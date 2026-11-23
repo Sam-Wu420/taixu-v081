@@ -1,0 +1,18 @@
+/* r7：撼山客的「动静」——屏幕边缘朝他那边的冲击光（HanshanQuake.tsx）。只动 transform / opacity */
+.hs-quake-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+.hs-quake { position: absolute; width: 0; height: 0; transform: rotate(var(--hs-rot, 0deg)); }
+.hs-quake > i {
+  position: absolute; left: -260px; top: -170px; width: 520px; height: 340px; border-radius: 50%;
+  background: radial-gradient(ellipse at 44% 50%, rgba(255, 236, 190, 0.95) 0%, rgba(255, 200, 120, 0.5) 24%, rgba(255, 170, 90, 0) 60%);
+  opacity: 0; transform: scale(0.55);
+  animation: hs-quake 1.25s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.hs-quake > i::after {
+  content: ''; position: absolute; left: 22%; top: 16%; width: 44%; height: 68%; border-radius: 50%;
+  border: 2px solid rgba(255, 236, 196, 0.55); opacity: 0.8;
+}
+@keyframes hs-quake {
+  0% { opacity: 0; transform: scale(calc(0.55 * var(--hs-s, 1))); }
+  14% { opacity: var(--hs-a, 0.6); transform: scale(calc(0.8 * var(--hs-s, 1))); }
+  100% { opacity: 0; transform: scale(calc(1.25 * var(--hs-s, 1))); }
+}

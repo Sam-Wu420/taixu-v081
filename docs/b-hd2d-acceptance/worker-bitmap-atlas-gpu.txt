@@ -1,0 +1,178 @@
+Browser tab: 50, Title: "B-HD2D 渲染验收", URL: "http://127.0.0.1:5215/tools/hd2d-check.html".
+0 AXWebArea B-HD2D 渲染验收, URL: 127.0.0.1:5215/tools/hd2d-check.html
+	1 heading B-HD2D 渲染验收, Value: 1
+		2 text B-HD2D 渲染验收
+	3 button 验证投影与共享 GPU 渲染, ID: run
+	4 button 验证透明边缘与神识, ID: alpha-depth
+	5 button 验证静态图集分块更新, ID: atlas-update
+	6 button 验证 Worker 位图图集, ID: bitmap-atlas
+	7 button 验证人物画布像素, ID: character-cpu
+	8 button 验证人物几何与立板混排, ID: geometry-batch
+	9 text {
+  "passed": true,
+  "diffs": {
+    "partial": 0,
+    "rebuilt": 0,
+    "changed": 0,
+    "changedRebuilt": 0
+  },
+  "reference": [
+    [
+      206,
+      56,
+      34,
+      255
+    ],
+    [
+      84,
+      179,
+      76,
+      255
+    ],
+    [
+      40,
+      56,
+      200,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ]
+  ],
+  "partial": [
+    [
+      206,
+      56,
+      34,
+      255
+    ],
+    [
+      84,
+      179,
+      76,
+      255
+    ],
+    [
+      40,
+      56,
+      200,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ]
+  ],
+  "rebuilt": [
+    [
+      206,
+      56,
+      34,
+      255
+    ],
+    [
+      84,
+      179,
+      76,
+      255
+    ],
+    [
+      40,
+      56,
+      200,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ]
+  ],
+  "referenceChanged": [
+    [
+      104,
+      162,
+      138,
+      255
+    ],
+    [
+      206,
+      184,
+      34,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ],
+    [
+      133,
+      151,
+      106,
+      255
+    ]
+  ],
+  "changed": [
+    [
+      104,
+      162,
+      138,
+      255
+    ],
+    [
+      206,
+      184,
+      34,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ],
+    [
+      133,
+      151,
+      106,
+      255
+    ]
+  ],
+  "changedRebuilt": [
+    [
+      104,
+      162,
+      138,
+      255
+    ],
+    [
+      206,
+      184,
+      34,
+      255
+    ],
+    [
+      148,
+      129,
+      121,
+      255
+    ],
+    [
+      133,
+      151,
+      106,
+      255
+    ]
+  ],
+  "glError": 0
+}
+
+The focused UI element is 6 button 验证 Worker 位图图集, ID: bitmap-atlas

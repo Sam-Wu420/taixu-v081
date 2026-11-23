@@ -1,0 +1,93 @@
+True terrain and sense ring depth regression
+north slope yaw=0
+{
+  "position": [
+    251520,
+    137300
+  ],
+  "camera": [
+    251520,
+    137300
+  ],
+  "zoom": 0.6,
+  "yaw": 0,
+  "radius": 761.1269837220809,
+  "triangleCount": 1564,
+  "count": 629,
+  "front": 629,
+  "occluded": 0,
+  "flips": 0,
+  "noGround": 0,
+  "minDelta": -1.3278074260717985,
+  "maxDelta": -1.04203547314229,
+  "examples": []
+}
+north slope yaw=0.785398163397448
+{
+  "position": [
+    251520,
+    137300
+  ],
+  "camera": [
+    251520,
+    137300
+  ],
+  "zoom": 0.6,
+  "yaw": 0.785398163397448,
+  "radius": 761.1269837220809,
+  "triangleCount": 1564,
+  "count": 629,
+  "front": 629,
+  "occluded": 0,
+  "flips": 0,
+  "noGround": 0,
+  "minDelta": -1.5336635672796537,
+  "maxDelta": -1.014352580050391,
+  "examples": []
+}
+north slope yaw=1.5707963267949
+{
+  "position": [
+    251520,
+    137300
+  ],
+  "camera": [
+    251520,
+    137300
+  ],
+  "zoom": 0.6,
+  "yaw": 1.5707963267949,
+  "radius": 761.1269837220809,
+  "triangleCount": 1564,
+  "count": 629,
+  "front": 629,
+  "occluded": 0,
+  "flips": 0,
+  "noGround": 0,
+  "minDelta": -1.3984343985772585,
+  "maxDelta": -0.9024806859649411,
+  "examples": []
+}
+{
+  "position": [
+    251060,
+    139460
+  ],
+  "camera": [
+    250544.47,
+    139253.41
+  ],
+  "zoom": 1,
+  "yaw": 0,
+  "radius": 761.1269837220809,
+  "triangleCount": 1566,
+  "count": 222,
+  "front": 222,
+  "occluded": 0,
+  "flips": 0,
+  "noGround": 0,
+  "minDelta": -0.9921222834964836,
+  "maxDelta": -0.9793220993848857,
+  "examples": []
+}
+ALL PASS

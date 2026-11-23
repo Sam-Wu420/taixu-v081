@@ -1,0 +1,100 @@
+/* 收官 I（甲）：新手引导的画面（ui/Coach.tsx）。
+   规矩：位置一律由 rAF 写 transform，动效只动 transform / opacity；整层 pointer-events: none，只有气泡吃点击——被指着的按钮照常能点。
+   层级 62：盖得住面板（50）和对话框（55），低于模组界面（70–80）。 */
+.coach { position: fixed; inset: 0; z-index: 62; pointer-events: none; }
+.coach-dim, .coach-corner, .coach-drop, .coach-ring, .coach-edge, .coach-bub, .coach-tail { position: fixed; left: 0; top: 0; opacity: 0; will-change: transform, opacity; transition: opacity 0.25s ease; }
+
+/* 暗幕：1×1 的块，用 scale 拉开 */
+.coach-dim { width: 1px; height: 1px; transform-origin: 0 0; background: rgba(10, 7, 4, 0.5); }
+
+/* 亮框的四个鎏金角（每个角是一个 L，按所在的角翻转） */
+.coach-corner { width: 0; height: 0; }
+.coach-corner i { position: absolute; left: -3px; top: -3px; width: 20px; height: 20px; border-left: 3px solid var(--lq-gold-hi); border-top: 3px solid var(--lq-gold-hi); border-radius: 3px 0 0 0;
+  box-shadow: inset 1px 1px 0 rgba(60, 30, 0, 0.6); animation: coachCorner 1.4s ease-in-out infinite; }
+@keyframes coachCorner { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-4px, -4px); } }
+
+/* 落点：两圈往外扩的金环 + 「放这里」 */
+.coach-drop { width: 0; height: 0; }
+.coach-drop i { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--lq-gold-hi); animation: coachPulse 1.4s ease-out infinite; }
+.coach-drop i + i { animation-delay: 0.7s; }
+.coach-drop span { position: absolute; left: -40px; top: 28px; width: 80px; text-align: center; font-size: 12px; color: var(--lq-gold-hi); text-shadow: 0 1px 3px #000; }
+@keyframes coachPulse { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* 地上的光圈（压扁成地面上的椭圆）+ 头顶一枚向下的箭头 */
+.coach-ring { width: 0; height: 0; }
+.coach-ring i { position: absolute; left: -60px; top: -22px; width: 120px; height: 44px; border-radius: 50%; border: 2px solid rgba(243, 213, 140, 0.95); box-shadow: 0 0 0 1px rgba(60, 30, 0, 0.35); animation: coachRing 1.6s ease-out infinite; }
+.coach-ring i + i { animation-delay: 0.8s; }
+.coach-ring b { position: absolute; left: -11px; top: -150px; width: 22px; height: 26px; background: var(--lq-gold-hi); clip-path: polygon(50% 100%, 0 30%, 30% 30%, 30% 0, 70% 0, 70% 30%, 100% 30%); animation: coachBob 1s ease-in-out infinite; }
+@keyframes coachRing { 0% { transform: scale(0.45); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes coachBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+
+/* 屏幕边上的方向箭头 */
+.coach-edge { width: 0; height: 0; }
+.coach-edge i { position: absolute; left: -22px; top: -18px; width: 44px; height: 36px; background: radial-gradient(circle at 30% 50%, var(--lq-gold-hi), var(--lq-gold) 70%);
+  clip-path: polygon(100% 50%, 30% 0, 40% 32%, 0 32%, 0 68%, 40% 68%, 30% 100%); animation: coachNudge 0.9s ease-in-out infinite; }
+@keyframes coachNudge { 0%, 100% { transform: translateX(-4px); } 50% { transform: translateX(4px); } }
+
+/* 气泡：乌木漆底、鎏金双线，左上一枚朱印「引」 */
+.coach.on .coach-bub { opacity: 1; }
+.coach-bub { width: min(340px, calc(100vw - 24px)); pointer-events: auto; color: var(--lq-ink-on-dark); border-radius: 4px; padding: 12px 14px 10px;
+  background: linear-gradient(180deg, rgba(48, 32, 20, 0.97), rgba(24, 16, 10, 0.97)); border: 1px solid rgba(216, 180, 101, 0.75); outline: 1px solid rgba(216, 180, 101, 0.3); outline-offset: -5px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5); transition: opacity 0.25s ease; }
+.coach-in { animation: coachIn 0.38s var(--lq-ease-out) both; }
+@keyframes coachIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.coach-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.coach-seal { flex: none; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-size: 17px; color: #fbe9cf; border-radius: 3px;
+  background: radial-gradient(circle at 30% 25%, #c24a36, #9a2a1c 70%); box-shadow: inset 0 0 0 1px rgba(255, 220, 190, 0.35); transform: rotate(-5deg); }
+.coach.ctx .coach-seal { background: radial-gradient(circle at 30% 25%, #4f8a74, #24584a 70%); }
+.coach-title { flex: 1; font-family: var(--title-font); font-weight: 400; font-size: 21px; letter-spacing: 0.12em; color: var(--lq-gold-hi); }
+.coach-idx { font-size: 11.5px; color: var(--lq-ink-on-dark-2); letter-spacing: 0.06em; }
+.coach-text { margin: 0; font-size: 14px; line-height: 1.75; white-space: pre-line; }
+.coach-checks { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; padding: 0; font-size: 12.5px; color: var(--lq-ink-on-dark-2); }
+.coach-checks li { display: flex; align-items: center; gap: 5px; }
+.coach-checks i { width: 13px; height: 13px; border-radius: 2px; border: 1px solid rgba(216, 180, 101, 0.6); position: relative; }
+.coach-checks li.ok { color: #9fe0c2; }
+.coach-checks li.ok i { border-color: #6fc59e; background: rgba(79, 160, 120, 0.35); }
+.coach-checks li.ok i::after { content: ''; position: absolute; left: 3px; top: 0; width: 4px; height: 8px; border: solid #c9f5df; border-width: 0 2px 2px 0; transform: rotate(40deg); animation: coachTick 0.3s var(--lq-ease-pop) both; }
+@keyframes coachTick { from { transform: rotate(40deg) scale(0); } to { transform: rotate(40deg) scale(1); } }
+.coach-btns { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.coach-btns:empty { display: none; }
+.coach-btn { min-height: 36px; padding: 0 14px; cursor: pointer; font: inherit; font-size: 13px; border-radius: 3px; border: 1px solid transparent; transition: transform 0.15s; }
+.coach-btn:active { transform: scale(0.96); }
+.coach-btn.link { padding: 0 6px; background: none; color: var(--lq-ink-on-dark-2); text-decoration: underline; text-underline-offset: 3px; }
+.coach-btn.link:first-child { margin-right: auto; }
+.coach-btn.ghost { background: transparent; border-color: rgba(216, 180, 101, 0.55); color: #e8d3a0; }
+.coach-btn.zhu { color: var(--lq-zhu-paper); border-color: #6a1e16; font-family: var(--title-font); font-size: 17px; letter-spacing: 0.16em; background: linear-gradient(180deg, var(--lq-zhu-hi), var(--lq-zhu-mid) 60%, var(--lq-zhu-lo)); }
+.coach-bub.ask { border-color: rgba(200, 80, 60, 0.8); }
+
+/* 气泡的小尾巴：一个朝目标的三角 */
+.coach.on .coach-tail { opacity: 1; }
+.coach-tail { width: 0; height: 0; }
+.coach-tail::before { content: ''; position: absolute; left: -9px; top: -10px; width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-bottom: 11px solid rgba(216, 180, 101, 0.85); }
+
+/* 「成」：完成一步时在气泡右上重重盖一下，再淡掉 */
+.coach-stamp { position: absolute; right: -14px; top: -18px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; pointer-events: none;
+  font-family: var(--title-font); font-size: 30px; color: #fbe9cf; border-radius: 6px; background: radial-gradient(circle at 30% 25%, #c94a34, #9a2a1c 70%);
+  box-shadow: inset 0 0 0 2px #9a2a1c, inset 0 0 0 3px rgba(255, 220, 190, 0.45), 0 4px 12px rgba(80, 10, 0, 0.45); animation: coachStamp 1.6s var(--lq-ease-out) both; }
+@keyframes coachStamp { 0% { opacity: 0; transform: rotate(-16deg) scale(2.6); } 18% { opacity: 1; transform: rotate(-6deg) scale(0.9); } 26% { transform: rotate(-8deg) scale(1); } 75% { opacity: 1; transform: rotate(-8deg) scale(1); } 100% { opacity: 0; transform: rotate(-8deg) scale(1.08); } }
+
+/* 对话框开着时：只留顶部一条小胶囊 */
+.coach-pill { position: fixed; left: 50%; top: calc(10px + var(--safe-t)); transform: translateX(-50%); max-width: calc(100vw - 24px); display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 16px;
+  font-size: 12.5px; color: var(--lq-ink-on-dark); background: rgba(26, 17, 10, 0.88); border: 1px solid rgba(216, 180, 101, 0.55); animation: coachIn 0.3s ease both; }
+.coach-pill b { font-family: var(--title-font); font-weight: 400; font-size: 15px; color: var(--lq-gold-hi); white-space: nowrap; }
+.coach-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 手机：字小一档 */
+@media (max-width: 760px), (max-height: 520px) {
+  .coach-bub { width: min(300px, calc(100vw - 20px)); padding: 10px 12px 8px; }
+  .coach-title { font-size: 18px; }
+  .coach-text { font-size: 13px; line-height: 1.65; }
+  .coach-btn { min-height: 40px; }
+}
+@media (max-height: 520px) {
+  .coach-bub { width: min(330px, 46vw); }
+  .coach-text { font-size: 12.5px; line-height: 1.55; }
+  .coach-checks { margin-top: 4px; }
+  .coach-btns { margin-top: 4px; }
+  .coach-btn { min-height: 40px; }
+}
+/* 第五轮：气泡压住的 HUD 小块让位（Coach 每 0.2 秒量一次）：只动 opacity；!important 压得住 HUD 浮现动画里的 opacity */
+.coach-yield { opacity: 0.1 !important; pointer-events: none !important; transition: opacity 0.2s; }

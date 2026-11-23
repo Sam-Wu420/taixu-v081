@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B 版：装上我的模组</title>
+<style>
+  body { margin: 0; font: 15px/1.7 "Microsoft YaHei", "PingFang SC", sans-serif; background: #f3efe4; color: #2c2a26; }
+  main { max-width: 720px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  p { margin: 6px 0; }
+  ul { list-style: none; padding: 0; margin: 16px 0; border: 1px solid #d8cfb8; border-radius: 8px; background: #fbf9f2; }
+  li { padding: 10px 14px; border-bottom: 1px solid #e6dfcc; display: flex; gap: 12px; align-items: baseline; }
+  li:last-child { border-bottom: 0; }
+  li b { flex: 0 0 auto; } li span { color: #7a7364; font-size: 13px; } li i { margin-left: auto; font-style: normal; font-size: 13px; color: #7a7364; white-space: nowrap; }
+  li.ok i { color: #3d7a4a; } li.bad i { color: #a8352a; }
+  button, a.go { font: inherit; padding: 9px 18px; border-radius: 6px; border: 1px solid #8a6a2a; background: #c8a03a; color: #2c2210; cursor: pointer; text-decoration: none; display: inline-block; }
+  button[disabled] { opacity: 0.5; cursor: default; }
+  a.go { background: #fbf9f2; margin-left: 10px; }
+  .warn { font-size: 13px; color: #7a5a2a; background: #f6ecd0; border: 1px solid #e2cf9a; border-radius: 6px; padding: 8px 12px; margin: 12px 0; }
+  #msg { margin-top: 14px; min-height: 1.7em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>B 版：装上我的模组</h1>
+  <p>把下面这几个模组装进<strong>这个浏览器、这个网址</strong>下的 B 版游戏，并直接启用。装过的会被换成这里的版本；不在名单里的模组不动。</p>
+  <ul id="list"><li>正在读取名单……</li></ul>
+  <div class="warn">其中带「高级权限」的模组能改动游戏内部。点下面的按钮，等于你在游戏里逐个点了「我了解风险，启用」。「流畅」模组不装：B 版自己做了那部分优化。</div>
+  <button id="go" disabled>装进这个浏览器并启用</button>
+  <a class="go" href="/">进入游戏</a>
+  <div id="msg"></div>
+</main>
+<script type="module">
+const $ = (id) => document.getElementById(id), list = $('list'), msg = $('msg'), go = $('go');
+let set = [];
+const row = (m) => { const li = document.createElement('li'); li.id = 'm-' + m.id; li.innerHTML = `<b></b><span></span><i>未安装</i>`; li.children[0].textContent = `${m.name} v${m.version}`; li.children[1].textContent = m.note ?? ''; return li; };
+const open = () => new Promise((res, rej) => { const r = indexedDB.open('taixu-mods', 1); r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('bundles')) r.result.createObjectStore('bundles'); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const readJson = (k) => { try { return JSON.parse(localStorage.getItem(k) ?? '{}') ?? {}; } catch { return {}; } };
+async function status() {
+  const db = await open();
+  for (const m of set) {
+    const b = await new Promise((res) => { const q = db.transaction('bundles').objectStore('bundles').get(m.id); q.onsuccess = () => res(q.result); q.onerror = () => res(undefined); });
+    const li = $('m-' + m.id), en = readJson('taixu.mods.enabled')[m.id];
+    li.className = b?.manifest?.version === m.version && en ? 'ok' : '';
+    li.children[2].textContent = !b ? '未安装' : b.manifest.version === m.version ? (en ? '已安装，已启用' : '已安装，未启用') : `已装 v${b.manifest.version}`;
+  }
+}
+try {
+  set = await (await fetch('/dist-mods/b-set.json', { cache: 'no-store' })).json();
+  list.textContent = ''; for (const m of set) list.appendChild(row(m));
+  await status(); go.disabled = false;
+} catch (e) { list.innerHTML = '<li class="bad">读不到名单（dist-mods/b-set.json）。请确认是从 B 版的开发服务器打开的这个页面。</li>'; }
+go.addEventListener('click', async () => {
+  go.disabled = true; msg.textContent = '';
+  const db = await open(), en = readJson('taixu.mods.enabled'), un = readJson('taixu.mods.unsafe');
+  let bad = 0;
+  for (const m of set) {
+    const li = $('m-' + m.id);
+    try {
+      li.children[2].textContent = '下载中……';
+      const r = await fetch(`/dist-mods/${m.id}-${m.version}.fmod`, { cache: 'no-store' });
+      if (!r.ok) throw new Error('找不到文件');
+      const b = await r.json();
+      if (b?.manifest?.id !== m.id) throw new Error('文件内容不对');
+      await new Promise((res, rej) => { const t = db.transaction('bundles', 'readwrite'); t.objectStore('bundles').put(b, m.id); t.oncomplete = res; t.onerror = () => rej(t.error); });
+      en[m.id] = true; if (b.manifest.unsafe) un[m.id] = b.manifest.version;
+    } catch (e) { bad++; li.className = 'bad'; li.children[2].textContent = '失败：' + (e?.message ?? e); }
+  }
+  delete en.liuchang;
+  localStorage.setItem('taixu.mods.enabled', JSON.stringify(en)); localStorage.setItem('taixu.mods.unsafe', JSON.stringify(un));
+  await status();
+  msg.textContent = bad ? `有 ${bad} 个没装上，其余已装好。` : '全部装好并启用。点「进入游戏」；已经开着游戏的话刷新一下。';
+  go.disabled = false;
+});
+</script>
+</body>
+</html>

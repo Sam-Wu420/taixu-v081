@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; for (let i = 0; i < 40 && !(g.tutorial.getView() && g.tutorial.getView().lesson === 'ctx'); i++) await new Promise(r => setTimeout(r, 500)); const v = g.tutorial.getView(); return v && [v.lesson, v.title, v.text, v.target && v.target.kind]; })()

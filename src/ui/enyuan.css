@@ -1,0 +1,132 @@
+/* 恩怨重做 · 第二批：江湖传音玉简、通缉榜、生死斗横幅、口碑小牌、队伍指令。只动 opacity / transform（HUD 动画不用 filter / box-shadow 动画）。 */
+
+/* ---------- 左上：传音角标（挨着「讯」） ---------- */
+.cy-badge { position: relative; flex: none; width: 24px; height: 24px; padding: 0; border-radius: 6px 6px 10px 10px; cursor: pointer; pointer-events: auto;
+  font-family: var(--title-font); font-size: 13px; line-height: 22px; text-align: center; color: #cfe8d6; opacity: 0.75;
+  background: linear-gradient(180deg, rgba(64, 120, 92, 0.85), rgba(26, 58, 44, 0.9)); border: 1px solid rgba(160, 220, 180, 0.45); margin-top: 4px; }
+.cy-badge.has { opacity: 1; color: #f2fff4; border-color: rgba(200, 255, 215, 0.8); }
+.cy-badge i { position: absolute; top: -7px; right: -9px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px; font: 700 9.5px/15px var(--body-font); font-style: normal; color: #f6fff8; background: #2f7a55; box-shadow: 0 0 0 1px rgba(10, 24, 16, 0.85); }
+.game-root.touch .cy-badge { width: 28px; height: 28px; line-height: 26px; font-size: 14px; }
+
+/* ---------- 面板遮罩 ---------- */
+.ey-mask { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 8, 0.38); pointer-events: auto; animation: eyFade 0.18s ease-out both; }
+@keyframes eyFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes eyPop { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+.cy-x { position: absolute; right: 10px; top: 6px; width: 30px; height: 30px; border: none; background: transparent; font-size: 22px; line-height: 1; cursor: pointer; color: inherit; opacity: 0.7; }
+.cy-x:hover { opacity: 1; }
+
+/* ---------- 江湖传音：玉简面板 ---------- */
+.cy-panel { position: relative; width: min(560px, calc(100vw - 32px)); height: min(720px, calc(100vh - 40px)); display: flex; flex-direction: column;
+  background: center / cover no-repeat; color: #173826; padding: 40px 38px 34px; box-sizing: border-box; border-radius: 10px; animation: eyPop 0.22s ease-out both; }
+.cy-frame { position: absolute; inset: 0; pointer-events: none; border-style: solid; border-width: 40px; border-image-slice: 90; border-image-repeat: stretch; }
+.cy-head { position: relative; display: flex; align-items: baseline; gap: 12px; padding: 4px 30px 6px 4px; }
+.cy-head b { font-family: var(--title-font); font-size: 24px; font-weight: normal; letter-spacing: 0.2em; color: #0f3a24; }
+.cy-head small { font-size: 12px; opacity: 0.75; }
+.cy-tabs { position: relative; display: flex; gap: 6px; padding: 2px 4px 8px; flex-wrap: wrap; }
+.cy-tabs button { position: relative; border: 1px solid rgba(20, 80, 50, 0.35); background: rgba(255, 255, 255, 0.35); color: #174a30; border-radius: 12px; padding: 2px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.cy-tabs button.on { background: rgba(26, 90, 58, 0.85); color: #effff4; border-color: transparent; }
+.cy-tabs button i { margin-left: 4px; font-style: normal; font-size: 11px; opacity: 0.85; }
+.cy-list { position: relative; flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px 6px 6px 4px; }
+.cy-empty { padding: 30px 10px; text-align: center; opacity: 0.7; font-size: 14px; }
+.cy-item { position: relative; padding: 8px 12px 9px; border-radius: 6px; background: rgba(255, 255, 255, 0.42); border-left: 3px solid rgba(30, 110, 70, 0.55); }
+.cy-item.hook { border-left-color: #b8862a; background: rgba(255, 250, 232, 0.6); }
+.cy-item.amb { background: rgba(255, 255, 255, 0.24); border-left-color: rgba(30, 110, 70, 0.25); }
+.cy-item.amb .cy-text { font-size: 13px; opacity: 0.85; }
+.cy-meta { display: flex; gap: 10px; font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+.cy-src { font-weight: 700; }
+.cy-text { font-size: 14px; line-height: 1.55; color: #12301f; }
+.cy-talk { font-size: 12.5px; margin-top: 3px; padding-left: 10px; color: #3e5c4a; font-style: italic; }
+.cy-talk::before { content: '— '; opacity: 0.6; }
+.cy-go { margin-top: 6px; border: 1px solid #b8862a; background: linear-gradient(180deg, #f7e2a8, #e2bf6c); color: #4a3006; border-radius: 4px; padding: 3px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+.cy-go:hover { transform: translateY(-1px); }
+/* 手机横屏（844×390）：面板贴满高度，边框收窄 */
+@media (max-height: 460px) {
+  .cy-panel { height: calc(100vh - 16px); width: min(620px, calc(100vw - 24px)); padding: 22px 26px 18px; }
+  .cy-frame { border-width: 22px; }
+  .cy-head { padding: 0 30px 2px 2px; }
+  .cy-head b { font-size: 19px; }
+  .cy-head small { display: none; }
+  .cy-tabs { padding-bottom: 4px; }
+  .cy-tabs button { padding: 3px 12px; font-size: 13px; }
+  .cy-item { padding: 6px 10px 7px; }
+  .cy-text { font-size: 13.5px; line-height: 1.45; }
+}
+
+/* ---------- 通缉榜 ---------- */
+.eyw-panel { position: relative; width: min(940px, calc(100vw - 32px)); height: min(620px, calc(100vh - 40px)); display: flex; flex-direction: column; box-sizing: border-box;
+  background: center / 100% 100% no-repeat; padding: 74px 60px 46px; color: #f6e7c8; border-radius: 6px; animation: eyPop 0.22s ease-out both; }
+.eyw-head { position: relative; display: flex; align-items: baseline; gap: 14px; padding: 0 36px 8px 4px; }
+.eyw-head b { font-family: var(--title-font); font-size: 28px; font-weight: normal; letter-spacing: 0.3em; color: #ffe2a0; text-shadow: 0 2px 0 rgba(60, 10, 4, 0.6); }
+.eyw-head small { font-size: 12.5px; opacity: 0.85; }
+.eyw-head .cy-x { color: #ffe2a0; top: -6px; }
+.eyw-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 196px)); gap: 14px; padding: 4px 6px 10px; align-content: start; }
+.eyw-empty { grid-column: 1 / -1; padding: 40px 20px; text-align: center; font-size: 15px; color: #ffe8c0; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.eyw-card { position: relative; aspect-ratio: 2 / 3; background: center / 100% 100% no-repeat; color: #2a1608; display: flex; flex-direction: column; align-items: center; padding: 18px 16px 22px; box-sizing: border-box; text-align: center; transform: rotate(-1.2deg); }
+.eyw-card:nth-child(even) { transform: rotate(1.4deg); }
+.eyw-t { font-family: var(--title-font); font-size: 26px; letter-spacing: 0.4em; color: #8c1d12; margin: 2px 0 4px; padding-left: 0.4em; }
+.eyw-name { font-family: var(--title-font); font-size: 22px; margin-top: 4px; }
+.eyw-realm { font-size: 12px; opacity: 0.8; }
+.eyw-crime { font-size: 13px; margin-top: 6px; color: #6b2a18; }
+.eyw-reward { font-size: 13px; margin-top: 4px; }
+.eyw-reward b { font-size: 17px; color: #8c1d12; }
+.eyw-from { font-size: 11px; opacity: 0.75; margin-top: auto; white-space: nowrap; }
+.eyw-by { font-size: 11px; color: #1f5e3a; margin-top: 2px; }
+.eyw-go { margin-top: 4px; border: 1px solid #8c1d12; background: rgba(255, 240, 210, 0.85); color: #8c1d12; border-radius: 3px; padding: 2px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.eyw-stamp { position: absolute; right: 12px; top: 56%; font-family: var(--title-font); font-size: 15px; padding: 2px 5px; border: 2px solid currentColor; border-radius: 3px; transform: rotate(-14deg); opacity: 0.85; }
+.eyw-stamp.open { color: #b3261a; }
+.eyw-stamp.caught { color: #1f5e3a; font-size: 18px; }
+.eyw-stamp.fled, .eyw-stamp.dead { color: #5a4a3a; }
+.eyw-card.caught .eyw-name, .eyw-card.dead .eyw-name { text-decoration: line-through; text-decoration-color: rgba(140, 29, 18, 0.7); }
+.eyw-foot { padding: 6px 8px 0; font-size: 13px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: #ffe8c0; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.eyw-foot button { border: 1px solid #e8c47a; background: rgba(60, 20, 10, 0.6); color: #ffe2a0; border-radius: 3px; padding: 2px 10px; font: inherit; cursor: pointer; }
+@media (max-height: 460px) {
+  .eyw-panel { height: calc(100vh - 16px); padding: 40px 36px 22px; }
+  .eyw-head b { font-size: 22px; }
+  .eyw-head small { display: none; }
+  .eyw-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 150px)); gap: 10px; }
+  .eyw-crime, .eyw-from { display: none; }
+  .eyw-stamp { font-size: 12px; }
+  .eyw-card { padding: 12px 10px 8px; }
+  .eyw-t { font-size: 20px; }
+  .eyw-name { font-size: 18px; }
+}
+
+/* ---------- 顶栏：生死斗横幅、口碑小牌 ---------- */
+.ey-duel { display: flex; align-items: baseline; gap: 10px; padding: 3px 16px; pointer-events: none; color: #ffe6d6;
+  background: linear-gradient(90deg, rgba(60, 6, 4, 0), rgba(90, 12, 8, 0.82) 15%, rgba(90, 12, 8, 0.82) 85%, rgba(60, 6, 4, 0)); animation: eyPop 0.3s ease-out both; }
+.ey-duel b { font-family: var(--title-font); font-size: 19px; font-weight: normal; letter-spacing: 0.3em; color: #ffb08a; }
+.ey-duel span { font-size: 15px; }
+.ey-duel small { font-size: 11.5px; opacity: 0.8; }
+.ey-kb { display: inline-flex; align-items: baseline; gap: 6px; padding: 1px 10px; border-radius: 10px; font-size: 12px; pointer-events: none; color: #f1e6cf; background: rgba(24, 20, 14, 0.62); }
+.ey-kb b { font-family: var(--title-font); font-weight: normal; font-size: 13px; }
+.ey-kb.good { color: #c9f0d2; }
+.ey-kb.bad { color: #ffc0b0; }
+.ey-kb small { opacity: 0.8; }
+.game-root.touch .ey-duel small { display: none; }
+.game-root.touch .ey-duel b { font-size: 15px; }
+
+/* ---------- 地点卡、城镇面板的口碑行 ---------- */
+.ey-kb-line { font-size: 12px; margin-top: 3px; opacity: 0.9; }
+.ey-kb-line b { font-weight: 700; }
+.ey-kb-line.good b { color: #1f6e42; }
+.ey-kb-line.bad b { color: #a3291a; }
+.loc-card .ey-kb-line.good b { color: #8fe0a8; }
+.loc-card .ey-kb-line.bad b { color: #ff9a84; }
+
+/* ---------- 恩怨页：化解按钮 ---------- */
+.fp-act { position: absolute; right: 18px; top: 12px; display: flex; gap: 6px; }
+.fp-act button { border: 1px solid rgba(140, 40, 20, 0.55); background: linear-gradient(180deg, #fbe7c2, #ecc98a); color: #6a1d10; border-radius: 3px; padding: 2px 12px; font: inherit; font-family: var(--title-font); font-size: 14px; cursor: pointer; }
+.fp-act button:hover { transform: translateY(-1px); }
+
+/* ---------- 第三批：夺宝局横幅、过时的可接事 ---------- */
+.ey-db { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; padding: 3px 16px; pointer-events: none; color: #fff1d2; max-width: min(640px, 92vw);
+  background: linear-gradient(90deg, rgba(40, 28, 6, 0), rgba(70, 50, 12, 0.84) 12%, rgba(70, 50, 12, 0.84) 88%, rgba(40, 28, 6, 0)); animation: eyPop 0.3s ease-out both; }
+.ey-db b { font-family: var(--title-font); font-size: 17px; font-weight: normal; letter-spacing: 0.15em; color: #ffd98a; }
+.ey-db span { font-size: 14px; color: #fff; }
+.ey-db small { font-size: 12px; opacity: 0.85; }
+.ey-db em { font-style: normal; font-size: 12px; padding: 0 6px; border-radius: 8px; background: rgba(0, 0, 0, 0.35); color: #e8d8b0; }
+.ey-db em.on { background: rgba(60, 140, 80, 0.75); color: #f0fff0; }
+.ey-db.ph-escape { background: linear-gradient(90deg, rgba(60, 6, 4, 0), rgba(90, 20, 10, 0.84) 12%, rgba(90, 20, 10, 0.84) 88%, rgba(60, 6, 4, 0)); }
+.game-root.touch .ey-db small { display: none; }
+.game-root.touch .ey-db b { font-size: 14px; }
+.cy-gone { display: inline-block; margin-top: 4px; font-size: 12px; opacity: 0.55; }

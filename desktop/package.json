@@ -1,0 +1,84 @@
+{
+  "name": "taixu-xiuxian-desktop",
+  "productName": "太虚问道录",
+  "version": "0.8.1",
+  "description": "太虚问道录 v0.8.1（HD2D）· Windows 桌面版",
+  "main": "main.js",
+  "author": "qwasx",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dist": "electron-builder --win --x64",
+    "dist:nsis": "electron-builder --win nsis --x64",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "38.8.6",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.qwasx.taixu",
+    "productName": "太虚问道录",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../dist",
+        "to": "game",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "太虚问道录-v0.8.1-Windows-x64.${ext}"
+    },
+    "portable": {
+      "artifactName": "太虚问道录-v0.8.1-Windows-x64.${ext}",
+      "splashImage": "build/splash.bmp"
+    },
+    "compression": "normal",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.webp",
+      "**/*.json"
+    ],
+    "nsis": {
+      "artifactName": "太虚问道录-v0.8.1-Windows-x64-安装版.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "太虚问道录",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ]
+  }
+}

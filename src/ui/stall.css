@@ -1,0 +1,133 @@
+/* 收官 D（甲）个人摊位窗口。外壳是界面底座的 LacquerModal（紧凑、乌木漆底）。类名一律 stl-（不用全局 .wb-*）。
+   动效只动 transform / opacity：格子依次浮现、成交盖章、还价成败、买空的格子合上、吆喝气泡弹出。 */
+.lq-modal.stl { --lq-w: 880px; --lq-h: 720px; padding: 0 18px 12px; }
+.stl-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 272px; gap: 14px; }
+.stl-main { min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+
+/* —— 摊主一栏 */
+.stl-head { display: flex; gap: 14px; align-items: stretch; padding: 10px 12px; border-radius: 4px; flex: none;
+  background: linear-gradient(90deg, rgba(120, 70, 30, 0.22), rgba(20, 12, 8, 0.4)); border: 1px solid var(--lq-gold-faint); box-shadow: inset 0 0 0 3px rgba(12, 8, 5, 0.6); }
+.stl-face { flex: none; width: 96px; height: 120px; border-radius: 4px; overflow: hidden; position: relative; background: radial-gradient(circle at 50% 30%, #3a2a1a, #120c07);
+  border: 1px solid var(--lq-gold-line); box-shadow: inset 0 0 0 2px rgba(12, 8, 5, 0.85); display: flex; align-items: flex-end; justify-content: center; }
+.stl-portrait { position: absolute; inset: 0; background: center 18% / cover no-repeat; }
+.stl-face .bust { display: block; }
+.stl-who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.stl-name { display: flex; align-items: center; gap: 10px; }
+.stl-seal { flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-size: 24px; color: #fbe9cc;
+  background: var(--lq-zhu); border-radius: 3px; box-shadow: inset 0 0 0 2px rgba(255, 236, 200, 0.35); transform: rotate(-4deg); }
+.stl-name-t { font-family: var(--title-font); font-size: 32px; letter-spacing: 0.12em; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: linear-gradient(180deg, #fff1c4 0%, #e7c06a 50%, #b8842e 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stl-keeper { font-size: 14px; color: var(--lq-ink-on-dark); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.stl-keeper small { font-size: 12px; color: var(--lq-ink-on-dark-2); }
+.stl-urgent { font-style: normal; font-size: 11.5px; padding: 0 7px; border-radius: 9px; color: #fff2e0; background: #b8402e; }
+/* 吆喝气泡：纸色，尾巴指向头像 */
+.stl-bubble { position: relative; align-self: flex-start; max-width: 100%; margin: 4px 0 0 10px; padding: 7px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5;
+  color: #2a1f12; background: #f6ecd4; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); transform-origin: 0 50%; animation: stlBubble 0.38s var(--lq-ease-pop) both; }
+.stl-bubble::before { content: ''; position: absolute; left: -9px; top: 12px; border: 6px solid transparent; border-right: 9px solid #f6ecd4; border-left: 0; }
+.stl-bubble.say { background: #fff7e2; color: #6e1a10; }
+.stl-bubble.say::before { border-right-color: #fff7e2; }
+@keyframes stlBubble { from { opacity: 0; transform: scale(0.82) translateX(-6px); } to { opacity: 1; transform: none; } }
+
+/* —— 他的货 / 卖给他 */
+.stl-mode { display: flex; gap: 6px; flex: none; }
+.stl-mode button { min-height: 36px; padding: 0 16px; border: 1px solid var(--lq-gold-faint); border-radius: 3px; background: rgba(20, 13, 8, 0.6); color: var(--lq-ink-on-dark-2);
+  font-family: var(--title-font); font-size: 18px; letter-spacing: 0.12em; cursor: pointer; transition: transform var(--lq-t-fast); }
+.stl-mode button small { font-family: var(--body-font); font-size: 11px; letter-spacing: 0; opacity: 0.7; margin-left: 2px; }
+.stl-mode button.on { color: #241508; background: var(--lq-gold); border-color: var(--lq-gold); }
+.stl-mode button:active { transform: scale(0.96); }
+
+.stl-grid { --cs: 76px; flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(6, var(--cs)); grid-auto-rows: var(--cs); gap: 8px; justify-content: center; align-content: start;
+  padding: 10px; border-radius: 4px; background: rgba(8, 5, 3, 0.45); border: 1px solid var(--lq-gold-faint); }
+.stl-slot { position: relative; width: var(--cs); height: var(--cs); animation: stlIn 0.42s var(--lq-ease-out) both; animation-delay: var(--d, 0s); }
+@keyframes stlIn { from { opacity: 0; transform: translateY(10px) scale(0.86); } to { opacity: 1; transform: none; } }
+.stl-slot .lq-cell { --cs: inherit; position: absolute; inset: 0; width: 100%; height: 100%; }
+.stl-cell.lock { background: repeating-linear-gradient(45deg, rgba(36, 24, 14, 0.9) 0 6px, rgba(24, 16, 10, 0.9) 6px 12px); border: 1px solid rgba(216, 180, 101, 0.14); }
+.stl-cell.lock .lq-cell-lock { background: none; font-size: 15px; color: rgba(216, 180, 101, 0.32); }
+.stl-price { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 0; font-size: 11.5px; line-height: 1.25; text-align: center; color: #f3d58c; pointer-events: none;
+  background: linear-gradient(0deg, rgba(10, 6, 3, 0.9), rgba(10, 6, 3, 0.4)); font-variant-numeric: tabular-nums; }
+.stl-price.poor { color: #ff9a80; }
+.stl-cell .lq-cell-n { bottom: 14px; }
+.stl-cell.refused { opacity: 0.55; }
+.stl-no { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-size: 20px; color: #e05040;
+  transform: rotate(-14deg); pointer-events: none; text-shadow: 0 0 3px #000; }
+/* 买空的那格合上：货往下一沉、淡掉，底下的锁格露出来 */
+.stl-cell.closing { pointer-events: none; animation: stlClose 0.62s var(--lq-ease-out) both; }
+@keyframes stlClose { 0% { opacity: 1; transform: none; } 35% { opacity: 1; transform: scale(1.08); } 100% { opacity: 0; transform: translateY(8px) scale(0.5) rotate(-8deg); } }
+.stl-cell.shake-0 { animation: stlShake0 0.36s ease both; } .stl-cell.shake-1 { animation: stlShake1 0.36s ease both; }
+@keyframes stlShake0 { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
+@keyframes stlShake1 { 20% { transform: translateX(-5px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
+.stl-empty { grid-column: 1 / -1; padding: 24px 0; text-align: center; color: var(--lq-ink-on-dark-2); font-size: 14px; }
+
+/* —— 右栏：详情、价钱、按钮 */
+.stl-side { min-height: 0; display: flex; flex-direction: column; }
+.stl-detail { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 4px; border: 1px solid var(--lq-gold-line);
+  background: linear-gradient(180deg, rgba(34, 24, 15, 0.92), rgba(20, 13, 8, 0.92)); box-shadow: inset 0 0 0 3px rgba(18, 12, 7, 0.9), inset 0 0 0 4px rgba(216, 180, 101, 0.16);
+  animation: stlIn 0.3s var(--lq-ease-out) both; }
+.stl-none { align-items: center; justify-content: center; color: var(--lq-ink-on-dark-2); font-size: 14px; }
+.stl-card { flex: 1; min-height: 0; }
+.stl-deal { flex: none; display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px dashed rgba(216, 180, 101, 0.3); }
+.stl-pricebox { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.stl-pl { font-size: 12px; color: var(--lq-ink-on-dark-2); }
+.stl-pv { font-family: var(--title-font); font-size: 30px; color: var(--lq-gold-hi); line-height: 1; }
+.stl-was { font-size: 13px; color: rgba(241, 228, 196, 0.45); }
+.stl-ref { margin-left: auto; font-size: 12px; color: var(--lq-jade-hi); cursor: help; border-bottom: 1px dotted rgba(143, 224, 192, 0.5); }
+.stl-acts { display: flex; gap: 8px; align-items: stretch; }
+.stl-acts > span { display: flex; }
+.stl-acts .stl-buy { flex: 1; white-space: nowrap; font-size: 20px; letter-spacing: 0.2em; text-indent: 0.2em; padding: 0 10px; }
+.stl-acts .lq-btn-line { min-height: 44px; padding: 0 14px; font-size: 15px; }
+.stl-warn { font-size: 12px; color: #ff9a80; }
+
+/* —— 底栏 */
+.stl-foot { flex: none; display: flex; align-items: center; gap: 18px; margin-top: 10px; padding: 8px 6px 0; border-top: 1px solid var(--lq-gold-faint); font-size: 14px; color: var(--lq-ink-on-dark-2); }
+.stl-money { display: inline-flex; align-items: center; gap: 2px; font-size: 18px; color: var(--lq-ink-on-dark); }
+.stl-money small { font-size: 12px; opacity: 0.7; margin-left: 4px; }
+.stl-purse b { color: var(--lq-ink-on-dark); font-weight: 600; }
+.stl-swap { margin-left: auto; min-height: 38px; padding: 0 18px; font-size: 14px; }
+
+/* —— 盖章（成交 / 让利 / 不卖 / 伪） */
+.stl-stamp { position: absolute; right: 300px; top: 150px; z-index: 8; width: 104px; height: 104px; display: flex; align-items: center; justify-content: center; pointer-events: none;
+  font-family: var(--title-font); font-size: 36px; color: #d23a26; border: 4px double #d23a26; border-radius: 10px; background: rgba(40, 10, 6, 0.25);
+  animation: lqStamp 1.8s var(--lq-ease-pop) both; }
+.stl-stamp.jade { color: #6fd8b0; border-color: #6fd8b0; background: rgba(8, 40, 30, 0.3); }
+.stl-toast { bottom: 64px; }
+
+/* —— 窄屏（手机竖屏）：单列，头像缩小，格子六列自适应 */
+.lq-modal.stl.m-tall .stl-body { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; touch-action: pan-y; }
+.lq-modal.stl.m-tall .stl-main { min-height: 0; }
+.lq-modal.stl.m-tall .stl-face { width: 64px; height: 80px; }
+.lq-modal.stl.m-tall .stl-name-t { font-size: 24px; }
+.lq-modal.stl.m-tall .stl-seal { width: 28px; height: 28px; font-size: 19px; }
+.lq-modal.stl.m-tall .stl-head { padding: 8px; gap: 10px; }
+.lq-modal.stl.m-tall .stl-bubble { font-size: 13px; padding: 5px 10px; }
+.lq-modal.stl.m-tall .stl-grid { --cs: calc((100vw - 40px - 5 * 6px - 16px) / 6); gap: 6px; padding: 8px; flex: none; max-height: none; overflow: visible; }
+.lq-modal.stl.m-tall .stl-detail { min-height: 260px; }
+.lq-modal.stl.m-tall .stl-stamp { right: 30px; top: 110px; }
+/* 手机横屏：两栏，摊主一栏压成一行 */
+.lq-modal.stl.m-land .stl-body { grid-template-columns: minmax(0, 1fr) 250px; gap: 8px; }
+.lq-modal.stl.m-land .stl-head { padding: 4px 8px; gap: 8px; align-items: center; }
+.lq-modal.stl.m-land .stl-face { width: 44px; height: 54px; }
+.lq-modal.stl.m-land .stl-who { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
+.lq-modal.stl.m-land .stl-name-t { font-size: 20px; }
+.lq-modal.stl.m-land .stl-seal { width: 24px; height: 24px; font-size: 16px; }
+.lq-modal.stl.m-land .stl-keeper small { display: none; }
+.lq-modal.stl.m-land .stl-bubble { margin: 0 0 0 8px; padding: 2px 10px; font-size: 12px; }
+.lq-modal.stl.m-land .stl-mode button { min-height: 32px; font-size: 15px; }
+.lq-modal.stl.m-land .stl-grid { --cs: 46px; gap: 5px; padding: 6px; }
+.lq-modal.stl.m-land .stl-detail { padding: 8px; gap: 6px; }
+.lq-modal.stl.m-land .stl-pv { font-size: 22px; }
+.lq-modal.stl.m-land .stl-foot { margin-top: 4px; padding-top: 4px; }
+.lq-modal.stl.m-land .stl-stamp { right: 270px; top: 90px; width: 80px; height: 80px; font-size: 28px; }
+.lq-modal.stl.m-land .inv-card-desc { display: none; }
+@media (pointer: coarse) { .stl-acts .lq-btn-line { min-height: 44px; } }
+
+/* ---------------- 第五轮：格子按货量给、详情栏下半写摊主的话和掌眼 / 还价提示 ---------------- */
+.lq-modal.stl.m-wide { height: auto; min-height: min(560px, calc(100dvh - 90px)); max-height: calc(100dvh - 90px - var(--safe-t) - var(--safe-b)); }
+.lq-modal.stl.m-wide .stl-grid { flex: 1 1 auto; }
+.stl-tips { list-style: none; margin: 12px 0 0; padding: 10px 0 0; display: flex; flex-direction: column; gap: 7px; border-top: 1px dashed rgba(216, 180, 101, 0.25);
+  font-size: 12.5px; line-height: 1.6; color: var(--lq-ink-on-dark-2); }
+.stl-tips em { font-style: normal; display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 2px; font-size: 11.5px; color: #241508; background: rgba(216, 180, 101, 0.75); }
+.stl-tips .say, p.stl-tips.say { color: #f3e7c9; }
+.stl-tips .say b { color: var(--lq-gold-hi); font-weight: 500; margin-right: 2px; }
+p.stl-tips { border: none; margin: 10px 0 0; padding: 0; max-width: 220px; text-align: center; }
+.stl-none p { margin: 0; }
+.lq-modal.stl.m-land .stl-tips { margin-top: 6px; padding-top: 6px; gap: 4px; font-size: 11.5px; }

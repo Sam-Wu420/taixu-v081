@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; const tab = [...document.querySelectorAll('.inv-tabs button')].find(b => b.textContent.includes('丹药')); tab?.click(); await new Promise(r => setTimeout(r, 900)); return [g.tutorial.step, g.tutorial.getView()?.text]; })()

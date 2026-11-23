@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; g.onPanel('bag', true); await new Promise(r => setTimeout(r, 1500)); return [g.tutorial.step, g.tutorial.getView()?.text, !!document.querySelector('[data-uid]')]; })()

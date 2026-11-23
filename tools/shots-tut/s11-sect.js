@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; if (document.querySelector('.wm-panel')) g.onOpenMap(); await new Promise(r => setTimeout(r, 600)); g.tutorial.jump('sect'); await new Promise(r => setTimeout(r, 1200)); return [g.tutorial.step, g.tutorial.getView()?.text]; })()

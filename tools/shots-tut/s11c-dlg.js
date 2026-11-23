@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; const b = document.querySelector('.town-fac[data-fac="sect"]'); b?.click(); await new Promise(r => setTimeout(r, 2600)); return [g.tutorial.step, g.tutorial.getView()?.text, g.modal && g.modal.kind]; })()

@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; g.combat.brawl.stance && g.combat.brawl.toggleStance(); g.tutorial.jump('sit'); await new Promise(r => setTimeout(r, 1200)); return [g.tutorial.step, g.tutorial.getView()?.text]; })()

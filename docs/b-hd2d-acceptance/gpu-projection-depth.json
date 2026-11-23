@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "projectionCases": 45,
+  "maxErrorPx": 0.0006684255629210156,
+  "coloredPixels": 518400,
+  "depth": {
+    "occluded": true,
+    "visible": true,
+    "original": [
+      201,
+      61,
+      46,
+      255
+    ],
+    "behind": [
+      201,
+      61,
+      46,
+      255
+    ],
+    "front": [
+      0,
+      0,
+      208,
+      255
+    ],
+    "reconstructedSense": [
+      201,
+      61,
+      46,
+      255
+    ]
+  },
+  "imageDepth": {
+    "loaded": true,
+    "occluded": true,
+    "visible": true,
+    "behind": {
+      "pixel": [
+        201,
+        61,
+        46,
+        255
+      ],
+      "textured": true
+    },
+    "front": {
+      "pixel": [
+        221,
+        110,
+        42,
+        255
+      ],
+      "textured": true
+    }
+  },
+  "glError": 0,
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "worldDrawCalls": 45
+}

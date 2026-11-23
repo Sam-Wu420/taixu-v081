@@ -1,0 +1,1 @@
+(async () => { return { url: location.href, menu: [...document.querySelectorAll('.title-menu button')].map(b => b.textContent.trim().slice(0, 12)), mods: (window.__modHost?.status ?? []).map(s => `${s.id}:${s.state}:${s.errors ?? 0}`) }; })()

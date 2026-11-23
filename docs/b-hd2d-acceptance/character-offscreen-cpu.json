@@ -1,0 +1,330 @@
+{
+  "cpu": true,
+  "cases": 36,
+  "results": [
+    {
+      "action": "idle",
+      "yaw": 0,
+      "mean": 6.172119487908962,
+      "max": 255,
+      "changedOver8Percent": 31.29445234708393,
+      "directMs": 21.200000002980232,
+      "workerMs": 28.299999997019768
+    },
+    {
+      "action": "idle",
+      "yaw": 0.7853981633974483,
+      "mean": 4.0108,
+      "max": 204,
+      "changedOver8Percent": 21.12,
+      "directMs": 6.699999988079071,
+      "workerMs": 7.0999999940395355
+    },
+    {
+      "action": "idle",
+      "yaw": 1.5707963267948966,
+      "mean": 5.989219712525667,
+      "max": 223,
+      "changedOver8Percent": 30.184804928131413,
+      "directMs": 4.700000002980232,
+      "workerMs": 7.4000000059604645
+    },
+    {
+      "action": "idle",
+      "yaw": 3.141592653589793,
+      "mean": 5.086429725363489,
+      "max": 170,
+      "changedOver8Percent": 31.340872374798064,
+      "directMs": 3.9000000059604645,
+      "workerMs": 6.200000002980232
+    },
+    {
+      "action": "walk",
+      "yaw": 0,
+      "mean": 3.744496855345912,
+      "max": 255,
+      "changedOver8Percent": 20.28301886792453,
+      "directMs": 4.9000000059604645,
+      "workerMs": 6.5999999940395355
+    },
+    {
+      "action": "walk",
+      "yaw": 0.7853981633974483,
+      "mean": 3.372854914196568,
+      "max": 102,
+      "changedOver8Percent": 21.684867394695786,
+      "directMs": 4.100000008940697,
+      "workerMs": 6
+    },
+    {
+      "action": "walk",
+      "yaw": 1.5707963267948966,
+      "mean": 3.7719298245614037,
+      "max": 89,
+      "changedOver8Percent": 25.219298245614034,
+      "directMs": 4,
+      "workerMs": 4.299999997019768
+    },
+    {
+      "action": "walk",
+      "yaw": 3.141592653589793,
+      "mean": 2.7794520547945205,
+      "max": 141,
+      "changedOver8Percent": 15.890410958904111,
+      "directMs": 3.2000000029802322,
+      "workerMs": 4.4000000059604645
+    },
+    {
+      "action": "run",
+      "yaw": 0,
+      "mean": 5.019017980636238,
+      "max": 235,
+      "changedOver8Percent": 25.03457814661134,
+      "directMs": 4.299999997019768,
+      "workerMs": 5.5999999940395355
+    },
+    {
+      "action": "run",
+      "yaw": 0.7853981633974483,
+      "mean": 4.260906040268456,
+      "max": 128,
+      "changedOver8Percent": 28.187919463087248,
+      "directMs": 3.2999999970197678,
+      "workerMs": 4
+    },
+    {
+      "action": "run",
+      "yaw": 1.5707963267948966,
+      "mean": 5.189370078740158,
+      "max": 128,
+      "changedOver8Percent": 30.551181102362207,
+      "directMs": 4.200000002980232,
+      "workerMs": 4.299999997019768
+    },
+    {
+      "action": "run",
+      "yaw": 3.141592653589793,
+      "mean": 5.096302003081664,
+      "max": 129,
+      "changedOver8Percent": 29.275808936825886,
+      "directMs": 3.5,
+      "workerMs": 4.0999999940395355
+    },
+    {
+      "action": "cast",
+      "yaw": 0,
+      "mean": 6.702898550724638,
+      "max": 170,
+      "changedOver8Percent": 36.07085346215781,
+      "directMs": 6,
+      "workerMs": 6.600000008940697
+    },
+    {
+      "action": "cast",
+      "yaw": 0.7853981633974483,
+      "mean": 5.883199079401611,
+      "max": 255,
+      "changedOver8Percent": 31.990794016110474,
+      "directMs": 4.300000011920929,
+      "workerMs": 4.299999997019768
+    },
+    {
+      "action": "cast",
+      "yaw": 1.5707963267948966,
+      "mean": 3.99909200968523,
+      "max": 255,
+      "changedOver8Percent": 23.24455205811138,
+      "directMs": 3.8999999910593033,
+      "workerMs": 4.399999991059303
+    },
+    {
+      "action": "cast",
+      "yaw": 3.141592653589793,
+      "mean": 5.684966216216216,
+      "max": 255,
+      "changedOver8Percent": 24.155405405405407,
+      "directMs": 4,
+      "workerMs": 4.300000011920929
+    },
+    {
+      "action": "hit",
+      "yaw": 0,
+      "mean": 5.803110328638498,
+      "max": 255,
+      "changedOver8Percent": 28.52112676056338,
+      "directMs": 3.5999999940395355,
+      "workerMs": 4.299999997019768
+    },
+    {
+      "action": "hit",
+      "yaw": 0.7853981633974483,
+      "mean": 4.987068965517241,
+      "max": 255,
+      "changedOver8Percent": 27.155172413793103,
+      "directMs": 3.5999999940395355,
+      "workerMs": 3.8999999910593033
+    },
+    {
+      "action": "hit",
+      "yaw": 1.5707963267948966,
+      "mean": 5.2155172413793105,
+      "max": 255,
+      "changedOver8Percent": 23.23049001814882,
+      "directMs": 3.3999999910593033,
+      "workerMs": 4.4000000059604645
+    },
+    {
+      "action": "hit",
+      "yaw": 3.141592653589793,
+      "mean": 3.716044776119403,
+      "max": 255,
+      "changedOver8Percent": 20.746268656716417,
+      "directMs": 3.2999999970197678,
+      "workerMs": 3.5999999940395355
+    },
+    {
+      "action": "fly",
+      "yaw": 0,
+      "mean": 4.448072139303482,
+      "max": 255,
+      "changedOver8Percent": 24.378109452736318,
+      "directMs": 4.299999997019768,
+      "workerMs": 4.399999991059303
+    },
+    {
+      "action": "fly",
+      "yaw": 0.7853981633974483,
+      "mean": 7.066379310344828,
+      "max": 255,
+      "changedOver8Percent": 30.689655172413794,
+      "directMs": 3.2999999970197678,
+      "workerMs": 4.9000000059604645
+    },
+    {
+      "action": "fly",
+      "yaw": 1.5707963267948966,
+      "mean": 6.067425083240844,
+      "max": 255,
+      "changedOver8Percent": 28.745837957824637,
+      "directMs": 3.199999988079071,
+      "workerMs": 4.100000008940697
+    },
+    {
+      "action": "fly",
+      "yaw": 3.141592653589793,
+      "mean": 3.834765177548683,
+      "max": 255,
+      "changedOver8Percent": 22.107674684994272,
+      "directMs": 3,
+      "workerMs": 4.5
+    },
+    {
+      "action": "dodge",
+      "yaw": 0,
+      "mean": 5.273578811369509,
+      "max": 128,
+      "changedOver8Percent": 29.328165374677003,
+      "directMs": 3.2999999970197678,
+      "workerMs": 4.700000002980232
+    },
+    {
+      "action": "dodge",
+      "yaw": 0.7853981633974483,
+      "mean": 4.6620135363790185,
+      "max": 255,
+      "changedOver8Percent": 24.873096446700508,
+      "directMs": 3.5,
+      "workerMs": 3.7000000029802322
+    },
+    {
+      "action": "dodge",
+      "yaw": 1.5707963267948966,
+      "mean": 5.086226851851852,
+      "max": 218,
+      "changedOver8Percent": 21.52777777777778,
+      "directMs": 3.2000000029802322,
+      "workerMs": 3
+    },
+    {
+      "action": "dodge",
+      "yaw": 3.141592653589793,
+      "mean": 4.637919896640827,
+      "max": 102,
+      "changedOver8Percent": 25.581395348837212,
+      "directMs": 2.9000000059604645,
+      "workerMs": 3.0999999940395355
+    },
+    {
+      "action": "sit",
+      "yaw": 0,
+      "mean": 5.371247113163972,
+      "max": 113,
+      "changedOver8Percent": 33.25635103926097,
+      "directMs": 2.2999999970197678,
+      "workerMs": 3.2999999970197678
+    },
+    {
+      "action": "sit",
+      "yaw": 0.7853981633974483,
+      "mean": 8.314461883408072,
+      "max": 162,
+      "changedOver8Percent": 43.7219730941704,
+      "directMs": 2.5,
+      "workerMs": 2.5999999940395355
+    },
+    {
+      "action": "sit",
+      "yaw": 1.5707963267948966,
+      "mean": 9.678198433420366,
+      "max": 143,
+      "changedOver8Percent": 47.25848563968668,
+      "directMs": 3.2000000029802322,
+      "workerMs": 3.2000000029802322
+    },
+    {
+      "action": "sit",
+      "yaw": 3.141592653589793,
+      "mean": 10.32579185520362,
+      "max": 128,
+      "changedOver8Percent": 42.081447963800905,
+      "directMs": 2.7999999970197678,
+      "workerMs": 3.4000000059604645
+    },
+    {
+      "action": "gather",
+      "yaw": 0,
+      "mean": 4.974907063197026,
+      "max": 101,
+      "changedOver8Percent": 30.483271375464682,
+      "directMs": 3.199999988079071,
+      "workerMs": 3.2999999970197678
+    },
+    {
+      "action": "gather",
+      "yaw": 0.7853981633974483,
+      "mean": 5.297655068078669,
+      "max": 133,
+      "changedOver8Percent": 34.94704992435703,
+      "directMs": 3.2000000029802322,
+      "workerMs": 3.300000011920929
+    },
+    {
+      "action": "gather",
+      "yaw": 1.5707963267948966,
+      "mean": 7.448275862068965,
+      "max": 255,
+      "changedOver8Percent": 40.72249589490969,
+      "directMs": 3.2999999970197678,
+      "workerMs": 3.2000000029802322
+    },
+    {
+      "action": "gather",
+      "yaw": 3.141592653589793,
+      "mean": 4.475,
+      "max": 89,
+      "changedOver8Percent": 22.97872340425532,
+      "directMs": 3.199999988079071,
+      "workerMs": 2.7000000029802322
+    }
+  ]
+}

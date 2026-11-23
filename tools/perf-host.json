@@ -1,0 +1,27 @@
+{
+  "os": {
+    "Caption": "Microsoft Windows 11 专业版",
+    "Version": "10.0.26300",
+    "TotalVisibleMemorySize": 16586160
+  },
+  "gpu": [
+    {
+      "Name": "Zako Display Adapter",
+      "DriverVersion": "100.0.16.2"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070",
+      "DriverVersion": "32.0.16.2101"
+    }
+  ],
+  "capturedAt": "2026-11-13T00:40:58.7865696-05:00",
+  "note": "系统静态硬件信息；浏览器测得的 JS 堆和 GPU 查询不等同于总内存、显存或系统占用率",
+  "cpu": [
+    {
+      "Name": "12th Gen Intel(R) Core(TM) i5-12600KF",
+      "NumberOfCores": 10,
+      "NumberOfLogicalProcessors": 16,
+      "MaxClockSpeed": 3700
+    }
+  ]
+}

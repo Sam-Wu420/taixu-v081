@@ -1,0 +1,158 @@
+/* 贴身斗法（BrawlHUD.tsx）：罡气条、架势提示、手机的架势按钮与四个大按钮。
+   动效只动 transform / opacity；下一轮主界面重排时罡气条挪进目标框。 */
+.bx-hud { position: absolute; left: 16px; bottom: calc(96px + var(--safe-b, 0px)); z-index: 5;   /* 电脑：快捷栏正上方，左对齐（不压底部正中的地点卡） */
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px; pointer-events: none; animation: bx-in 0.18s ease-out; }
+.bx-hud.touch { left: 50%; bottom: calc(8px + var(--safe-b, 0px)); align-items: center; transform: translateX(-50%); animation: none; }   /* 手机：摇杆和右下按钮之间 */
+@keyframes bx-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.bx-bar { display: flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 10px; background: rgba(22, 18, 14, 0.62);
+  color: #f2e2c0; font-size: 12px; line-height: 16px; white-space: nowrap; }
+.bx-label { max-width: 7em; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
+.bx-track { position: relative; width: 170px; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.bx-track i { position: absolute; inset: 0; transform-origin: 0 50%; border-radius: 4px;
+  background: linear-gradient(90deg, #c88a2c, #ffd98a); transition: transform 0.12s linear; }
+.bx-bar.foe .bx-track i { background: linear-gradient(90deg, #a8502c, #ffb27a); }
+.bx-bar.broken .bx-track i { background: linear-gradient(90deg, #6a6a6a, #b8b0a0); }
+.bx-bar.broken .bx-num { color: #ffcf6a; font-weight: bold; animation: bx-pulse 0.5s ease-in-out infinite alternate; }
+@keyframes bx-pulse { from { opacity: 0.55; } to { opacity: 1; } }
+.bx-num { min-width: 2.4em; text-align: right; font-variant-numeric: tabular-nums; }
+.bx-tip { margin-top: 2px; padding: 3px 10px; border-radius: 10px; background: rgba(60, 36, 14, 0.7); color: #ffe2a8; font-size: 12px; white-space: nowrap; }
+.bx-hud.touch .bx-track { width: 120px; }
+/* 兵器线：架势里手持什么兵器、要点一句（颜色分拳 / 剑 / 重兵 / 枪；手机上字小一号、可折行，别顶出屏幕） */
+.bx-tip.wpn { background: rgba(26, 22, 18, 0.66); color: #efe6d2; }
+.bx-tip.wpn b { color: #ffd98a; font-weight: normal; }
+.bx-tip.wpn.k-sword b { color: #cfe6ff; } .bx-tip.wpn.k-heavy b { color: #ffb88a; } .bx-tip.wpn.k-spear b { color: #d8f0c8; }
+.bx-hud.touch .bx-tip.wpn { font-size: 11px; white-space: normal; max-width: 52vw; text-align: center; }
+
+/* 手机：快捷栏上方的「架势」按钮 */
+.bx-stance { position: absolute; z-index: 7; width: 56px; height: 56px;
+  right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(18px + var(--pad-w, 162px) + var(--safe-b, 0px));
+  background: radial-gradient(circle at 35% 30%, #8a5a2a, #3a2410 70%); }
+.bx-stance.on { background: radial-gradient(circle at 35% 30%, #d89a40, #6a3a10 70%); box-shadow: 0 0 0 2px rgba(255, 214, 140, 0.8); }
+.bx-stance small { font-size: 9px; }
+
+/* 进了架势：快捷栏那一块换成四个大按钮（2×2，按钮不小于 56px） */
+html.brawl-stance .game-root.touch .hotbar.pad { visibility: hidden; pointer-events: none; }
+.bx-pad { position: absolute; z-index: 7; right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + var(--safe-b, 0px));
+  width: var(--pad-w, 162px); height: var(--pad-w, 162px); display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; animation: bx-pop 0.16s ease-out; }
+@keyframes bx-pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+.bx-btn { min-width: 56px; min-height: 56px; border-radius: 50%; border: 1px solid rgba(255, 220, 160, 0.55); color: #fff2d8;
+  font-family: var(--title-font, serif); font-size: 24px; line-height: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #6a4a2a, #2a1a0e 72%); box-shadow: 0 4px 12px rgba(10, 8, 4, 0.45); touch-action: none; user-select: none; -webkit-user-select: none; }
+.bx-btn small { font-family: inherit; font-size: 10px; margin-top: 3px; opacity: 0.85; white-space: nowrap; }
+.bx-btn:active { transform: scale(0.92); }
+.bx-btn.heavy { background: radial-gradient(circle at 35% 30%, #a4502a, #3a160a 72%); }
+.bx-btn.rush { background: radial-gradient(circle at 35% 30%, #c89a3a, #4a300c 72%); }
+.bx-btn.pursue { background: radial-gradient(circle at 35% 30%, #5a4a8a, #1e1630 72%); }
+.bx-btn.pursue.ready { box-shadow: 0 0 0 2px rgba(200, 180, 255, 0.85), 0 4px 12px rgba(10, 8, 4, 0.45); }
+.bx-btn.pursue.tech { background: radial-gradient(circle at 35% 30%, #3a8aa0, #0e2a34 72%); box-shadow: 0 0 0 2px rgba(160, 230, 255, 0.85); }
+
+/* ---------------- E2：拼招面板（三选一、倒计时、结果；连按拼点）、连段计数、收尾大字 ----------------
+   放在画面下方三成处（两人在画面正中，不挡人）；只动 transform / opacity。 */
+.bx-clash { position: absolute; left: 50%; top: 66%; z-index: 9; transform: translateX(-50%); pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 14px 10px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(30, 20, 10, 0.78), rgba(14, 10, 6, 0.82)); border: 1px solid rgba(255, 214, 140, 0.55);
+  color: #ffe9c0; animation: bx-clash-in 0.16s ease-out; }
+@keyframes bx-clash-in { from { opacity: 0; transform: translateX(-50%) scale(0.86); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+.bx-clash-head { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+.bx-clash-head b { font-family: var(--title-font, serif); font-size: 20px; letter-spacing: 4px; color: #ffd76a; }
+.bx-clash-head span { font-size: 12px; opacity: 0.8; }
+.bx-clash.win .bx-clash-head b { color: #ffe27a; transform: scale(1.25); display: inline-block; }
+.bx-clash.lose .bx-clash-head b { color: #ff8a6a; }
+.bx-clash-time { position: relative; width: 260px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.bx-clash-time i { position: absolute; inset: 0; transform-origin: 0 50%; background: linear-gradient(90deg, #ff7a3a, #ffd76a); }
+.bx-picks { display: flex; gap: 10px; pointer-events: auto; }
+.bx-pick { position: relative; width: 78px; height: 72px; border-radius: 12px; border: 1px solid rgba(255, 220, 160, 0.6); color: #fff2d8;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: none; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(circle at 35% 30%, #6a4a2a, #2a1a0e 75%); transition: transform 0.1s ease-out, opacity 0.15s; }
+.bx-pick b { font-family: var(--title-font, serif); font-size: 28px; line-height: 1; }
+.bx-pick small { font-size: 11px; opacity: 0.85; white-space: nowrap; }
+.bx-pick em { position: absolute; top: -9px; right: -6px; font-style: normal; font-size: 11px; padding: 1px 6px; border-radius: 8px; background: #a8402a; color: #fff; }
+.bx-pick.atk { background: radial-gradient(circle at 35% 30%, #b0502a, #3a140a 75%); }
+.bx-pick.brk { background: radial-gradient(circle at 35% 30%, #c8962a, #4a300c 75%); }
+.bx-pick.par { background: radial-gradient(circle at 35% 30%, #3a8aa0, #0e2a34 75%); }
+.bx-pick.mine { transform: translateY(-6px) scale(1.08); border-color: #ffe7a0; box-shadow: 0 0 0 2px rgba(255, 230, 150, 0.85); }
+.bx-pick.theirs { border-color: #ff9a7a; }
+.bx-pick.won { box-shadow: 0 0 0 3px #ffe27a; }
+.bx-pick.lost { opacity: 0.6; }
+.bx-pick:disabled:not(.mine):not(.theirs) { opacity: 0.45; }
+.bx-clash-res { font-size: 14px; color: #ffe2a8; }
+.bx-mash { display: flex; align-items: center; gap: 16px; pointer-events: auto; }
+.bx-mash-n { display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+.bx-mash-n b { font-size: 30px; font-variant-numeric: tabular-nums; color: #ffd76a; line-height: 1; }
+.bx-mash-n.foe b { color: #ff9a7a; }
+.bx-mash-n small { font-size: 11px; opacity: 0.8; }
+.bx-mash-tip { font-size: 13px; white-space: nowrap; animation: bx-pulse 0.25s ease-in-out infinite alternate; }
+.bx-mash-btn { width: 96px; height: 72px; border-radius: 14px; border: 1px solid rgba(255, 220, 160, 0.7); color: #fff2d8; font-family: var(--title-font, serif); font-size: 26px;
+  background: radial-gradient(circle at 35% 30%, #d0702a, #4a1a0a 75%); touch-action: none; user-select: none; -webkit-user-select: none; }
+.bx-mash-btn:active { transform: scale(0.92); }
+.bx-clash.touch { top: auto; bottom: calc(14px + var(--safe-b, 0px)); }
+.bx-clash.touch .bx-pick { width: 84px; height: 76px; }   /* 手机：三个大按钮（不小于 64px） */
+
+/* 连段计数：右侧中部的大数字（每多一下弹一下） */
+.bx-combo { position: absolute; right: 18%; top: 34%; z-index: 6; pointer-events: none; display: flex; align-items: baseline; gap: 4px;
+  color: #ffd76a; font-family: var(--title-font, serif); animation: bx-combo-pop 0.22s ease-out; }
+.bx-combo b { font-size: 46px; line-height: 1; font-style: italic; -webkit-text-stroke: 1px rgba(60, 20, 0, 0.8); }
+.bx-combo small { font-size: 20px; color: #ffe9c0; }
+.bx-combo.touch { right: 12%; top: 22%; }
+.bx-combo.touch b { font-size: 34px; }
+@keyframes bx-combo-pop { from { transform: scale(1.6); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+/* 收尾大字：画面上方三成处，亮一下就淡掉 */
+.bx-fin { position: absolute; left: 50%; top: 20%; z-index: 6; pointer-events: none; transform: translateX(-50%);
+  font-family: var(--title-font, serif); font-size: 40px; letter-spacing: 6px; color: #ffe27a; white-space: nowrap;
+  -webkit-text-stroke: 1px rgba(80, 30, 0, 0.85); animation: bx-fin 1.4s ease-out forwards; }
+.bx-fin.touch { font-size: 28px; top: 14%; }
+@keyframes bx-fin { 0% { opacity: 0; transform: translateX(-50%) scale(1.8); } 12% { opacity: 1; transform: translateX(-50%) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-14px); } }
+
+/* 收官 E3「追！」：一键追击俯冲的提示（手机上是按钮）。只动 transform / opacity：一下一下地往前顶 */
+.bx-chase { position: fixed; left: 74%; top: 44%; z-index: 41; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 26px 8px; border: 2px solid #ffd27a; border-radius: 14px; background: linear-gradient(180deg, rgba(120,30,10,.92), rgba(60,12,6,.92)); color: #fff1cf;
+  font-family: var(--lq-font-title, "Ma Shan Zheng", "KaiTi", serif); cursor: pointer; pointer-events: auto; animation: bx-chase-pulse .5s ease-in-out infinite alternate; }
+.bx-chase b { font-size: 40px; line-height: 1; letter-spacing: 6px; color: #ffe08a; text-shadow: 0 0 2px #000, 0 2px 0 #6a1a08; }
+.bx-chase small { font-size: 13px; opacity: .92; letter-spacing: 1px; }
+.bx-chase.drop { border-color: #bfe0ff; background: linear-gradient(180deg, rgba(30,50,110,.92), rgba(14,20,60,.92)); }
+.bx-chase.drop b { color: #d8ecff; text-shadow: 0 0 2px #000, 0 2px 0 #1a2a6a; }
+.bx-chase.touch { top: auto; bottom: calc(150px + env(safe-area-inset-bottom)); padding: 6px 16px 5px; }
+.bx-chase.touch b { font-size: 28px; letter-spacing: 3px; }
+.bx-chase-arrow { position: absolute; left: 50%; top: 50%; width: 120px; height: 0; margin-left: -60px; pointer-events: none; }
+.bx-chase-arrow::after { content: ''; position: absolute; right: -34px; top: -12px; border-left: 22px solid #ffd27a; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+@keyframes bx-chase-pulse { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.08); } }
+
+/* 第三轮：拼招时对方的起手式（读招的依据），对应的那张卡描一圈 */
+.bx-clash-tell { text-align: center; font-size: 15px; color: #f3e6c8; margin: 2px 0 6px; animation: bx-tell-in .18s ease-out both; }
+.bx-clash-tell b { font-size: 20px; margin: 0 2px; }
+.bx-clash-tell.atk b { color: #ff8a6a; } .bx-clash-tell.brk b { color: #ffd27a; } .bx-clash-tell.par b { color: #8ad0ff; }
+.bx-pick.tell { outline: 2px dashed rgba(255,230,170,.85); outline-offset: 2px; }
+@keyframes bx-tell-in { from { opacity: 0; transform: translateY(6px) scale(.9); } to { opacity: 1; transform: none; } }
+
+/* ---------------- r7 重击定向：按住右键（手机长按「崩」）时的小提示、手机的小摇杆和「升」「降」 ----------------
+   提示放在画面下方三成处偏下（两人在画面正中，不挡人）；只动 transform / opacity。 */
+.bx-tip.aim { background: rgba(18, 34, 48, 0.74); color: #d8f0ff; }
+.bx-aimtag { position: absolute; left: 50%; top: 74%; z-index: 8; transform: translateX(-50%); pointer-events: none;
+  display: flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 12px; white-space: nowrap;
+  background: rgba(14, 10, 6, 0.58); border: 1px solid rgba(255, 214, 140, 0.4); color: #ffd27a; animation: bx-aim-in 0.12s ease-out; }
+@keyframes bx-aim-in { from { opacity: 0; transform: translateX(-50%) scale(0.9); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+.bx-aimtag b { font-family: var(--title-font, serif); font-size: 18px; letter-spacing: 2px; }
+.bx-aimtag small { font-size: 11px; color: #f2e2c0; opacity: 0.8; }
+.bx-aimtag.v1 { color: #9fe0ff; border-color: rgba(150, 220, 255, 0.45); }
+.bx-aimtag.v-1 { color: #ff8a6a; border-color: rgba(255, 130, 100, 0.45); }
+.bx-aimtag.no { color: #c8c8c8; border-color: rgba(200, 200, 200, 0.35); }
+.bx-aimbar { position: relative; width: 84px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.bx-aimbar i { position: absolute; inset: 0; transform-origin: 0 50%; background: currentColor; }
+.bx-aimtag.touch { top: 16%; }
+@media (max-aspect-ratio: 1/1) { .bx-aimtag.touch { top: 31%; } }   /* 竖屏：让开顶上的目标框、「下一步」条 */
+/* 手机：长按「崩」变成小摇杆（虚线圈 + 跟着手指的钮） */
+.bx-btn.heavy.aiming { position: relative; border: 2px solid rgba(255, 210, 150, 0.85);
+  background: radial-gradient(circle, rgba(164, 80, 42, 0.35), rgba(58, 22, 10, 0.6) 72%); }
+.bx-btn.heavy.aiming:active { transform: none; }
+.bx-joy { position: absolute; inset: 9px; border-radius: 50%; border: 1px dashed rgba(255, 220, 160, 0.55); pointer-events: none; }
+.bx-knob { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #ffe0a0, #b4602a 75%); box-shadow: 0 2px 6px rgba(10, 6, 2, 0.5); }
+/* 定向时「崩」左边的「升」「降」：点一下选上挑 / 下砸，再点取消 */
+.bx-vpick { position: absolute; right: calc(100% + 8px); top: 0; display: flex; flex-direction: column; gap: 8px; animation: bx-pop 0.14s ease-out; }
+.bx-vbtn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid rgba(255, 220, 160, 0.55); color: #fff2d8; touch-action: none; user-select: none; -webkit-user-select: none;
+  font-family: var(--title-font, serif); font-size: 19px; line-height: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #4a4a52, #1a1a20 72%); box-shadow: 0 3px 10px rgba(10, 8, 4, 0.45); }
+.bx-vbtn small { font-family: inherit; font-size: 9px; margin-top: 2px; opacity: 0.85; }
+.bx-vbtn.up.on { background: radial-gradient(circle at 35% 30%, #4aa8d0, #0e3448 72%); border-color: #bfe8ff; }
+.bx-vbtn.dn.on { background: radial-gradient(circle at 35% 30%, #d0603a, #4a160a 72%); border-color: #ffc8b0; }
+.bx-vbtn:active { transform: scale(0.92); }

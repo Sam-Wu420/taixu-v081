@@ -1,0 +1,18 @@
+Sense ground projection and sandbox regression
+node --import tsx tools/test-fx-projection.ts
+PASS Three 正交矩阵与真实 Batch：135 组 yaw/zoom/地形/升空；地贴分格、深度、条带、粒子 z 和立板速度
+EXIT 0
+node --import tsx tools/test-fx-combat.ts
+PASS 真实火弹、飞行名牌、竖雷、连线两端高度与投影方向
+EXIT 0
+node --import tsx tools/test-vfx-sprites.ts
+火弹与拖尾: 平均通道差 0.0000，变化通道比例 0.02%
+雷柱与爆发: 平均通道差 0.0002，变化通道比例 0.00%
+阵法与展开: 平均通道差 0.0001，变化通道比例 0.01%
+PASS 真实贴图拖尾与 Three 相机对照：60 组 yaw/zoom/斜坡/飞行高度和世界长度上限
+PASS 真实原图、Canvas 旧绘制与 Batch 像素对照；纹理缓存与 HD 深度
+EXIT 0
+node --import tsx tools/test-shahe-boot.ts
+Sandbox war1000 passed: 500 allies, 500 foes, normal HP, 3 hits in 61 updates, undo cleared all
+Sandbox fresh and saved title boots, story, scene and restore lifecycle passed
+EXIT 0

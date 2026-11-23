@@ -1,0 +1,162 @@
+[
+  {
+    "origin": "http://127.0.0.1:5235",
+    "sample": {
+      "run": 1,
+      "readyMs": 2794,
+      "navigationType": "navigate",
+      "responseEndMs": 51.1,
+      "domContentLoadedMs": 1174.5,
+      "resources": {
+        "count": 565,
+        "transferBytes": 40068034,
+        "decodedBytes": 39898534,
+        "apparentlyCached": 0
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "dpr": 1,
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+      },
+      "heap": {
+        "usedJSHeapSize": 951495684,
+        "totalJSHeapSize": 1123997428,
+        "jsHeapSizeLimit": 4395630592
+      },
+      "gpu": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "software": false
+      }
+    }
+  },
+  {
+    "origin": "http://127.0.0.1:5236",
+    "sample": {
+      "run": 1,
+      "readyMs": 2160.1,
+      "navigationType": "navigate",
+      "responseEndMs": 7.4,
+      "domContentLoadedMs": 596.1,
+      "resources": {
+        "count": 567,
+        "transferBytes": 40069147,
+        "decodedBytes": 39899047,
+        "apparentlyCached": 0
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "dpr": 1,
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+      },
+      "heap": {
+        "usedJSHeapSize": 1137477864,
+        "totalJSHeapSize": 1256295896,
+        "jsHeapSizeLimit": 4395630592
+      },
+      "gpu": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "software": false
+      }
+    }
+  },
+  {
+    "origin": "http://127.0.0.1:5237",
+    "sample": {
+      "run": 1,
+      "readyMs": 2210.1,
+      "navigationType": "navigate",
+      "responseEndMs": 15.1,
+      "domContentLoadedMs": 532.6,
+      "resources": {
+        "count": 567,
+        "transferBytes": 40069147,
+        "decodedBytes": 39899047,
+        "apparentlyCached": 0
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "dpr": 1,
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+      },
+      "heap": {
+        "usedJSHeapSize": 1362118590,
+        "totalJSHeapSize": 1427614022,
+        "jsHeapSizeLimit": 4395630592
+      },
+      "gpu": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "software": false
+      }
+    }
+  },
+  {
+    "origin": "http://127.0.0.1:5238",
+    "sample": {
+      "run": 1,
+      "readyMs": 2122.4,
+      "navigationType": "navigate",
+      "responseEndMs": 30.1,
+      "domContentLoadedMs": 548.2,
+      "resources": {
+        "count": 580,
+        "transferBytes": 44082474,
+        "decodedBytes": 43908474,
+        "apparentlyCached": 0
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "dpr": 1,
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+      },
+      "heap": {
+        "usedJSHeapSize": 1412357391,
+        "totalJSHeapSize": 1612574787,
+        "jsHeapSizeLimit": 4395630592
+      },
+      "gpu": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "software": false
+      }
+    }
+  },
+  {
+    "origin": "http://127.0.0.1:5239",
+    "sample": {
+      "run": 1,
+      "readyMs": 2098.5,
+      "navigationType": "navigate",
+      "responseEndMs": 8.9,
+      "domContentLoadedMs": 534.5,
+      "resources": {
+        "count": 571,
+        "transferBytes": 41720857,
+        "decodedBytes": 41549557,
+        "apparentlyCached": 0
+      },
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "dpr": 1,
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+      },
+      "heap": {
+        "usedJSHeapSize": 1704417604,
+        "totalJSHeapSize": 1770696236,
+        "jsHeapSizeLimit": 4395630592
+      },
+      "gpu": {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "software": false
+      }
+    }
+  }
+]

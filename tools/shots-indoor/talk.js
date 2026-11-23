@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; const I = g.indoor; const f = I.focus?.seat.title; g.interact(); await new Promise((r) => setTimeout(r, 900)); return { focus: f, modal: g.modal?.kind, title: document.querySelector('.lq-modal .lq-title, .scroll-title, h2')?.textContent }; })()

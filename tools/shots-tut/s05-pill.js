@@ -1,0 +1,1 @@
+(async () => { const g = window.__game; const T = g.tutorial; const b = g.hero.bag.find(x => x.uid === g.ws.tut.gearUid); if (b) { const C = await import('/src/world/cultivation.ts'); C.wearGear(g.hero, b); } await new Promise(r => setTimeout(r, 1200)); return [T.step, T.getView()?.text]; })()

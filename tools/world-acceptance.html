@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>B 版世界与建筑验收</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#161a17}
+    #world-panel{position:fixed;right:8px;top:8px;z-index:2147483647;width:min(370px,calc(100vw - 16px));max-height:calc(100vh - 16px);overflow:auto;box-sizing:border-box;padding:9px 11px;background:rgba(19,28,25,.95);color:#eee6ce;border:1px solid #a5926b;border-radius:6px;font:13px/1.5 system-ui,sans-serif}
+    #world-panel summary{cursor:pointer;font-size:15px;font-weight:700;color:#f2d49b}
+    #world-panel p{margin:5px 0} #world-panel button{margin:2px;padding:5px 7px;border:1px solid #a5926b;background:#394b3d;color:#fff5d9;border-radius:3px;cursor:pointer}
+    #world-panel button:disabled{opacity:.45;cursor:default} #world-panel button.selected{background:#846e3c}
+    #world-status{color:#f2cc7c} #world-readout{white-space:pre-wrap;background:#111a16;padding:6px;font:12px/1.45 monospace}
+    #world-log{white-space:pre-wrap;overflow-wrap:anywhere;max-height:22vh;overflow:auto;background:#111a16;padding:6px;font:11px/1.4 monospace}
+  </style>
+  <script>
+    const url = new URL(location.href);
+    url.searchParams.set('auto', 'new'); url.searchParams.set('hd2d', '1');
+    if (!url.searchParams.has('map')) url.searchParams.set('map', 'tiannan');
+    history.replaceState(null, '', url);
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <details id="world-panel" open>
+    <summary>世界与建筑验收 · 点击收起</summary>
+    <p id="world-status" role="status">等待正常新局启动…</p>
+    <div aria-label="场景">
+      <button id="scene-qixuan" disabled>青玄门登山</button><button id="scene-huangfeng" disabled>青霞谷登山</button>
+      <button id="scene-jingzhou" disabled>镜州建筑</button><button id="scene-yejia" disabled>叶家城墙门洞</button>
+    </div>
+    <div aria-label="路线控制">
+      <button id="route-start" disabled>开始行走</button><button id="route-pause" disabled>暂停行走</button><button id="route-reverse" disabled>反向行走</button>
+    </div>
+    <div aria-label="镜头与飞行">
+      <button id="rotate-left" disabled>旋转 −45°</button><button id="rotate-right" disabled>旋转 +45°</button>
+      <button id="zoom-out" disabled>缩小</button><button id="zoom-in" disabled>放大</button><button id="fly" disabled>飞行切换</button>
+    </div>
+    <div aria-label="画面诊断">
+      <button id="debug-reveal" disabled>揭示全图：关</button><button id="debug-sense" disabled>神识显色：关</button>
+      <span>神识显色需同时揭示全图</span>
+    </div>
+    <div aria-label="存读档">
+      <button id="save" disabled>存档</button><button id="load" disabled>重载</button>
+      <span id="save-origin"></span>
+    </div>
+    <p id="world-readout">等待选择场景</p>
+    <pre id="world-log">尚无记录</pre>
+  </details>
+  <script type="module" src="/src/main.tsx"></script>
+  <script type="module" src="/tools/world-acceptance.ts"></script>
+</body>
+</html>

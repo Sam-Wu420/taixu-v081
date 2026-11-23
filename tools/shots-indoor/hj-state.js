@@ -1,0 +1,1 @@
+(() => { const g = window.__game, H = g.huajuan; return { near: H.near?.id, k: +H.k.toFixed(2), cover: +H.cover.toFixed(2), cur: H.cur?.id, mj: g.mijing.active, veil: +g.mijing.veil.toFixed(2), p: [Math.round(g.player.x), Math.round(g.player.y)], paint: g.renderer?.huajuanGl?.stats }; })()

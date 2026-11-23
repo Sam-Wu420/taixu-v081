@@ -1,0 +1,1 @@
+(async () => { document.querySelector('.lq-close')?.click(); await new Promise(r => setTimeout(r, 500)); [...document.querySelectorAll('.title-menu .menu-btn')].find(b => b.textContent.includes('设'))?.click(); await new Promise(r => setTimeout(r, 1300)); return 'settings'; })()

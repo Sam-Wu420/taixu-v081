@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="UTF-8">
+<title>B-HD2D 渲染验收</title>
+<style>body{margin:20px;background:#e9dfc6;color:#342b20;font:16px system-ui}canvas{display:block;width:960px;height:540px}pre{white-space:pre-wrap}button{padding:8px 20px;margin:12px 12px 12px 0}</style>
+<h1>B-HD2D 渲染验收</h1>
+<button id="run">验证投影与共享 GPU 渲染</button>
+<button id="alpha-depth">验证透明边缘与神识</button>
+<button id="atlas-update">验证静态图集分块更新</button>
+<button id="bitmap-atlas">验证 Worker 位图图集</button>
+<button id="character-cpu">验证人物画布像素</button>
+<button id="character-alpha">比较人物逐部件与整图淡出</button>
+<button id="geometry-batch">验证人物几何与立板混排</button>
+<pre id="result">等待测试</pre>
+<div id="view"></div>
+<script type="module" src="./hd2d-check.ts"></script>
+</html>

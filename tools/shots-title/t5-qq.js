@@ -1,0 +1,1 @@
+(async () => { document.querySelector('.lq-close')?.click(); await new Promise(r => setTimeout(r, 500)); document.querySelector('.title-qq')?.click(); await new Promise(r => setTimeout(r, 1300)); return 'qq'; })()

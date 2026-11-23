@@ -1,0 +1,1 @@
+(async () => { await new Promise(r => setTimeout(r, 20000)); window.__mark(); const g = window.__game; return { foes: g.combat.enemies.length, status: document.querySelector('#status')?.textContent }; })()

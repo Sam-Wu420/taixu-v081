@@ -1,0 +1,201 @@
+/* 收官 H1（甲）：卷轴式面板统一外壳（LqPanel）与面板里旧部件的新样子。
+   选择器一律以 .lq-modal.lqp 打头（两个类名），压住 styles.css 里旧的 .scroll-panel / .cult-panel / .settings / .tabs / .ink-btn……
+   旧类名都还挂在元素上（清界皮肤模组认它们）；这里只改长相。动效只动 transform / opacity。 */
+
+/* ============ 外壳：高度随内容（不超过 dvh），窄屏全屏 ============ */
+.lq-modal.lqp { --lq-top: 92px; height: auto; max-height: min(var(--lq-h), calc(100vh - 90px)); max-height: min(var(--lq-h), calc(100dvh - 90px - var(--safe-t) - var(--safe-b)));
+  min-height: 0; width: min(var(--lq-w), 96vw); padding: 0 22px 16px; font-family: var(--body-font); }
+.lq-modal.lqp.lqp-compact { --lq-top: 0px; }
+.lq-modal.lqp.wide { min-height: min(560px, calc(100dvh - 90px)); }
+/* 题字由匾额 / 标题栏写；旧的 .panel-title 元素留着（模组皮肤认它），视觉上藏起来 */
+.lq-modal.lqp .lqp-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font-size: 1px; }
+.lq-modal.lqp .lqp-head { flex: none; justify-content: center; text-align: center; padding: var(--lq-top) 40px 6px; margin: 0; gap: 0; }
+.lq-modal.lqp .lqp-sub { flex: 0 1 auto; font-size: 13px; line-height: 1.6; color: var(--lq-ink-2); }
+.lq-modal.lqp .lqp-sub.empty { display: none; }
+.lq-modal.lqp .lqp-sub b { color: var(--lq-ink-0); }
+.lq-modal.lqp .lqp-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overflow-x: hidden; padding: 4px 6px 4px 2px; touch-action: pan-y; }
+.lq-modal.lqp.lqp-compact .lqp-head { padding-top: 0; }
+.lq-modal.lqp.lqp-compact .lq-titlebar { margin-top: 6px; }
+
+/* ============ 页签（旧 .tabs：没换成 InkTabs 的那几处）→ 墨痕页签的样子 ============ */
+.lq-modal.lqp .tabs:not(.lq-tabs) { display: flex; flex-wrap: wrap; gap: 2px 4px; margin: 2px 0 10px; padding: 0 2px; border-bottom: 1px solid var(--lq-paper-line); }
+.lq-modal.lqp .tabs:not(.lq-tabs) button { position: relative; min-height: 38px; padding: 6px 14px 8px; border: none; border-radius: 0; background: none; cursor: pointer;
+  font-family: var(--title-font); font-size: 18px; letter-spacing: 0.1em; color: #7a6a52; }
+.lq-modal.lqp .tabs:not(.lq-tabs) button::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -2px; height: 4px; border-radius: 2px; opacity: 0; transform: scaleX(0.3);
+  background: linear-gradient(90deg, transparent, #8e2a20 30%, #8e2a20 70%, transparent); transition: transform 0.3s var(--lq-ease-ink), opacity 0.2s; }
+.lq-modal.lqp .tabs:not(.lq-tabs) button.on { color: var(--lq-ink-0); background: none; }
+.lq-modal.lqp .tabs:not(.lq-tabs) button.on::after { opacity: 1; transform: none; }
+.lq-modal.lqp .lq-tabs { margin: 2px 0 10px; }
+.lq-modal.lqp .lq-tabs.scrollx { overflow-x: auto; overflow-y: hidden; touch-action: pan-x; scrollbar-width: none; }
+
+/* ============ 按钮（旧 .ink-btn）→ 朱漆主按钮 / 玉色 / 描边 ============ */
+.lq-modal.lqp .ink-btn:not(.lq-btn) { position: relative; min-height: 40px; padding: 0 20px; border: 1px solid #6a1e16; border-radius: 4px; overflow: hidden; cursor: pointer;
+  font-family: var(--title-font); font-size: 18px; letter-spacing: 0.16em; color: var(--lq-zhu-paper); background: linear-gradient(180deg, var(--lq-zhu-hi), var(--lq-zhu-mid) 60%, var(--lq-zhu-lo));
+  transition: transform var(--lq-t-fast); }
+.lq-modal.lqp .ink-btn:not(.lq-btn):hover:not(:disabled) { transform: translateY(-1px); }
+.lq-modal.lqp .ink-btn:not(.lq-btn):active:not(:disabled) { transform: scale(0.96); }
+.lq-modal.lqp .ink-btn:not(.lq-btn):disabled { opacity: 0.42; cursor: default; }
+.lq-modal.lqp .ink-btn.jade:not(.lq-btn) { border-color: var(--lq-jade-line); background: linear-gradient(180deg, #3a7d6e, var(--lq-jade) 60%, var(--lq-jade-lo)); color: #f1f7ef; }
+.lq-modal.lqp .ink-btn.ghost:not(.lq-btn) { border-color: rgba(94, 67, 27, 0.5); background: rgba(255, 252, 244, 0.5); color: var(--lq-ink-1); }
+.lq-modal.lqp .ink-btn.small:not(.lq-btn) { min-height: 36px; padding: 0 14px; font-size: 15px; letter-spacing: 0.08em; }
+.lq-modal.lqp .ink-btn.big:not(.lq-btn) { min-height: 46px; font-size: 20px; letter-spacing: 0.24em; }
+@media (pointer: coarse) { .lq-modal.lqp .ink-btn:not(.lq-btn) { min-height: 44px; } .lq-modal.lqp .ink-btn.small:not(.lq-btn) { min-height: 40px; } }
+
+/* ============ 小节标题、提示、键值行 ============ */
+.lq-modal.lqp .sec-title { font-family: var(--title-font); font-size: 19px; letter-spacing: 0.12em; color: var(--lq-ink-1); margin: 14px 0 8px; padding: 0 0 0 10px;
+  border: none; border-left: 3px solid var(--lq-zhu); line-height: 1.25; }
+.lq-modal.lqp .sec-title small { color: var(--lq-ink-3); }
+.lq-modal.lqp .hint { font-size: 12.5px; line-height: 1.7; color: var(--lq-ink-3); }
+.lq-modal.lqp .kv { border-bottom: 1px dashed var(--lq-paper-dash); padding: 6px 2px; }
+.lq-modal.lqp .kv span { color: var(--lq-ink-3); }
+.lq-modal.lqp .kv b { color: var(--lq-ink-0); font-variant-numeric: tabular-nums; }
+
+/* ============ 格子（旧 .slot）：纸底格子 + 品阶描边 ============ */
+.lq-modal.lqp .slot:not(.lq-cell) { border-radius: 5px; border: 1px solid rgba(94, 67, 27, 0.32); background: radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.85), rgba(226, 210, 172, 0.7));
+  box-shadow: inset 0 -2px 0 rgba(94, 67, 27, 0.18); transition: transform var(--lq-t-fast) var(--lq-ease-out); }
+.lq-modal.lqp .slot:not(.lq-cell):hover { transform: translateY(-2px); }
+.lq-modal.lqp .slot.on:not(.lq-cell) { box-shadow: inset 0 0 0 2px #a07a2a, inset 0 0 12px rgba(160, 122, 42, 0.35); }
+
+/* ============ 列表行（旧 .shop-row / .skill-row / .slot-row）：宣纸卡片，悬停微抬 ============ */
+.lq-modal.lqp .shop-list { max-height: none; overflow: visible; gap: 6px; }
+.lq-modal.lqp .shop-row, .lq-modal.lqp .slot-row { border-radius: 4px; border: 1px solid rgba(94, 67, 27, 0.22); background: linear-gradient(180deg, rgba(255, 252, 244, 0.82), rgba(246, 238, 220, 0.82));
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.35); transition: transform var(--lq-t-fast) var(--lq-ease-out); animation: lqpRow 0.36s var(--lq-ease-out) both; }
+.lq-modal.lqp .shop-row:hover { transform: translateY(-1px); }
+.lq-modal.lqp .shop-row .sr-name { letter-spacing: 0.04em; }
+.lq-modal.lqp .shop-row .sr-price { color: #8a5a10; font-variant-numeric: tabular-nums; }
+.lq-modal.lqp .skill-row { border-radius: 4px; border: 1px solid rgba(94, 67, 27, 0.16); background: rgba(255, 252, 244, 0.55); min-height: 40px; transition: transform var(--lq-t-fast); }
+.lq-modal.lqp .skill-row:hover { transform: translateX(2px); }
+.lq-modal.lqp .skill-row.on { border-color: #a07a2a; background: rgba(255, 248, 228, 0.95); box-shadow: inset 3px 0 0 var(--lq-zhu); }
+@keyframes lqpRow { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ============ 开关（旧 .switch）：玉色底、金色珠子，只动 transform ============ */
+.lq-modal.lqp .switch { position: relative; width: 52px; height: 28px; border-radius: 14px; border: 1px solid rgba(94, 67, 27, 0.4); background: rgba(94, 67, 27, 0.18); }
+.lq-modal.lqp .switch::before { content: ''; position: absolute; left: -4px; right: -4px; top: 50%; height: 40px; margin-top: -20px; }
+.lq-modal.lqp .switch::after { top: 3px; left: 3px; width: 20px; height: 20px; background: linear-gradient(180deg, #fff6dc, #e2c27a); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s var(--lq-ease-out); }
+.lq-modal.lqp .switch.on { background: var(--lq-jade); border-color: var(--lq-jade-line); }
+.lq-modal.lqp .switch.on::after { left: 3px; transform: translateX(24px); }
+
+/* ============ 设置一行 ============ */
+.lq-modal.lqp .set-row { border-bottom: 1px dashed var(--lq-paper-dash); padding: 10px 2px; min-height: 44px; }
+.lq-modal.lqp .set-row small { color: var(--lq-ink-3); }
+.lq-modal.lqp input[type=range] { accent-color: var(--lq-zhu); min-height: 36px; }
+.lq-modal.lqp select { min-height: 36px; border: 1px solid rgba(94, 67, 27, 0.4); border-radius: 3px; background: rgba(255, 252, 244, 0.8); color: var(--lq-ink-1); font: inherit; padding: 2px 6px; }
+
+/* ============ 城镇设施：印章卡（旧 .town-fac） ============ */
+.lq-modal.lqp .town-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.lq-modal.lqp .town-fac { position: relative; grid-template-columns: 58px 1fr; padding: 12px 12px 12px 10px; border-radius: 4px; overflow: hidden; min-height: 76px;
+  border: 1px solid rgba(160, 122, 42, 0.55); background: linear-gradient(180deg, rgba(255, 252, 244, 0.95), rgba(240, 229, 204, 0.95));
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 0 0 4px rgba(160, 122, 42, 0.25); animation: lqpRow 0.4s var(--lq-ease-out) both; animation-delay: var(--d, 0s); }
+.lq-modal.lqp .town-fac:hover:not(:disabled) { transform: translateY(-3px); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 0 0 4px rgba(160, 122, 42, 0.45); }
+.lq-modal.lqp .town-fac .tf-seal { width: 50px; height: 50px; border-radius: 6px; font-size: 30px; color: #fbe9cc; background: var(--lq-zhu); transform: rotate(-5deg);
+  box-shadow: inset 0 0 0 2px rgba(255, 236, 200, 0.4), inset 0 0 0 4px var(--lq-zhu); transition: transform 0.3s var(--lq-ease-pop); }
+.lq-modal.lqp .town-fac:hover:not(:disabled) .tf-seal { transform: rotate(0) scale(1.06); }
+.lq-modal.lqp .town-fac.gold .tf-seal { background: linear-gradient(135deg, #c9962e, #9a6a1a); box-shadow: inset 0 0 0 2px rgba(255, 244, 210, 0.5), inset 0 0 0 4px #a8741e; }
+.lq-modal.lqp .town-fac.love .tf-seal { background: #b84866; box-shadow: inset 0 0 0 2px rgba(255, 230, 236, 0.45), inset 0 0 0 4px #b84866; }
+.lq-modal.lqp .town-fac.gold { border-color: rgba(201, 150, 46, 0.8); }
+.lq-modal.lqp .town-fac .tf-name { font-size: 20px; letter-spacing: 0.12em; color: var(--lq-ink-0); }
+.lq-modal.lqp .town-fac .tf-desc { font-size: 12px; color: var(--lq-ink-3); }
+/* 第五轮：3b91ed3 删 styles.css 里的旧 .tf-*（和过场、目标框撞名）时把印章卡的排法也删了——印章占左列两行，名字、说明在右列上下排 */
+.lq-modal.lqp .town-fac { column-gap: 12px; row-gap: 2px; grid-template-rows: auto 1fr; align-items: start; }
+.lq-modal.lqp .town-fac .tf-seal { grid-row: 1 / 3; grid-column: 1; align-self: center; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); }
+.lq-modal.lqp .town-fac .tf-name { grid-column: 2; grid-row: 1; font-family: var(--title-font); line-height: 1.3; min-width: 0; }
+.lq-modal.lqp .town-fac .tf-desc { grid-column: 2; grid-row: 2; line-height: 1.45; min-width: 0; overflow-wrap: anywhere; padding-bottom: 14px; }
+.lq-modal.lqp .town-fac:disabled { opacity: 0.5; }
+.lq-modal.lqp .town-fac:disabled .tf-seal { background: #7a6a58; }
+
+/* ============ 收起长按 / 悬停的说明钮：带 ⓘ 的小字 ============ */
+.lq-modal.lqp .lqp-tip { cursor: help; border-bottom: 1px dotted rgba(94, 67, 27, 0.5); }
+
+/* ============ 窄屏（≤760 宽或 ≤520 高）：全屏、单列 ============ */
+@media (max-width: 760px), (max-height: 520px) {
+  .lq-modal.lqp, .lq-modal.lqp.wide { width: 100vw; height: 100vh; height: 100dvh; max-height: none; min-height: 0; border-radius: 0;
+    padding: var(--safe-t) calc(8px + var(--lq-safe-r)) calc(6px + var(--safe-b)) calc(8px + var(--lq-safe-l)); }
+  .lq-modal.lqp .lqp-head { padding: var(--lq-top) 44px 4px; }
+  .lq-modal.lqp .lqp-sub { font-size: 12px; }
+  .lq-modal.lqp .town-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .lq-modal.lqp .town-fac { grid-template-columns: 44px 1fr; min-height: 64px; padding: 8px; }
+  .lq-modal.lqp .town-fac .tf-seal { width: 40px; height: 40px; font-size: 24px; }
+  .lq-modal.lqp .town-fac .tf-name { font-size: 17px; }
+  .lq-modal.lqp .tabs:not(.lq-tabs) { flex-wrap: nowrap; overflow-x: auto; touch-action: pan-x; scrollbar-width: none; }
+  .lq-modal.lqp .tabs:not(.lq-tabs) button { flex: none; font-size: 16px; padding: 6px 10px 8px; }
+}
+@media (max-height: 520px) {
+  .lq-modal.lqp .lqp-sub { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+}
+/* 内联外壳改过来的面板：内容自带的 .cult-body 不再自己滚（外层 .lqp-body 滚） */
+.lq-modal.lqp .lqp-body > .cult-body { max-height: none; overflow: visible; padding-right: 0; }
+
+/* ============ 操作说明（KeysHelp：修仙指南、设置共用） ============ */
+.keys-help { display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 1.6; color: var(--lq-ink-1); }
+.keys-help .kh-group { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: start; padding-bottom: 6px; border-bottom: 1px dashed var(--lq-paper-dash); }
+.keys-help .kh-t { font-family: var(--title-font); font-size: 16px; letter-spacing: 0.1em; color: var(--lq-zhu-ink); padding-top: 2px; }
+.keys-help .kh-rows { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.keys-help .kh-row { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.keys-help.touch .kh-row { white-space: normal; }
+.keys-help .kh-row em { font-style: normal; margin-left: 4px; color: var(--lq-ink-2); }
+.keys-help kbd { display: inline-block; min-width: 22px; padding: 0 5px; border-radius: 3px; text-align: center; font-family: var(--body-font); font-size: 12px; line-height: 20px;
+  color: #fbecd0; background: linear-gradient(180deg, #4a3826, #2a1f12); border: 1px solid #1a120a; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35); }
+.keys-help .kh-foot { font-size: 12px; color: var(--lq-ink-3); }
+@media (max-width: 760px) { .keys-help .kh-group { grid-template-columns: 1fr; gap: 2px; } .keys-help .kh-row { white-space: normal; } }
+
+/* ============ 人脉录（收掉原来的 34 处内联样式） ============ */
+.lq-modal.lqp .rel-alarm { color: #c0302a; } .lq-modal.lqp .rel-red { color: #a8352a; }
+.lq-modal.lqp .rel-tabs { margin-bottom: 10px; }
+.lq-modal.lqp .rel-tabs sup { color: #fff; background: #c0302a; border-radius: 6px; padding: 0 4px; font-size: 10px; }
+.lq-modal.lqp .sec-title.rel-first { margin-top: 2px; } .lq-modal.lqp .sec-title.rel-gap { margin-top: 14px; }
+.lq-modal.lqp .rel-click { cursor: pointer; transition: transform var(--lq-t-fast); } .lq-modal.lqp .rel-click:hover { transform: translateX(2px); }
+.lq-modal.lqp .rel-n { font-weight: 400; }
+.lq-modal.lqp .rel-stand.siege { color: #c0302a; } .lq-modal.lqp .rel-stand.hostile { color: #d06a3a; } .lq-modal.lqp .rel-stand.friend { color: #3f9a5a; } .lq-modal.lqp .rel-stand.calm { color: #7a6a58; }
+.lq-modal.lqp .rel-roster { padding: 4px 10px 10px 22px; font-size: 13px; line-height: 1.7; color: #4a3f34; }
+.lq-modal.lqp .rel-mem { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.lq-modal.lqp .rel-mem.dead { opacity: 0.45; }
+.lq-modal.lqp .rel-mem .c-name { font-weight: 400; min-width: 64px; } .lq-modal.lqp .rel-mem .c-rank { min-width: 96px; } .lq-modal.lqp .rel-mem .c-realm { min-width: 64px; }
+.lq-modal.lqp .rel-mem .c-dim, .lq-modal.lqp .rel-mem .c-tier { color: #7a6a58; }
+.lq-modal.lqp .rel-foot { margin-top: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.lq-modal.lqp .favor { display: flex; align-items: center; gap: 10px; }
+.lq-modal.lqp .favor .lq-bar.favor-bar { flex: 1; height: 8px; width: auto; min-width: 80px; background: rgba(94, 67, 27, 0.18); }
+.lq-modal.lqp .rel-sect .lq-bar.favor-bar { flex: 1; height: 7px; min-width: 60px; background: rgba(94, 67, 27, 0.18); }
+
+/* ============ 修仙指南：页签横排可滑，「新玩法」一页 ============ */
+.lq-modal.lqp .guide-tabs { flex: none; margin: 0 4px 8px; }
+.lq-modal.lqp.help-panel .hd-intro { font-size: 14px; line-height: 1.9; color: var(--lq-ink-1); }
+.lq-modal.lqp.help-panel .hd-intro b { color: var(--lq-zhu-ink); font-family: var(--title-font); font-weight: 400; font-size: 16px; letter-spacing: 0.06em; }
+
+/* ============ 法术书：门派筛选成一排小印 ============ */
+.lq-modal.lqp .tabs .school-filter { display: inline-flex; flex-wrap: wrap; gap: 2px; margin-left: auto; align-items: center; }
+.lq-modal.lqp .tabs .school-filter button { min-height: 36px; min-width: 36px; padding: 2px 9px 4px; font-size: 15px; }
+.lq-modal.lqp .skill-panel .bag-wrap, .lq-modal.lqp.skill-panel .bag-wrap { gap: 14px; }
+.lq-modal.lqp.skill-panel .bag-detail { border: 1px solid rgba(160, 122, 42, 0.45); border-radius: 4px; background: rgba(255, 252, 244, 0.7); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.45); }
+.lq-modal.lqp.skill-panel .bd-name { font-family: var(--title-font); }
+
+/* ============ 设置：分成一行行 ============ */
+.lq-modal.lqp.settings .set-list { display: flex; flex-direction: column; }
+.lq-modal.lqp.settings .set-keys { border-bottom: none; }
+
+/* 匾额在窄屏 / 矮屏缩小了，头部留的位置跟着缩（kit.css 里同名变量的单类名写法压不过上面的双类名） */
+@media (max-width: 860px) { .lq-modal.lqp { --lq-top: 70px; } }
+@media (max-width: 760px) { .lq-modal.lqp { --lq-top: 56px; } }
+@media (max-height: 520px) { .lq-modal.lqp { --lq-top: 44px; } .lq-modal.lqp .lqp-head { padding: var(--lq-top) 44px 2px; } }
+.lq-modal.lqp.lqp-compact { --lq-top: 0px; }
+
+/* ============ 收官 H2：手机横屏（矮屏）——匾额缩小挪到左上角，副标题（统计行）挪到匾额右边同一行 ============
+   以前匾额居中压在顶上、下面再一行副标题、再一行页签，法术书光头部就占了 160 像素（390 高的屏幕去掉四成）。
+   现在匾额、统计行一行（约 46 像素），页签紧跟其下。 */
+@media (max-height: 520px) {
+  .lq-modal.lqp:not(.lqp-compact) { --lq-top: 0px; }
+  .lq-modal.lqp:not(.lqp-compact) > .lq-plaque { left: calc(6px + var(--lq-safe-l)); top: calc(var(--safe-t) + 2px); margin-left: 0; width: 150px; height: 42px; }
+  .lq-modal.lqp:not(.lqp-compact) > .lq-plaque .lq-plaque-t { font-size: 19px; letter-spacing: 0.14em; padding-left: 0.14em; }
+  .lq-modal.lqp:not(.lqp-compact) .lqp-head { justify-content: flex-start; text-align: left; min-height: 44px; padding: calc(var(--safe-t) + 8px) 50px 2px 162px; }
+  .lq-modal.lqp:not(.lqp-compact) .lqp-sub { font-size: 12px; }
+  .lq-modal.lqp:not(.lqp-compact) .lqp-sub.empty { display: block; }
+  .lq-modal.lqp .lq-tabs, .lq-modal.lqp .tabs:not(.lq-tabs) { margin-top: 0; margin-bottom: 6px; }
+  .lq-modal.lqp .lq-corner { width: 44px; height: 44px; }
+}
+
+/* ============ 第五轮：大事记 ============
+   .chron 自己 max-height 66vh 再滚一层，卷轴外层 .lqp-body 也滚：竖屏上第一列最后那行说明被内层裁掉一半，紧贴着外层底下的图例行，看着像两行叠在一起。
+   卷轴里只让外层滚；底下图例行和上面隔开。 */
+.lq-modal.lqp .chron { max-height: none; overflow: visible; }
+.lq-modal.lqp .chron + .hint { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--lq-paper-dash); }
+.lq-modal.lqp .chron-col > .hint { margin-top: 6px; }

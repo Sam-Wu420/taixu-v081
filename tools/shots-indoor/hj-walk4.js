@@ -1,0 +1,1 @@
+(async () => { const g = window.__game, a = window.__hjIn; g.setDestination(a.x + 60, a.y + 420); await new Promise((r) => setTimeout(r, 1500)); return { cover: g.huajuan.cover, p: [g.player.x, g.player.y] }; })()

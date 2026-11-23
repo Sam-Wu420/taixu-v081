@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>B 版启动计时</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#161a17}
+    #cold-panel{position:fixed;right:8px;top:8px;z-index:2147483647;width:360px;max-height:calc(100vh - 16px);overflow:auto;padding:10px 12px;background:rgba(19,28,25,.94);color:#eee6ce;border:1px solid #a5926b;border-radius:6px;font:13px/1.5 system-ui,sans-serif}
+    #cold-panel h1{font-size:15px;margin:0 0 4px} #cold-panel button{margin:2px;padding:5px 7px;border:1px solid #a5926b;background:#394b3d;color:#fff5d9;border-radius:3px;cursor:pointer} #cold-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:30vh;overflow:auto;background:#111a16;padding:6px;font:11px/1.4 monospace}
+  </style>
+  <script type="module" src="/tools/perf-cold.ts"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <aside id="cold-panel" aria-label="启动计时控制台">
+    <h1>5 次游戏页面启动</h1>
+    <p id="cold-status" role="status">等待正常游戏启动…</p>
+    <p>每次通过真实 App 和 auto=new 进入；同一浏览器进程与缓存可能已热，网络传输数据会随结果记录，不能当作 5 次清缓存冷启动。</p>
+    <button id="cold-start">开始 5 次</button><button id="cold-stop">停止</button><button id="cold-download">下载 JSON</button><button id="cold-back">返回场景验收</button>
+    <pre id="cold-results">尚无结果</pre>
+  </aside>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
