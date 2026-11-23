@@ -860,7 +860,9 @@ export class HdScene {
     const W = this.W, H = this.H;
     const floor = this.boundsFloor ?? -64;
     // 视距上限：站在高处能望出去很远，超过这个距离的地面不再加载，交给远山雾盖住（见后期里的 uHaze）
-    const limit = MOUNTAINS && this.persp ? this.camD * HD_VIEW_LIMIT : Infinity;
+    // 俯角越低，地面交点越远：45° 时约 camD×1.0，30° 时约 camD×1.73，需要更大的 limit
+    const pitchK = MOUNTAINS && this.persp ? Math.max(1, 1 / Math.tan(this.pitch * Math.PI / 180)) : 1;
+    const limit = MOUNTAINS && this.persp ? this.camD * HD_VIEW_LIMIT * pitchK : Infinity;
     // 第五轮性能：一帧里要问五六次（begin、阴影、视野、战斗界面、特效贴地……），每次 16 条视线 × 七十多次取高——
     // 镜头没动就沿用上一次的结果（同样的相机矩阵、画布、云底，算出来一模一样）；每帧 begin 时清掉，地形高度有变也跟得上
     const key = (this.gbKey ??= new Float64Array(36)), me = this.cam.matrixWorld.elements, pe = this.cam.projectionMatrix.elements;
