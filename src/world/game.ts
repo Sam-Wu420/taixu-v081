@@ -9,6 +9,7 @@ import { TUNING } from '../data/tuning';
 import { modx } from '../mod/hooks';
 import { LivingWorld } from './living';
 import { prof } from '../core/prof';
+import { LOD } from '../gfx/lod';
 import { ARTS as ARTS_ALL } from '../data/arts';
 import { Terrain } from './terrain';
 import { Renderer } from './render';
@@ -1260,6 +1261,8 @@ export class Game {
       const u1 = performance.now();
       if (!this.inCave) { try { this.renderer.render(dt); } catch (err) { this.onFrameError('render', err); } }
       const u2 = performance.now();
+      // LOD 自适应：喂帧时间给全局偏置（掉帧时整体少画细节）
+      LOD.noteFrame(u2 - u1);
       prof.endFrame(rdt * 1000);
       const pf = this.perf; pf.frames++; pf.acc += rdt; pf.upd += u1 - u0; pf.ren += u2 - u1; pf.worst = Math.max(pf.worst, rdt * 1000);
       if (pf.acc >= 0.5) { pf.fps = pf.frames / pf.acc; pf.updMs = pf.upd / pf.frames; pf.renMs = pf.ren / pf.frames; pf.worstMs = pf.worst; pf.frames = 0; pf.acc = 0; pf.upd = 0; pf.ren = 0; pf.worst = 0; }

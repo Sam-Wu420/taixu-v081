@@ -3,6 +3,8 @@
 import { isGrandSect } from '../data/sectPlan';
 import { modx } from '../mod/hooks';
 import { prof } from '../core/prof';
+import { FrameBudget, RenderPriority } from './frameBudget';
+import { LOD } from '../gfx/lod';
 import { grassSprite, grassRes, grassFrame } from '../gfx/grass';
 import type { Game } from './game';
 import { FOG_CELL, FOG_W, FOG_H } from './game';
@@ -198,6 +200,8 @@ export class Renderer {
   flatTrees = false;
   // 风摆预计算（每帧算一次，所有树共用 sin/cos，避免每棵树调三角函数）
   private _wSinA = 0; private _wCosA = 0; private _wSinB = 0; private _wCosB = 0; private _wGlobal = 0;
+  // 帧预算调度器（移植自 taixu071）：低优先级装饰按预算决定画不画
+  readonly frameBudget = new FrameBudget();
   private treeWarmQ: { d: TreeDeco; season: Season; res: number }[] = [];
   private treeWarmSet = new Set<string>();
   private lastLight = { night: 0, dusk: 0, gloom: 0, dayK: 1, mul: [255, 255, 255] as number[] };
@@ -953,6 +957,8 @@ export class Renderer {
     // let：HD2D 模式下本帧前半段要换成立板工作画布；绘制闭包按引用捕获 ctx，换了也跟着走
     let ctx = this.ctx; const game = this.game;
     this.adapt(dt);
+    // 帧预算：按近期帧时间 EMA 收紧或放宽装饰预算
+    this.frameBudget.begin(LOD.emaMs());
     if (!sprites.unlimited) sprites.frameMs = game.time < 2 ? 28 : 7; // 开场预热：多生成一些位图
     sprites.beginFrame(); grassFrame();
     if (this.seasonCache) this.pumpTreeWarm();
@@ -1241,8 +1247,9 @@ export class Renderer {
     if (WR.props.length || WR.carries.length) this.wreckExtra(list, left, top, right, bottom);   // 野外破坏：扔出去落地的树、拔起来拿着 / 飞着的树
     prof.add('R·收集山树', _p); _p = prof.t();
 
-    // 倒影（贴在水面上）
-    if (reflect.length && z >= 0.35 && this.lowered < 4) this.drawReflections(reflect, t);
+    // 倒影（贴在水面上）—— 帧预算控制：掉帧时跳过
+    this.frameBudget.syncElapsed();
+    if (reflect.length && z >= 0.35 && this.lowered < 4 && this.frameBudget.allow(RenderPriority.DECO, 0.7)) this.drawReflections(reflect, t);
     prof.add('R·倒影', _p); _p = prof.t();
 
     // ---------- 4. 地点 ----------
@@ -1463,12 +1470,15 @@ export class Renderer {
     // 遮挡时的人影（透过树木建筑仍可见）。HD2D 下它会被画成贴地的平面人影，先不画
     if (!hd) this.drawPlayerGhost();
 
-    // 炊烟（极简档不画：纯氛围，一帧十几团渐变）
-    if (this.lowered < 4 && !hd) for (const l of visibleLocs) { const L = this.layout(l); for (const s of L.smoke) if (Math.hypot(l.x * WORLD_SCALE + s.x * LOC_SCALE - p.x, l.y * WORLD_SCALE + s.y * LOC_SCALE - p.y) < R) this.drawSmoke(l.x * WORLD_SCALE + s.x * LOC_SCALE, l.y * WORLD_SCALE + s.y * LOC_SCALE, t, hash2(s.x, s.y, 3)); }
+    // 炊烟（极简档不画：纯氛围，一帧十几团渐变）—— 帧预算控制
+    this.frameBudget.syncElapsed();
+    if (this.lowered < 4 && !hd && this.frameBudget.allow(RenderPriority.DECO, 0.25)) for (const l of visibleLocs) { const L = this.layout(l); for (const s of L.smoke) if (Math.hypot(l.x * WORLD_SCALE + s.x * LOC_SCALE - p.x, l.y * WORLD_SCALE + s.y * LOC_SCALE - p.y) < R) this.drawSmoke(l.x * WORLD_SCALE + s.x * LOC_SCALE, l.y * WORLD_SCALE + s.y * LOC_SCALE, t, hash2(s.x, s.y, 3)); }
 
     // ---------- 7. 护山大阵 ----------
     // HD2D 下护山大阵是立体光罩（hd2d/buildings.ts），不再往地面上画平面的那一版
-    if (this.lowered < 4 && !hd) for (const b of barriers) this.drawBarrier(b.L, b.x, b.y, t);
+    // 帧预算控制：掉帧时跳过
+    this.frameBudget.syncElapsed();
+    if (this.lowered < 4 && !hd && this.frameBudget.allow(RenderPriority.DECO, 0.2)) for (const b of barriers) this.drawBarrier(b.L, b.x, b.y, t);
 
     // 预取视野外的山（有剩余预算时）
     if (sprites.canBuild()) {
@@ -1494,7 +1504,9 @@ export class Renderer {
     }
 
     // ---------- 8.5 四季飘物：春花瓣、夏柳絮、秋落叶（仅神识圈内）----------
-    this.drawSeasonFx(dt, season, p.x, p.y, R);
+    // 帧预算控制：掉帧时跳过飘物
+    this.frameBudget.syncElapsed();
+    if (this.frameBudget.allow(RenderPriority.DECO, 0.2)) this.drawSeasonFx(dt, season, p.x, p.y, R);
 
     prof.add('R·粒子四季飘物', _p); _p = prof.t();
     if (hd) {
