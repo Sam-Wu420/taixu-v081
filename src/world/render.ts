@@ -1179,12 +1179,12 @@ export class Renderer {
           if (ta <= 0.02) continue;
           // P10：拉到比 0.19 还远（只有占山宗门里拉得到 0.13）时一屏五六千棵树，光是排序打包立板就一帧二三十毫秒、飞越时连着几十帧过 50 毫秒：
           // 按位置哈希只留一部分（0.13 时约六成），留下的放大一点补满林冠——这么远看不出少了，帧时降下来（取哈希不动随机序列）
-          const thin = hd && z < 0.19 && !fixedTrees;
-          if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > Math.pow(z / 0.19, 1.4)) continue;
+          const thin = hd && z < 0.05 && !fixedTrees;
+          if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > Math.pow(z / 0.05, 1.4)) continue;
           // 优化：远景代表树系统（借鉴 taixu071）
           // 当 zoom 很远时（z < 0.25），用屏幕空间网格把树分组，每组只画一棵"代表树"
           // 比哈希剔除更稳定：树不会随机闪烁，森林密度视觉一致
-          if (hd && z < 0.25 && z >= 0.19 && !fixedTrees) {
+          if (hd && z < 0.25 && z >= 0.05 && !fixedTrees) {
             // 屏幕空间网格：每格约 40×40 像素，同格内只留离格心最近的一棵
             const gridSize = 40 / (z * dpr);  // 世界坐标下的格大小
             const gx = Math.floor(d.x / gridSize), gy = Math.floor(d.y / gridSize);
