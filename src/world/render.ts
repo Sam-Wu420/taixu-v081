@@ -168,6 +168,11 @@ export class Renderer {
   cloud: HTMLCanvasElement;
   glow: HTMLCanvasElement;
   particles: Particle[] = [];
+  /** GC 优化：粒子对象池，避免每帧 new Particle */
+  private _particlePool: Particle[] = [];
+  private _acquireParticle(): Particle {
+    return this._particlePool.pop() ?? { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, size: 0, color: '' };
+  }
   driftClouds: { x: number; y: number; s: number; v: number }[] = [];
   private pendingBuilds = 0;
   atmo: HTMLCanvasElement; atmoCtx: CanvasRenderingContext2D;
@@ -409,17 +414,22 @@ export class Renderer {
     if (a === 1) OCCL_A.delete(ent); else OCCL_A.set(ent, a);
     return a;
   }
+  /** GC 优化：复用 viewRect 对象，避免每帧多次调用时重复创建 */
+  private _viewRect = { left: 0, top: 0, right: 0, bottom: 0 };
   viewRect() {
-    if (this.hd) { const b = this.hd.groundBounds(0); return { left: b.l, top: b.t, right: b.r, bottom: b.b }; }
+    const vr = this._viewRect;
+    if (this.hd) { const b = this.hd.groundBounds(0); vr.left = b.l; vr.top = b.t; vr.right = b.r; vr.bottom = b.b; return vr; }
     const z = this.game.cam.zoom, W = this.W || window.innerWidth, H = this.H || window.innerHeight;
-    return { left: this.game.cam.x - W / 2 / z, top: this.game.cam.y - H / 2 / z, right: this.game.cam.x + W / 2 / z, bottom: this.game.cam.y + H / 2 / z };
+    vr.left = this.game.cam.x - W / 2 / z; vr.top = this.game.cam.y - H / 2 / z;
+    vr.right = this.game.cam.x + W / 2 / z; vr.bottom = this.game.cam.y + H / 2 / z;
+    return vr;
   }
 
   burst(x: number, y: number, color: string, n = 26) {
     const c = color.startsWith('#') ? `${parseInt(color.slice(1, 3), 16)},${parseInt(color.slice(3, 5), 16)},${parseInt(color.slice(5, 7), 16)}` : color;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2, v = 30 + Math.random() * 90;
-      this.particles.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6 - 40, life: 0, max: 0.7 + Math.random() * 0.8, size: 2 + Math.random() * 4, color: c });
+      { const pt = this._acquireParticle(); pt.x = x; pt.y = y; pt.vx = Math.cos(a) * v; pt.vy = Math.sin(a) * v * 0.6 - 40; pt.life = 0; pt.max = 0.7 + Math.random() * 0.8; pt.size = 2 + Math.random() * 4; pt.color = c; this.particles.push(pt); }
     }
   }
 
@@ -3404,7 +3414,7 @@ export class Renderer {
         ctx.fillStyle = `rgba(150,240,200,${0.35 + 0.25 * Math.sin(t * 3 + i)})`;
         ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * 46, p.y - 30 + Math.sin(a) * 16, 3.2, 0, Math.PI * 2); ctx.fill();
       }
-      if (Math.random() < dt * 6) this.particles.push({ x: p.x + (Math.random() - 0.5) * 140, y: p.y + (Math.random() - 0.5) * 50, vx: 0, vy: -30, life: 0, max: 1.2, size: 3, color: '160,240,210' });
+      if (Math.random() < dt * 6) { const pt = this._acquireParticle(); pt.x = p.x + (Math.random() - 0.5) * 140; pt.y = p.y + (Math.random() - 0.5) * 50; pt.vx = 0; pt.vy = -30; pt.life = 0; pt.max = 1.2; pt.size = 3; pt.color = '160,240,210'; this.particles.push(pt); }
     }
     if (game.gathering) {
       const k = game.gathering.t / 1.2;
@@ -3416,11 +3426,11 @@ export class Renderer {
     const mg = mount ? artLook(mount).glow : '120,230,170';
     if (st.action === 'fly' && p.moving && Math.random() < 0.8) {
       const a = st.yaw;
-      this.particles.push({ x: p.x - Math.sin(a) * 30 + (Math.random() - 0.5) * 20, y: p.y - lift - Math.cos(a) * 10, vx: -Math.sin(a) * 40, vy: -Math.cos(a) * 20, life: 0, max: 0.6 + Math.random() * 0.5, size: 3 + Math.random() * 4, color: Math.random() < 0.5 ? mg : '220,240,255' });
+      { const pt = this._acquireParticle(); pt.x = p.x - Math.sin(a) * 30 + (Math.random() - 0.5) * 20; pt.y = p.y - lift - Math.cos(a) * 10; pt.vx = -Math.sin(a) * 40; pt.vy = -Math.cos(a) * 20; pt.life = 0; pt.max = 0.6 + Math.random() * 0.5; pt.size = 3 + Math.random() * 4; pt.color = Math.random() < 0.5 ? mg : '220,240,255'; this.particles.push(pt); }
     }
     // 踏云靴：足下生云
     if (!p.flying && eq.boots && p.moving && Math.random() < (p.running ? 0.9 : 0.45)) {
-      this.particles.push({ x: p.x + (Math.random() - 0.5) * 26, y: p.y + 2, vx: -Math.sin(st.yaw) * 30 + (Math.random() - 0.5) * 20, vy: -6 - Math.random() * 10, life: 0, max: 0.5 + Math.random() * 0.4, size: 5 + Math.random() * 5, color: '245,248,255' });
+      { const pt = this._acquireParticle(); pt.x = p.x + (Math.random() - 0.5) * 26; pt.y = p.y + 2; pt.vx = -Math.sin(st.yaw) * 30 + (Math.random() - 0.5) * 20; pt.vy = -6 - Math.random() * 10; pt.life = 0; pt.max = 0.5 + Math.random() * 0.4; pt.size = 5 + Math.random() * 5; pt.color = '245,248,255'; this.particles.push(pt); }
     }
     const hideMount = !!this.stage && !!this.fx && (!!game.combat.wing || (p.flying && p.boosting && game.boostKind === 'thunder'));
     // v0.53：元婴出窍——画缩小的主角 + 金光（肉身在 yuanying.collect 里另画）
@@ -3465,15 +3475,28 @@ export class Renderer {
     const ctx = this.ctx;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    this.particles = this.particles.filter((pt) => {
-      pt.life += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt;
-      const k = 1 - pt.life / pt.max;
-      if (k <= 0) return false;
-      ctx.fillStyle = `rgba(${pt.color},${0.5 * k})`;
-      ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * k, 0, Math.PI * 2); ctx.fill();
-      return true;
-    });
-    if (this.particles.length > 400) this.particles.splice(0, this.particles.length - 400);
+    // GC 优化：就地压缩 + 回收死亡粒子到对象池（避免 filter 创建新数组）
+    { let w = 0;
+      for (let i = 0; i < this.particles.length; i++) {
+        const pt = this.particles[i];
+        pt.life += dt; pt.x += pt.vx * dt; pt.y += pt.vy * dt;
+        const k = 1 - pt.life / pt.max;
+        if (k <= 0) { if (this._particlePool.length < 500) this._particlePool.push(pt); continue; }
+        ctx.fillStyle = `rgba(${pt.color},${0.5 * k})`;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * k, 0, Math.PI * 2); ctx.fill();
+        this.particles[w++] = pt;
+      }
+      // 超量粒子回收到池
+      while (this.particles.length > w) {
+        const pt = this.particles.pop()!;
+        if (this._particlePool.length < 500) this._particlePool.push(pt);
+      }
+      this.particles.length = w;
+      if (w > 400) {
+        for (let i = 0; i < w - 400; i++) if (this._particlePool.length < 500) this._particlePool.push(this.particles[i]);
+        this.particles.splice(0, w - 400);
+      }
+    }
     ctx.restore();
   }
 
