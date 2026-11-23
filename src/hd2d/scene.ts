@@ -45,8 +45,12 @@ export interface HdAllocCell { Z: number; ox: number; oy: number; clip: readonly
 export const MAX_BB = 4096;
 /** 俯角（度）固定：立板高度按它补偿回原 2D 比例，交给玩家调会让人物比例走样 */
 export const HD_PITCH = 45;
+/** 高山模式俯角上限（被山挡住时最高抬到这里，保持立体感） */
+export const HD_PITCH_MAX = 68;
+/** 高山模式远景俯角（zoom<0.22 时放平，露出台地层次） */
+export const HD_PITCH_FAR = 30;
 /** 透视相机的竖直视场（度）。取小视场：保留俯视的规整感，又有近大远小——站在高处看山脚会变小，飞高时大地向远处退去 */
-export const HD_FOV = 30;
+export const HD_FOV = 35;
 /** 高山模式的视距上限，按相机到人物距离的倍数计。平地上画面最远处约 1.41 倍；远山雾从 1.5 倍起、到 2.0 倍全白 */
 export const HD_VIEW_LIMIT = 2.05;
 /** 默认用透视相机；localStorage taixu.hdcam=ortho 退回正交相机 */
@@ -734,12 +738,12 @@ export class HdScene {
       }
       return false;
     };
-    // 拉得比平时更远（占山宗门里能拉到 0.13）时俯角放平一点，露出层层台地的立面
-    const base = zoom < 0.22 ? HD_PITCH - Math.min(10, (0.22 - zoom) / 0.09 * 10) : HD_PITCH;
-    const lowest = (margin: number) => { let deg = base; while (deg < 80 && blocked(deg, margin)) deg += 5; return deg; };
+    // 拉得比平时更远（占山宗门里能拉到 0.13）时俯角放平到 HD_PITCH_FAR，露出层层台地的立面
+    const base = zoom < 0.22 ? HD_PITCH_FAR + Math.max(0, (zoom - 0.13) / 0.09 * (HD_PITCH - HD_PITCH_FAR)) : HD_PITCH;
+    const lowest = (margin: number) => { let deg = base; while (deg < HD_PITCH_MAX && blocked(deg, margin)) deg += 5; return deg; };
     const up = lowest(50), down = lowest(170);
     const target = this.pitch < up ? up : this.pitch > down ? down : this.pitch;
-    const rate = (target > this.pitch ? 70 : 16) * dt;
+    const rate = (target > this.pitch ? 70 : 22) * dt;
     return this.pitch + Math.max(-rate, Math.min(rate, target - this.pitch));
   }
   /** 相机参数改动后调用：刷新矩阵、视图投影和屏幕右方向 */
