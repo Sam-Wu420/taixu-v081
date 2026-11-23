@@ -173,6 +173,10 @@ export class Renderer {
   private _acquireParticle(): Particle {
     return this._particlePool.pop() ?? { x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 0, size: 0, color: '' };
   }
+  /** GC 优化：复用 Drawable 列表数组，避免每帧 new Array */
+  private _drawList: Drawable[] = [];
+  private _drawReflect: (TreeDeco | MtnDeco)[] = [];
+  private _drawPrefetch: MtnDeco[] = [];
   driftClouds: { x: number; y: number; s: number; v: number }[] = [];
   private pendingBuilds = 0;
   atmo: HTMLCanvasElement; atmoCtx: CanvasRenderingContext2D;
@@ -1179,9 +1183,10 @@ export class Renderer {
     prof.add('R·草', _p); _p = prof.t();
 
     // ---------- 3. 收集装饰 ----------
-    const list: Drawable[] = [];
-    const reflect: (TreeDeco | MtnDeco)[] = [];
-    const prefetch: MtnDeco[] = [];
+    // GC 优化：复用数组，避免每帧 new Array
+    const list = this._drawList; list.length = 0;
+    const reflect = this._drawReflect; reflect.length = 0;
+    const prefetch = this._drawPrefetch; prefetch.length = 0;
     // 优化：弱机（降过 2 档以上）提前切到更保守的 LOD——远处的树更早跳过
     const lodMax = this.lowered >= 2
       ? (z < 0.4 ? 0 : z < 0.6 ? 1 : 2)
