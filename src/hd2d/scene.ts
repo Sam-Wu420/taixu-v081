@@ -325,8 +325,8 @@ function noiseTexture(): DataTexture {
   tex.wrapS = tex.wrapT = RepeatWrapping; tex.magFilter = LinearFilter; tex.minFilter = LinearMipmapLinearFilter; tex.generateMipmaps = true; tex.needsUpdate = true;
   return sharedNoise = tex;
 }
-/** 阴影图边长；localStorage taixu.shadows=0 关闭投影 */
-const SHADOW_SIZE = 2048;
+/** 阴影图边长；localStorage taixu.shadows=0 关闭投影；画质降档时自动缩小 */
+const SHADOW_SIZE_DEFAULT = 2048;
 const SHADOWS_ON = (() => { try { return typeof localStorage === 'undefined' || localStorage.getItem('taixu.shadows') !== '0'; } catch { return true; } })();
 
 export class HdGround {
@@ -555,6 +555,8 @@ export class HdScene {
   private shadowRadius = 0;
   /** 画质太低时由渲染器关掉 */
   shadowsEnabled = true;
+  /** 阴影图边长（画质降档时自动缩小：0档=2048, 1档=1024, 2档=512, 3档=512） */
+  shadowSize = SHADOW_SIZE_DEFAULT;
   /** 云海（高山模式）：玩家登上云层以上才渐渐显出来，脚下的山谷被云盖住 */
   private clouds: { mesh: Mesh; mat: ShaderMaterial }[] = [];
   /** 计算可见范围时视线最低探到的海拔 */
@@ -1071,9 +1073,10 @@ export class HdScene {
     hdShadows.active = on;
     if (!on) { U.uShadowParams.value.x = 0; return; }
     if (!this.shadowTarget) {
-      const depth = new DepthTexture(SHADOW_SIZE, SHADOW_SIZE, UnsignedIntType);
+      const sz = this.shadowSize;
+      const depth = new DepthTexture(sz, sz, UnsignedIntType);
       depth.minFilter = depth.magFilter = NearestFilter;
-      this.shadowTarget = new WebGLRenderTarget(SHADOW_SIZE, SHADOW_SIZE, { depthBuffer: true, depthTexture: depth, generateMipmaps: false });
+      this.shadowTarget = new WebGLRenderTarget(sz, sz, { depthBuffer: true, depthTexture: depth, generateMipmaps: false });
       this.shadowBbMat = new ShaderMaterial({ vertexShader: VS, fragmentShader: SHADOW_BB_FS, side: DoubleSide,
         uniforms: { uMap: this.bbMat.uniforms.uMap, uStatic: this.bbMat.uniforms.uStatic, uScenery: this.bbMat.uniforms.uScenery, uRight: { value: new Vector3(1, 0, 0) }, uBoost: { value: 1 }, uFold: { value: new Vector4(0, -1, 0, 0) }, uShadowMatrix: U.uShadowMatrix } });
     }
@@ -1088,7 +1091,7 @@ export class HdScene {
     cam.position.set(cx - L.x * (R * 2 + reach), cy - L.y * (R * 2 + reach), cz - L.z * (R * 2 + reach));
     cam.lookAt(cx, cy, cz); cam.updateMatrixWorld();
     // 对齐到阴影图的像素格：镜头平移时影子边缘不闪
-    const texel = 2 * R / SHADOW_SIZE, view = cam.matrixWorldInverse, e = view.elements;
+    const texel = 2 * R / this.shadowSize, view = cam.matrixWorldInverse, e = view.elements;
     const lx = e[0] * cx + e[4] * cy + e[8] * cz + e[12], ly = e[1] * cx + e[5] * cy + e[9] * cz + e[13];
     const dx = Math.round(lx / texel) * texel - lx, dy = Math.round(ly / texel) * texel - ly, w = cam.matrixWorld.elements;
     cam.position.x -= w[0] * dx + w[4] * dy; cam.position.y -= w[1] * dx + w[5] * dy; cam.position.z -= w[2] * dx + w[6] * dy;
@@ -1132,7 +1135,7 @@ void main(){ roomOut(); gl_FragColor = vec4(1.0); }` });
     gl.setRenderTarget(null);
     U.uShadowMap.value = this.shadowTarget.depthTexture;
     // 深度偏移折合约 14 个世界单位；立板只按六成受影（脚下一点定整块，太实会显脏）
-    U.uShadowParams.value.set(this.sunStrength, 14 / (cam.far - cam.near), 1 / SHADOW_SIZE, 0.6);
+    U.uShadowParams.value.set(this.sunStrength, 14 / (cam.far - cam.near), 1 / this.shadowSize, 0.6);
   }
 
   /** 立板按视线方向从远到近排序（飞行的始终在上层），写入实例并渲染 */

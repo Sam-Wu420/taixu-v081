@@ -1420,7 +1420,13 @@ export class Renderer {
     game.life.collectGround(list, view, t, dt); tag('D·生灵(人兽)');
     collectCombat(game.combat, list, view, t, dt, !!hd); tag('D·战斗单位');
     if (!hd) { game.jueyu.collect2D(list as never, ctx); tag('D·海上大件'); }   // 收官 B3：纯 2D 回退下鲸背、触须、蛟身、灵舟、鬼船、祭坛、遗迹（HD 下在 seathings 网格里）
-    game.npcs.collect(list, view, t, dt); game.indoor.collect(list, view, t, dt); collectTownWorkers(game, list, view, dt); tag('D·NPC');   // r7-fix：修房子的工匠   // 收官 P8（丁）：屋里的掌柜、客人
+    // 远景 NPC 剔除：zoom 远时缩小收集范围，减少 60-80% 的 NPC 绘制
+    this.frameBudget.syncElapsed();
+    { const npcView = z < 0.3
+      ? (() => { const cx = (left + right) / 2, cy = (top + bottom) / 2, hw = (right - left) * 0.35, hh = (bottom - top) * 0.35; return { left: cx - hw, top: cy - hh, right: cx + hw, bottom: cy + hh }; })()
+      : view;
+      game.npcs.collect(list, npcView, t, dt); game.indoor.collect(list, npcView, t, dt); collectTownWorkers(game, list, npcView, dt); tag('D·NPC');
+    }
     game.events.collect(list, view, t, dt); game.story.collect(list, view, t, dt); tag('D·事件剧情');
     game.landmarks.collect(list, view, t); tag('D·名地');
     game.sites.collect(list, view, t, dt); game.home.collect(list, view, t); game.happen.collect(list, view, t, dt); game.enyuan.collect(list); game.daoxin.collect(list, view, t, dt); game.pianju.collect(list, view, t); game.pets.collect(list); game.heartx.collect(list); tag('D·遗府奇遇');
@@ -1529,6 +1535,8 @@ export class Renderer {
       this.hdTarget = this.stage!.worldTarget(this.stage!.W, this.stage!.H);
       // 影子跟着时辰走；阴天、雾天变淡；最低两档画质不做投影
       hd.shadowsEnabled = this.lowered < 3;
+      // 阴影图按画质档降分辨率：0档=2048, 1档=1024, 2档=512, 3档=512
+      hd.shadowSize = this.lowered === 0 ? 2048 : this.lowered === 1 ? 1024 : 512;
       hd.setSun(game.dayPhase, game.night, game.weather.gloom + game.tianxiang.gloom);
       { const W0 = game.weather; hd.buildings.setSway(t, Math.cos(W0.windDir), Math.sin(W0.windDir), 0.45 + W0.wind * 1.1); }   // P4：幡、旗、灯笼随风摆
       hd.setClouds(game.time, game.terrain.surfaceHeight(p.x, p.y) + p.st.lift);
