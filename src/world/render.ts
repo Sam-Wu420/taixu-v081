@@ -1079,7 +1079,19 @@ export class Renderer {
       hd.setGpuGround(GROUND);
       game.npcs.labelsInUi = true;   // 返工：界内立体画法里 NPC 名牌画在界面层（别的画法照旧画进人物立板）   // GPU 地表在后期里按斜视角采样垫在底下；没有时才用 Canvas 地形块
       if (GROUND) hd.syncGround([], CHUNK);
-      const gb = hd.groundBounds(320); left = gb.l; top = gb.t; right = gb.r; bottom = gb.b;
+      const gb = hd.groundBounds(320);
+      // 借鉴 taixu071：远景时 HD2D 透视相机的地面投影比 2D 正交范围小很多，
+      // 导致缩放远后加载范围不够。当 z < 0.35 时，取两者并集扩大加载区域。
+      // 性能由已有 LOD 系统保障：树片金字塔(z<0.19)、代表树(z<0.25)、哈希剔除、
+      // 地形预览块、FrameBudget 门控——远处多加载的内容都是低开销的。
+      if (z < 0.35) {
+        const ortho2d_l = camX - W / 2 / z, ortho2d_t = camY - H / 2 / z;
+        const ortho2d_r = camX + W / 2 / z, ortho2d_b = camY + H / 2 / z;
+        left = Math.min(gb.l, ortho2d_l); top = Math.min(gb.t, ortho2d_t);
+        right = Math.max(gb.r, ortho2d_r); bottom = Math.max(gb.b, ortho2d_b);
+      } else {
+        left = gb.l; top = gb.t; right = gb.r; bottom = gb.b;
+      }
       ctx = this.ctx = hd.wctx;
       const x = hd.decalXf(); this.Z = x.Z; this.ox = x.ox; this.oy = x.oy; this.world();
     }
