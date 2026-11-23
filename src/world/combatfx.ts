@@ -151,15 +151,21 @@ export function collectCombat(c: Combat, out: Drawable[], view: { left: number; 
     drawable.combat = c; drawable.alpha = a; drawable.time = t; drawable.dt = dt; drawable.prepared = null;
     out.push(drawable);
   }
-  const crowded = out.length - firstEnemy >= 120;
+  const nEnemies = out.length - firstEnemy;
+  const crowded = nEnemies >= 120;
+  // 远景优化：zoom 远时（z < 0.4），即使敌人不多也启用缓存（远处敌人屏幕上很小，不需要逐帧重画）
+  const z = c.game.cam.zoom;
+  const farZoom = z < 0.4;
   const workers = c.game.renderer?.characterWorkers;
-  const useWorkers = hdWorker && out.length - firstEnemy >= 80 && workers?.stats.state === 'ready';
+  const useWorkers = hdWorker && (nEnemies >= 80 || (farZoom && nEnemies >= 20)) && workers?.stats.state === 'ready';
   const candidates: EnemyDrawable[] = [];
   for (let i = firstEnemy; i < out.length; i++) {
     const d = out[i] as EnemyDrawable, e = d.enemy, p = c.game.player;
     const dx = e.x - p.x, dy = e.y - p.y, scale = e.ying ? 1.06 * 0.46 : 1.06;
-    d.cache = crowded && !!c.game.renderer?.hd && !!e.look && !!e.cs && !e.dead && d.alpha >= 0.99 && c.lock !== e
-      && dx * dx + dy * dy > 220 * 220 && c.game.cam.zoom * scale * e.look.height <= 0.85;
+    // 远景时降低缓存距离阈值：zoom 越小，敌人屏幕尺寸越小，更远的就可以缓存
+    const cacheDistSq = farZoom ? 150 * 150 : 220 * 220;
+    d.cache = (crowded || farZoom) && !!c.game.renderer?.hd && !!e.look && !!e.cs && !e.dead && d.alpha >= 0.99 && c.lock !== e
+      && dx * dx + dy * dy > cacheDistSq && z * scale * e.look.height <= 0.85;
     // 神识圈边缘半透明的人也走后台线程（整张位图按透明度贴上去）；以前这批人每帧在主线程直接画，千人战里占 87 ms
     d.worker = !!useWorkers && !!e.look && !!e.cs && !e.look.headTex && !e.dead && c.lock !== e
       && c.game.cam.zoom * scale * e.look.height <= 0.85;
@@ -305,10 +311,16 @@ function drawEnemy(g: G, c: Combat, e: EnemyWithYing, alpha: number, t: number, 
   }
   if (timing) { prof.add('R·单位主体含影', section); section = performance.now(); }
   if (sv) { g.restore(); drawSupOver(g, e.x, e.y, sv, t, e.anim.flying ? 170 : e.look ? 120 : 70 + 40 * (e.def.look?.size ?? 1)); }
-  // 异状表现
-  if (e.st.freeze) { g.globalCompositeOperation = 'source-over'; g.fillStyle = 'rgba(190,230,255,0.45)'; g.strokeStyle = 'rgba(240,250,255,0.9)'; g.lineWidth = 1.5; g.beginPath(); const h = e.anim.flying ? 110 : 70; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.lineTo(e.x + Math.cos(a) * 42, e.y - h / 2 + Math.sin(a) * h * 0.6); } g.closePath(); g.fill(); g.stroke(); }
-  emitEnemySparks(c, e);
-  drawEnemyStatus(g, e, t);
+  // 异状表现 —— 远景优化：zoom < 0.35 时跳过远处敌人的状态特效（屏幕上太小看不见）
+  { const z = c.game.cam.zoom, p = c.game.player;
+    const distSq = (e.x - p.x) ** 2 + (e.y - p.y) ** 2;
+    const skipFx = z < 0.35 && distSq > 300 * 300;
+    if (!skipFx) {
+      if (e.st.freeze) { g.globalCompositeOperation = 'source-over'; g.fillStyle = 'rgba(190,230,255,0.45)'; g.strokeStyle = 'rgba(240,250,255,0.9)'; g.lineWidth = 1.5; g.beginPath(); const h = e.anim.flying ? 110 : 70; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; g.lineTo(e.x + Math.cos(a) * 42, e.y - h / 2 + Math.sin(a) * h * 0.6); } g.closePath(); g.fill(); g.stroke(); }
+      emitEnemySparks(c, e);
+      drawEnemyStatus(g, e, t);
+    }
+  }
   if (timing) { prof.add('R·单位状态绘制', section); section = performance.now(); }
   g.restore();
   if (timing) prof.add('R·单位收尾', section);
