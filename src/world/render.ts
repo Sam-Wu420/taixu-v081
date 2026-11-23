@@ -1210,6 +1210,12 @@ export class Renderer {
     const wkOn = WR.downCount > 0;
     const decoT0 = performance.now();
     const fixedTrees = this.treeSpriteZoom > 0;   // 选了固定清晰度档：树的数量不再随缩放变
+    // 优化：循环不变量提前算好，避免每棵树重复计算
+    const thinThresh = hd && z < 0.19 && !fixedTrees ? Math.pow(z / 0.19, 1.4) : -1;
+    const repGridSize = hd && z < 0.25 && z >= 0.19 && !fixedTrees ? 40 / (z * dpr) : 0;
+    const closeGridSize = hd && z > 0.8 && !fixedTrees && (this.stillFrames < 8 || this.lowered >= 1)
+      ? (this.frameBudget.budgetMs < 6 ? 55 / (z * dpr) : this.frameBudget.budgetMs < 8 ? 55 / (z * dpr) : 0) : 0;
+    const closeBudgetK = closeGridSize > 0 ? (this.frameBudget.budgetMs < 6 ? 0.55 : 0.75) : 1;
     // ── 树片金字塔：远景（z < 0.19）用宏片替代逐棵绘制 ──
     const useMacroPatches = hd && z < 0.19 && !fixedTrees;
     let macroPatchTrees = 0;
@@ -1217,11 +1223,17 @@ export class Renderer {
       macroPatchTrees = this.emitMacroTreePatches(T, season, z, left, top, right, bottom, list);
       nTrees += macroPatchTrees;
     }
+    let decoOverBudget = false;
     for (let cy = cy0 - 1; cy <= cy1 + 2; cy++) for (let cx = cx0 - 1; cx <= cx1 + 1; cx++) {
       if (!T.hasChunk(cx, cy)) continue;
       // P10：山树也每帧限量生成新块（画面里的先生成；生成过的直接用）
       let ds = T.peekDecos(cx, cy);
-      if (!ds) { const inView = cx >= cx0 && cx <= cx1 && cy >= cy0 && cy <= cy1; if (decoBuilt >= (inView ? 3 : 1) || performance.now() - decoT0 > 4) continue; decoBuilt++; ds = T.getDecos(cx, cy); }
+      if (!ds) {
+        const inView = cx >= cx0 && cx <= cx1 && cy >= cy0 && cy <= cy1;
+        if (decoBuilt >= (inView ? 3 : 1) || decoOverBudget) continue;
+        if (performance.now() - decoT0 > 4) { decoOverBudget = true; continue; }
+        decoBuilt++; ds = T.getDecos(cx, cy);
+      }
       for (const d of ds) {
         // 收官 B4：别界险地的流沙、熔岩、冰面上不撒「水波纹」那几笔蓝白的浪（地形装饰按「这里是水」撒的）
         if (alienSea && d.kind === 'img' && d.img === T.waveGlyph) continue;
@@ -1251,28 +1263,20 @@ export class Renderer {
           if (ta <= 0.02) continue;
           // P10：拉到比 0.19 还远（只有占山宗门里拉得到 0.13）时一屏五六千棵树，光是排序打包立板就一帧二三十毫秒、飞越时连着几十帧过 50 毫秒：
           // 按位置哈希只留一部分（0.13 时约六成），留下的放大一点补满林冠——这么远看不出少了，帧时降下来（取哈希不动随机序列）
-          const thin = hd && z < 0.19 && !fixedTrees;
-          if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > Math.pow(z / 0.19, 1.4)) continue;
+          const thin = thinThresh >= 0;
+          if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > thinThresh) continue;
           // 优化：远景代表树系统（借鉴 taixu071）
           // 当 zoom 很远时（z < 0.25），用屏幕空间网格把树分组，每组只画一棵"代表树"
           // 比哈希剔除更稳定：树不会随机闪烁，森林密度视觉一致
-          if (hd && z < 0.25 && z >= 0.19 && !fixedTrees) {
-            // 屏幕空间网格：每格约 40×40 像素，同格内只留离格心最近的一棵
-            const gridSize = 40 / (z * dpr);  // 世界坐标下的格大小
-            const gx = Math.floor(d.x / gridSize), gy = Math.floor(d.y / gridSize);
-            const repHash = hash2(gx, gy, 137);
-            // 每格约留 1/3 的树（repHash < 0.33），视觉上足够密
-            if (repHash > 0.33) continue;
+          if (repGridSize > 0) {
+            const gx = Math.floor(d.x / repGridSize), gy = Math.floor(d.y / repGridSize);
+            if (hash2(gx, gy, 137) > 0.33) continue;
           }
           // 优化：拉近时（z > 0.8）树多且每棵都大，帧预算紧时用屏幕空间网格疏化
           // 只在缩放变化中（stillFrames < 8）或弱机（lowered >= 1）触发，稳定后恢复全量
-          if (hd && z > 0.8 && !fixedTrees && (this.stillFrames < 8 || this.lowered >= 1)) {
-            const budgetK = this.frameBudget.budgetMs < 6 ? 0.55 : this.frameBudget.budgetMs < 8 ? 0.75 : 1;
-            if (budgetK < 1) {
-              const gs = 55 / (z * dpr);
-              const gx = Math.floor(d.x / gs), gy = Math.floor(d.y / gs);
-              if (hash2(gx, gy, 211) > budgetK) continue;
-            }
+          if (closeGridSize > 0) {
+            const gx = Math.floor(d.x / closeGridSize), gy = Math.floor(d.y / closeGridSize);
+            if (hash2(gx, gy, 211) > closeBudgetK) continue;
           }
           nTrees++;
           const td = d as TreeDeco & { _refl?: number; _dw?: Drawable; _dwk?: number; _ts?: number; _ta?: number; _cosPh?: number; _sinPh?: number; _cosPh2?: number; _sinPh2?: number };
