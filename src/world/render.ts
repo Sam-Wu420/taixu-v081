@@ -177,6 +177,9 @@ export class Renderer {
   private _drawList: Drawable[] = [];
   private _drawReflect: (TreeDeco | MtnDeco)[] = [];
   private _drawPrefetch: MtnDeco[] = [];
+  /** HD2D 打包阶段的 V 对象池：避免每帧 1000+ 个短命对象 */
+  private _vPool: { d: Drawable; l: number; r: number; t: number; b: number; fy: number; air: boolean; a: number; k: number; slot: number; layered: boolean;
+    overlay?: (g: CanvasRenderingContext2D) => void; underSlot?: number; underlay?: (g: CanvasRenderingContext2D) => void }[] = [];
   driftClouds: { x: number; y: number; s: number; v: number }[] = [];
   private pendingBuilds = 0;
   atmo: HTMLCanvasElement; atmoCtx: CanvasRenderingContext2D;
@@ -788,6 +791,7 @@ export class Renderer {
     let area = 0, heroArea = 0, actorArea = 0;
     // r9：撼山客出招取景期间（brawl.shotWho），挡在镜头和他俩之间的树、房、墙渐隐成半透明（只在取景期间；不再靠出招前放倒一片树）
     const shot = this.occShot(hd);
+    let vIdx = 0;
     for (const d of list) {
       if (d.hx === undefined || !d.hb) { vis.push(d); continue; }
       // zk：该立板脚下的局部缩放（透视相机下近大远小），屏幕裁剪按它算
@@ -800,7 +804,12 @@ export class Renderer {
       let a = 1;
       if (OCCLUDERS.has(d.k ?? '') && d.hx * u.x + fy * u.y < pd - 20 && pcx > sx + l * zk && pcx < sx + r * zk && pcy > sy + t * zk && pcy < sy + b * zk) a = 0.38;
       if (shot && (OCCLUDERS.has(d.k ?? '') || d.k === 'D·地面小景') && !BACKDROP.has(d.k ?? '')) a = Math.min(a, this.occFadeOf(d.hx, fy, d.hx * u.x + fy * u.y, sx + l * zk, sx + r * zk, sy + t * zk, sy + b * zk, shot));
-      vis.push({ d, l, r, t, b, fy, air: d.y - fy > 100000, a, k, slot: -1, layered: false });
+      // 优化：复用 V 对象池，避免每帧上千个短命对象
+      let v = this._vPool[vIdx];
+      if (!v) { v = { d, l, r, t, b, fy, air: d.y - fy > 100000, a, k, slot: -1, layered: false }; this._vPool[vIdx] = v; }
+      else { v.d = d; v.l = l; v.r = r; v.t = t; v.b = b; v.fy = fy; v.air = d.y - fy > 100000; v.a = a; v.k = k; v.slot = -1; v.layered = false; v.overlay = undefined; v.underSlot = undefined; v.underlay = undefined; }
+      vIdx++;
+      vis.push(v);
       const ar = (r - l) * (b - t) * k * k; area += ar;
       // r14：人物（主角另算）单独记面积。分层缓存的人物（staticLayers）位图进人物图集、不占这里的动态图集，不算
       if (d.k === 'D·主角') heroArea += ar; else if (ACTORS.has(d.k ?? '') && !d.staticLayers && !d.staticSprite) actorArea += ar;
@@ -820,7 +829,7 @@ export class Renderer {
     for (const v of vis) ('fy' in v && OCCLUDERS.has(v.d.k ?? '') ? occ : ordered).push(v);
     for (const v of occ) ordered.push(v);
     const requests: HdAllocRequest[] = [], seqBase = hd.items.length;
-    let extraSlots = Math.max(0, MAX_BB - seqBase - vis.filter(v => 'fy' in v).length);
+    let extraSlots = Math.max(0, MAX_BB - seqBase - vIdx);
     for (let i = 0; i < ordered.length; i++) {
       const v = ordered[i];
       if (!('fy' in v)) continue;
@@ -1254,6 +1263,16 @@ export class Renderer {
             const repHash = hash2(gx, gy, 137);
             // 每格约留 1/3 的树（repHash < 0.33），视觉上足够密
             if (repHash > 0.33) continue;
+          }
+          // 优化：拉近时（z > 0.8）树多且每棵都大，帧预算紧时用屏幕空间网格疏化
+          // 只在缩放变化中（stillFrames < 8）或弱机（lowered >= 1）触发，稳定后恢复全量
+          if (hd && z > 0.8 && !fixedTrees && (this.stillFrames < 8 || this.lowered >= 1)) {
+            const budgetK = this.frameBudget.budgetMs < 6 ? 0.55 : this.frameBudget.budgetMs < 8 ? 0.75 : 1;
+            if (budgetK < 1) {
+              const gs = 55 / (z * dpr);
+              const gx = Math.floor(d.x / gs), gy = Math.floor(d.y / gs);
+              if (hash2(gx, gy, 211) > budgetK) continue;
+            }
           }
           nTrees++;
           const td = d as TreeDeco & { _refl?: number; _dw?: Drawable; _dwk?: number; _ts?: number; _ta?: number; _cosPh?: number; _sinPh?: number; _cosPh2?: number; _sinPh2?: number };

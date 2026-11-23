@@ -516,6 +516,10 @@ export class HdScene {
   /** 2D 绘制用的工作画布：上半是地贴，下半是立板图集 */
   readonly work: HTMLCanvasElement; readonly wctx: CanvasRenderingContext2D;
   private workTex: CanvasTexture;
+  /** 立板区实际用到的底部 y（begin 时 = decalH，alloc 后可能更高） */
+  private workUsedH = 0;
+  /** 首帧需要整图上传以分配 GPU 存储 */
+  private workTexFirst = true;
   readonly decalW = 2048; readonly decalH = 2048; atlasH = 2048;
   /** 地贴覆盖的世界矩形与比例（像素 / 世界单位） */
   decal = { l: 0, t: 0, s: 1, w: 1, h: 1 };
@@ -523,7 +527,7 @@ export class HdScene {
   private staticAtlas: HdStaticAtlas | null = null;
   /** 景物（树、草、城中小件）单独一张图集：种类多、尺寸杂，和人物的后台位图放一起会把人物挤出去 */
   private sceneryAtlas: HdStaticAtlas | null = null;
-  private readonly restoreStaticAtlas = () => { this.staticAtlas?.invalidate(); this.sceneryAtlas?.invalidate(); };
+  private readonly restoreStaticAtlas = () => { this.staticAtlas?.invalidate(); this.sceneryAtlas?.invalidate(); this.workTexFirst = true; };
   private bb: InstancedMesh; private bbMat: ShaderMaterial;
   /** r11：叠加的光那一组立板（模组 blend: 'add'）：在普通立板之后画，深度只比不写 */
   private bbAdd: InstancedMesh | null = null;
@@ -921,7 +925,16 @@ export class HdScene {
       if (d > largest) largest = d;
     }
     const minFactor = 1 / largest;
-    let factor = 1;
+    // 优化：按面积比估算初始因子，减少重试次数（原来从 1 开始逐次 ×0.8 试到装得下）
+    let totalArea = 0;
+    for (let i = 0; i < order.length; i++) {
+      const r = order[i].request;
+      totalArea += ((r.r - r.l) * r.scale + 2) * ((r.b - r.t) * r.scale + 2);
+    }
+    const availW = this.decalW, availH = this.work.height - start.py;
+    const availArea = Math.max(1, availW * availH - (start.rowH > 0 ? start.px * start.rowH : 0));
+    let factor = totalArea > availArea ? Math.sqrt(availArea / totalArea) * 0.92 : 1;
+    factor = Math.max(minFactor, factor);
     for (;;) {
       this.px = start.px; this.py = start.py; this.rowH = start.rowH; this.items.length = start.count;
       let failed = false;
@@ -965,6 +978,33 @@ export class HdScene {
   atlasFree() { return this.decalW * Math.max(0, this.work.height - this.py - this.rowH); }
   /** 图集已用到的比例（草等小件用来自限，别把人物的位置占掉） */
   atlasUsed() { return (this.py + this.rowH - this.decalH) / this.atlasH; }
+
+  /** 部分上传工作画布纹理：只传用到的行（地贴 + 立板区），省掉未用行的带宽 */
+  private flushWorkTex(): void {
+    const usedH = Math.min(this.work.height, this.workUsedH);
+    // 首帧或用量达到整图：走 three 的整图上传（分配 GPU 存储）
+    if (this.workTexFirst || usedH >= this.work.height) {
+      this.workTex.needsUpdate = true;
+      this.workTexFirst = false;
+      return;
+    }
+    this.gl.initTexture(this.workTex);
+    const handle = (this.gl.properties?.get(this.workTex) as { __webglTexture?: WebGLTexture } | undefined)?.__webglTexture;
+    if (!handle) { this.workTex.needsUpdate = true; return; }
+    const gl = this.gl.getContext() as WebGL2RenderingContext;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, handle);
+    gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+    gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
+    gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
+    gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.work.width, usedH, gl.RGBA, gl.UNSIGNED_BYTE, this.work);
+    this.gl.resetState();
+  }
 
   releaseCharacterFrames(): void { this.staticAtlas?.clearBitmaps(); }
 
@@ -1143,8 +1183,10 @@ void main(){ roomOut(); gl_FragColor = vec4(1.0); }` });
     this.bb.count = nb;
     if (add) { if (na) this.addFoot!.needsUpdate = this.addBox!.needsUpdate = this.addUv!.needsUpdate = this.addA!.needsUpdate = true; add.count = na; }
     if (timing) { prof.add('R·HD实例填充', start); start = performance.now(); }
-    this.workTex.needsUpdate = true;
-    if (timing) prof.num('N·上传字节', this.work.width * this.work.height * 4);
+    // 部分上传：只传地贴 + 实际用到的立板行，省掉空行的 GPU 带宽
+    this.workUsedH = this.py + this.rowH;
+    this.flushWorkTex();
+    if (timing) prof.num('N·上传字节', this.work.width * this.workUsedH * 4);
     this.gl.resetState();
     this.staticAtlas?.flush(this.gl); this.sceneryAtlas?.flush(this.gl);
     if (timing) { prof.add('R·HD目标与静态上传', start); start = performance.now(); }
