@@ -20,6 +20,14 @@ import { rebuildLandmarks } from '../data/landmarks';
 import { releaseTerrainChunkJobs } from './terrain-chunk-jobs';
 import { Travel, encodeFog, decodeFog } from './travel';
 import { clamp } from '../core/rng';
+
+/** 最远缩放时让完整神识外圈刚好落在短边内；阈值随视口尺寸与当前完整神识半径动态变化。 */
+function senseFitZoom(radius: number, width: number, height: number, minZoom = 0.02, maxZoom = 2.5, margin = 16, offsetX = 0, offsetY = 0): number {
+  if (![radius, width, height, minZoom, maxZoom, margin, offsetX, offsetY].every(Number.isFinite) || radius <= 0 || width <= 0 || height <= 0) return minZoom;
+  const fitX = (width / 2 - Math.max(0, margin)) / (radius + Math.abs(offsetX));
+  const fitY = (height / 2 - Math.max(0, margin)) / (radius + Math.abs(offsetY));
+  return Math.max(minZoom, Math.min(maxZoom, fitX, fitY));
+}
 import { audio } from './audio';
 import { Nuoyi } from './nuoyi';
 import { Dunkong } from './dunkong';
@@ -2273,26 +2281,14 @@ export class Game {
 
   // ---------- 操作 ----------
   setZoom(z: number) { this.cam.targetZoom = clamp(z, this.minZoom, 1.6); }
-  /** 镜头最远能拉到多远：基础值 0.22；占山宗门 0.13。
-   *  神识圈很大时（后期），senseFitZoom 允许拉得更远，让完整神识圈落在屏幕内。 */
+  /** 最远缩放限制按完整神识外圈、实际画布与相机偏移动态推导，而非固定 zoom 阈值。 */
   get minZoom(): number {
+    const w = this.renderer?.W || (typeof window !== 'undefined' ? window.innerWidth : 1280);
+    const h = this.renderer?.H || (typeof window !== 'undefined' ? window.innerHeight : 800);
     const p = this.player;
-    const m = this.terrain?.surface?.massifAt(p.x, p.y);
-    const base = m && m.weight > 0.5 && isMajorSect(m.plan) ? 0.13 : 0.22;
-    // 借鉴 taixu071：神识圈很大时允许拉得更远（senseFitZoom < base 时才生效）
-    const r = this.senseRadius;
-    if (r > 600) {
-      const w = this.renderer?.W || (typeof window !== 'undefined' ? window.innerWidth : 1280);
-      const h = this.renderer?.H || (typeof window !== 'undefined' ? window.innerHeight : 800);
-      const offsetX = Math.abs(p.x - this.cam.x);
-      const offsetY = Math.abs(p.y - this.cam.y);
-      const margin = 16;
-      const fitX = (w / 2 - margin) / (r + Math.abs(offsetX));
-      const fitY = (h / 2 - margin) / (r + Math.abs(offsetY));
-      const senseZoom = Math.max(0.05, Math.min(fitX, fitY));
-      return Math.min(base, senseZoom);
-    }
-    return base;
+    const offsetX = Math.abs(p.x - this.cam.x);
+    const offsetY = Math.abs(p.y - this.cam.y);
+    return senseFitZoom(this.senseRadius, w, h, 0.05, 1.6, 16, offsetX, offsetY);
   }
   zoomBy(f: number) { if (this.xukong.inVoid) this.xukong.zoomBy(f); else this.setZoom(this.cam.targetZoom * f); }
   /** 第三十五步：禁空（追兵的禁空令）剩余秒数 */
