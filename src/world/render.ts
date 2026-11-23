@@ -196,6 +196,8 @@ export class Renderer {
   mtnSpriteZoom = 0;
   /** 树风摆关掉：走轴对齐快路径，密林更流畅，树不再轻摆（默认开＝原版） */
   flatTrees = false;
+  // 风摆预计算（每帧算一次，所有树共用 sin/cos，避免每棵树调三角函数）
+  private _wSinA = 0; private _wCosA = 0; private _wSinB = 0; private _wCosB = 0; private _wGlobal = 0;
   private treeWarmQ: { d: TreeDeco; season: Season; res: number }[] = [];
   private treeWarmSet = new Set<string>();
   private lastLight = { night: 0, dusk: 0, gloom: 0, dayK: 1, mul: [255, 255, 255] as number[] };
@@ -1124,9 +1126,17 @@ export class Renderer {
     const list: Drawable[] = [];
     const reflect: (TreeDeco | MtnDeco)[] = [];
     const prefetch: MtnDeco[] = [];
-    const lodMax = z < 0.3 ? 0 : z < 0.45 ? 1 : 2;
+    // 优化：弱机（降过 2 档以上）提前切到更保守的 LOD——远处的树更早跳过
+    const lodMax = this.lowered >= 2
+      ? (z < 0.4 ? 0 : z < 0.6 ? 1 : 2)
+      : (z < 0.3 ? 0 : z < 0.45 ? 1 : 2);
     const alienSea = !!game.jueyu.alienMedium;
     let nTrees = 0, nM = 0, nD = 0, decoBuilt = 0;
+    // 优化：每帧预算风摆三角函数——所有树共用 sin(t*1.3)/cos(t*1.3)/sin(t*2.9)/cos(t*2.9)，
+    // 每棵树只用自己的相位做 sin(a+b) 展开（加减乘，不再有三角函数调用）
+    this._wSinA = Math.sin(t * 1.3); this._wCosA = Math.cos(t * 1.3);
+    this._wSinB = Math.sin(t * 2.9); this._wCosB = Math.cos(t * 2.9);
+    this._wGlobal = this.flatTrees ? 0 : this.game.weather.gustAt(game.cam.x, game.cam.y, t);
     const wkOn = WR.downCount > 0;
     const decoT0 = performance.now();
     const fixedTrees = this.treeSpriteZoom > 0;   // 选了固定清晰度档：树的数量不再随缩放变
@@ -1165,19 +1175,23 @@ export class Renderer {
           const thin = hd && z < 0.19 && !fixedTrees;
           if (thin && hash2(Math.round(d.x), Math.round(d.y), 91) > Math.pow(z / 0.19, 1.4)) continue;
           nTrees++;
-          const td = d as TreeDeco & { _refl?: number; _dw?: Drawable; _dwk?: number };
+          const td = d as TreeDeco & { _refl?: number; _dw?: Drawable; _dwk?: number; _ts?: number; _ta?: number; _cosPh?: number; _sinPh?: number; _cosPh2?: number; _sinPh2?: number };
           const treeScale = fixedTrees ? 1 : lodMax < 2 ? (lodMax === 0 ? (thin ? 1.45 : 1.25) : 1.1) : 1;
           // 镜头拉远后树的摇摆不到几个像素：直接把树的位图当静态立板摆上去（同一种树共用图集里的一格），
           // 不再每帧往画布里画一遍。最远缩放时视野里有上千棵树，这是那时最大的一笔开销。
           // P10 收尾：每棵树的绘制项（对象 + 两个闭包）记在树上反复用——占山宗门镜头 0.13 时一屏五千棵树，
           // 每帧重新造一遍是每秒上百兆的垃圾，飞越时一次次整堆回收就是几十上百毫秒的长帧
-          const st = !!hd && z * dpr < 0.5 && ta > 0.98, dk = treeScale * 2 + (st ? 1 : 0) + Math.round(ta * 20) * 4;
+          const st = !!hd && z * dpr < 0.5 && ta > 0.98;
+          // 优化：dk 不再含 ta（透明度每帧渐变，原来一渐变就重建闭包 → 大量短命对象）；
+          // treeScale 和 ta 记在 TreeDeco 上，draw 闭包从对象读，只需建一次
+          const dk = treeScale * 2 + (st ? 1 : 0);
+          td._ts = treeScale; td._ta = ta;
           let dw = td._dw;
           if (!dw || td._dwk !== dk) {
             td._dwk = dk;
             dw = td._dw = { y: d.y, k: 'D·树', hx: d.x, hb: hdBox.tree(d.w, d.h),
-              staticSprite: st ? () => this.treeStatic(td, treeScale) : undefined,
-              draw: () => this.drawTree(td, this.game.time, treeScale, ta),
+              staticSprite: st ? () => this.treeStatic(td, td._ts) : undefined,
+              draw: () => this.drawTree(td, this.game.time, td._ts, td._ta),
               occ: { get: () => this.treeSprite(td, z), x: d.x, y: d.y, flip: d.flip, footY: d.y, k: 0.42, ent: d } };
           }
           list.push(dw);
@@ -2753,9 +2767,20 @@ export class Renderer {
     const z = this.game.cam.zoom;
     const s = this.treeSprite(d, z);
     if (!s) return;
-    // 全局风场：树冠顺着风向倒，阵风里倒得多、抖得急
-    const W = this.game.weather, wind = W.gustAt(d.x, d.y, t);
-    const sw = this.flatTrees ? 0 : (Math.sin(t * 1.3 + d.ph) * 0.022 + Math.sin(t * 2.9 + d.ph * 2) * 0.008) * (0.35 + wind) + wind * 0.03 * W.windLean;
+    // 优化：风场用镜头中心的值近似（gustAt 本身有 3 次 sin + 2 次 cos/乘，
+    // 一屏 500 棵树就是 2500 次三角函数；改用预计算后只做加减乘）。
+    // 每棵树的视觉差异由 d.ph 相位保证——sin(a+b) 展开，相位项缓存在树上。
+    const td = d as TreeDeco & { _cosPh?: number; _sinPh?: number; _cosPh2?: number; _sinPh2?: number };
+    const cosPh = td._cosPh ?? (td._cosPh = Math.cos(d.ph));
+    const sinPh = td._sinPh ?? (td._sinPh = Math.sin(d.ph));
+    const cosPh2 = td._cosPh2 ?? (td._cosPh2 = Math.cos(d.ph * 2));
+    const sinPh2 = td._sinPh2 ?? (td._sinPh2 = Math.sin(d.ph * 2));
+    const wind = this._wGlobal;
+    const W = this.game.weather;
+    const sw = this.flatTrees ? 0
+      : ((this._wSinA * cosPh + this._wCosA * sinPh) * 0.022
+       + (this._wSinB * cosPh2 + this._wCosB * sinPh2) * 0.008) * (0.35 + wind)
+       + wind * 0.03 * W.windLean;
     const k = this.Z * d.s * TREE_K * lodScale;
     const fl = d.flip ? -1 : 1;
     this.ctx.setTransform(fl * k, 0, sw * k, k, d.x * this.Z + this.ox, d.y * this.Z + this.oy);

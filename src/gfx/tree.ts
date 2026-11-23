@@ -531,17 +531,37 @@ export function makeTree(sp: Species, season: Season, seed: number, res = 1): Tr
   return trimSprite(big as HTMLCanvasElement, res, (W / 2 + MX), (H - 10 + MY));
 }
 
-/** 裁掉透明边缘；ax/ay 为世界单位下的锚点（树根） */
+/** 裁掉透明边缘；ax/ay 为世界单位下的锚点（树根）
+ *  性能优化：先以 STEP=4 大步粗扫定位大致边界（只需 1/16 的像素读取量），
+ *  再在四条边附近逐像素精修。对 300×300 的画布，从 90k 次检查降到 ~6k 次。 */
 export function trimSprite(c: HTMLCanvasElement, res: number, axW: number, ayW: number): TreeSprite {
   const g = c.getContext('2d')!;
   const w = c.width, h = c.height;
+  const STEP = 4;   // 粗扫步长：每 4 像素取一个，覆盖 93%+ 的透明区
   const d = g.getImageData(0, 0, w, h).data;
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
-  for (let y = 0; y < h; y += 1) {
+  // —— 第一遍：大步粗扫，找到非透明像素的大致范围 ——
+  for (let y = 0; y < h; y += STEP) {
     const row = y * w * 4;
-    for (let x = 0; x < w; x += 1) if (d[row + x * 4 + 3] > 6) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    for (let x = 0; x < w; x += STEP) {
+      if (d[row + x * 4 + 3] > 6) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
   }
   if (x1 < 0) return { canvas: c, w: w / res, h: h / res, ax: axW, ay: ayW };
+  // —— 第二遍：在粗边界外扩 STEP 像素的带里精修（处理步长跨过的细枝、叶片尖端） ——
+  const rx0 = Math.max(0, x0 - STEP), ry0 = Math.max(0, y0 - STEP);
+  const rx1 = Math.min(w - 1, x1 + STEP), ry1 = Math.min(h - 1, y1 + STEP);
+  // 上边带
+  for (let y = ry0; y < y0; y++) { const row = y * w * 4; for (let x = rx0; x <= rx1; x++) if (d[row + x * 4 + 3] > 6) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; } }
+  // 下边带
+  for (let y = y1 + 1; y <= ry1; y++) { const row = y * w * 4; for (let x = rx0; x <= rx1; x++) if (d[row + x * 4 + 3] > 6) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y > y1) y1 = y; } }
+  // 左边带
+  for (let y = ry0; y <= ry1; y++) { const row = y * w * 4; for (let x = rx0; x < x0; x++) if (d[row + x * 4 + 3] > 6) { if (x < x0) x0 = x; } }
+  // 右边带
+  for (let y = ry0; y <= ry1; y++) { const row = y * w * 4; for (let x = x1 + 1; x <= rx1; x++) if (d[row + x * 4 + 3] > 6) { if (x > x1) x1 = x; } }
   x0 = Math.max(0, x0 - 1); y0 = Math.max(0, y0 - 1); x1 = Math.min(w - 1, x1 + 1); y1 = Math.min(h - 1, y1 + 1);
   const out = makeCanvas(x1 - x0 + 1, y1 - y0 + 1);
   out.getContext('2d')!.drawImage(c as any, -x0, -y0);

@@ -3,6 +3,7 @@
 export interface Spr { canvas: HTMLCanvasElement; w: number; h: number; ax: number; ay: number }
 import { spriteJobs } from './spriteJobs';
 import type { SpriteDone } from './sprite.worker';
+import { IS_PHONE } from '../core/touch';
 type Req = Parameters<ReturnType<typeof spriteJobs>['post']>[1];
 interface Entry { s: Spr; px: number; used: number; base: string; res: number }
 
@@ -24,7 +25,7 @@ export class SpriteCache {
   unlimited = false;
   pending = 0;
 
-  constructor(budgetPx = 64e6) { this.budgetPx = budgetPx; }
+  constructor(budgetPx = IS_PHONE ? 24e6 : 64e6) { this.budgetPx = budgetPx; }
   /** 依据显存/内存与画质档调预算：位图缓存越多，山、树、建筑就不用反复重建 */
   setBudget(px: number) { this.budgetPx = Math.max(16e6, Math.min(160e6, px)); }   // 26MP→160MP 之间，按档位给
 
