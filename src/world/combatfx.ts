@@ -805,8 +805,14 @@ export function drawCombatFx(g: G, c: Combat, t: number) {
     for (let i = 0; i < 2; i++) { const k = (t * 0.8 + i * 0.5) % 1; g.globalAlpha = 1 - k; g.beginPath(); g.ellipse(0, -k * 100, 40, 12, 0, 0, TAU); g.stroke(); }
     g.restore();
   }
-  // 火花
-  for (const s of c.sparks) { const k = 1 - s.t / s.max; g.fillStyle = `rgba(${s.color},${0.7 * k})`; g.beginPath(); g.arc(s.x, s.y + (s.anchor?.offsetY ?? 0), s.size * k + 0.5, 0, TAU); g.fill(); }
+  // 火花 —— 远景优化：zoom < 0.4 时跳过远处火花（屏幕上太小看不见）
+  { const z = c.game.cam.zoom, farZoom = z < 0.4;
+    const px = p.x, py = p.y, maxDistSq = farZoom ? 500 * 500 : Infinity;
+    for (const s of c.sparks) {
+      if (farZoom && (s.x - px) ** 2 + (s.y - py) ** 2 > maxDistSq) continue;
+      const k = 1 - s.t / s.max; g.fillStyle = `rgba(${s.color},${0.7 * k})`; g.beginPath(); g.arc(s.x, s.y + (s.anchor?.offsetY ?? 0), s.size * k + 0.5, 0, TAU); g.fill();
+    }
+  }
   g.restore();
 }
 
