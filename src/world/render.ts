@@ -2322,11 +2322,8 @@ export class Renderer {
       // 高山模式下神识圈外的水墨留白减淡：保留一半颜色，圈外的山形和岩色还看得见（样板阶段的取值，待定）
       sat: MOUNTAINS ? 0.5 : 0,
       // 高山模式：视距之外交给远山雾（雾色取纸色偏青，之后照常过昼夜调色）
-      // 高山模式：视距之外交给远山雾。俯角越低，地面交点越远，雾也要跟着扩展
-      haze: MOUNTAINS && hd?.persp ? (() => {
-        const pitchK = Math.max(1, 1 / Math.tan((hd as any).pitch * Math.PI / 180));
-        return { start: hd.viewDistance * 1.5 * pitchK, end: hd.viewDistance * 2.2 * pitchK, strength: 0.94, color: [0.86, 0.88, 0.865] as const };
-      })() : undefined,
+      // 高山模式：视距之外交给远山雾（雾色取纸色偏青，之后照常过昼夜调色）
+      haze: MOUNTAINS && hd?.persp ? { start: hd.viewDistance * 1.5, end: hd.viewDistance * 2.0, strength: 0.94, color: [0.86, 0.88, 0.865] as const } : undefined,
       ground: this.groundOn ? { view: this.groundView(camX, camY, z, W, H), provider: this.segProvider } : null,
       // 绝域：海况交给后期着色器。r10：离岸距离场还在分帧算的那几秒（开局、读档后），绝域按「离图边多远」估了个 2000 的占位深度、
       // 报「在海里」——人在陆上时这是假的，不交给后期（否则要为它现编一份冷编十几二十秒的海面着色器）；人真在海上时 jueyu.tick 会当场把场算完

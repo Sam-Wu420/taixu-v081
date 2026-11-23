@@ -43,12 +43,8 @@ export interface HdAllocRequest {
 export interface HdAllocCell { Z: number; ox: number; oy: number; clip: readonly [number, number, number, number] }
 
 export const MAX_BB = 4096;
-/** 俯角（度）固定：立板高度按它补偿回原 2D 比例，交给玩家调会让人物比例走样 */
+/** 俯角（度）固定 45°：不改角度，遇到山时相机随人物升高 */
 export const HD_PITCH = 45;
-/** 高山模式俯角上限（被山挡住时最高抬到这里，保持立体感） */
-export const HD_PITCH_MAX = 68;
-/** 高山模式远景俯角（zoom<0.22 时放平，露出台地层次） */
-export const HD_PITCH_FAR = 30;
 /** 透视相机的竖直视场（度）。取小视场：保留俯视的规整感，又有近大远小——站在高处看山脚会变小，飞高时大地向远处退去 */
 export const HD_FOV = 35;
 /** 高山模式的视距上限，按相机到人物距离的倍数计。平地上画面最远处约 1.41 倍；远山雾从 1.5 倍起、到 2.0 倍全白 */
@@ -513,7 +509,7 @@ export class HdScene {
   /** 相机方位角（弧度，0 = 正对北方）；俯角固定 */
   yaw = 0;
   /** 俯角（度）。平时是 HD_PITCH；高山模式下镜头到人物之间被山挡住时自动抬高，挡不住了再慢慢落回 */
-  pitch = HD_PITCH; private pitchAt = 0;
+  pitch = HD_PITCH;
   /** 相机到焦点的距离（世界单位） */
   get viewDistance() { return this.camD; }
   W = 1; H = 1; zoom = 1; tx = 0; ty = 0;
@@ -675,7 +671,7 @@ export class HdScene {
   begin(tx: number, ty: number, zoom: number, dpr: number) {
     this.staticAtlas?.begin(); this.sceneryAtlas?.begin();
     this.tx = tx; this.ty = ty; this.zoom = zoom;
-    if (MOUNTAINS) this.pitch = this.clearPitch(tx, ty, zoom);
+    // 俯角固定 45°，不改角度。遇到山时相机已随人物升高（ground 取 heightAt）。
     const P = this.pitch * Math.PI / 180, u = this.upDir;
     const c = this.cam;
     let D = 20000;
@@ -721,31 +717,7 @@ export class HdScene {
   get heightScale(): number { return this.foreshorten * this.zoom; }
   get heightBoost(): number { return this.boost; }
   depthAt(x: number, y: number, absoluteHeight: number): number { return this.projectDepth(x, y, absoluteHeight); }
-  /**
-   * 镜头到人物之间有没有被山挡住。从 45 度起每次抬 5 度试，取第一个不挡的俯角（最高 80 度）；
-   * 抬得快、落得慢，而且要比抬的时候多留出一截净空才肯落，免得在临界处来回晃。
-   */
-  private clearPitch(tx: number, ty: number, zoom: number): number {
-    if (!(this.cam instanceof PerspectiveCamera)) return HD_PITCH;
-    const now = performance.now(), dt = Math.min(0.1, this.pitchAt ? (now - this.pitchAt) / 1000 : 0.016);
-    this.pitchAt = now;
-    const D = (this.H / 2 / zoom) / Math.tan(HD_FOV * Math.PI / 360), u = this.upDir, eye = this.heightAt(tx, ty) + 70;
-    const blocked = (deg: number, margin: number) => {
-      const c = Math.cos(deg * Math.PI / 180), s = Math.sin(deg * Math.PI / 180);
-      for (let i = 1; i <= 14; i++) {
-        const d = D * (0.05 + 0.95 * i / 14);
-        if (this.heightAt(tx - u.x * c * d, ty - u.y * c * d) + margin > eye + s * d) return true;
-      }
-      return false;
-    };
-    // 拉得比平时更远（占山宗门里能拉到 0.13）时俯角放平到 HD_PITCH_FAR，露出层层台地的立面
-    const base = zoom < 0.22 ? HD_PITCH_FAR + Math.max(0, (zoom - 0.13) / 0.09 * (HD_PITCH - HD_PITCH_FAR)) : HD_PITCH;
-    const lowest = (margin: number) => { let deg = base; while (deg < HD_PITCH_MAX && blocked(deg, margin)) deg += 5; return deg; };
-    const up = lowest(50), down = lowest(170);
-    const target = this.pitch < up ? up : this.pitch > down ? down : this.pitch;
-    const rate = (target > this.pitch ? 70 : 22) * dt;
-    return this.pitch + Math.max(-rate, Math.min(rate, target - this.pitch));
-  }
+  // clearPitch 已移除：俯角固定 45°，不再动态调整。相机高度随人物升高。
   /** 相机参数改动后调用：刷新矩阵、视图投影和屏幕右方向 */
   private syncCamera() {
     const c = this.cam;
@@ -860,9 +832,7 @@ export class HdScene {
     const W = this.W, H = this.H;
     const floor = this.boundsFloor ?? -64;
     // 视距上限：站在高处能望出去很远，超过这个距离的地面不再加载，交给远山雾盖住（见后期里的 uHaze）
-    // 俯角越低，地面交点越远：45° 时约 camD×1.0，30° 时约 camD×1.73，需要更大的 limit
-    const pitchK = MOUNTAINS && this.persp ? Math.max(1, 1 / Math.tan(this.pitch * Math.PI / 180)) : 1;
-    const limit = MOUNTAINS && this.persp ? this.camD * HD_VIEW_LIMIT * pitchK : Infinity;
+    const limit = MOUNTAINS && this.persp ? this.camD * HD_VIEW_LIMIT : Infinity;
     // 第五轮性能：一帧里要问五六次（begin、阴影、视野、战斗界面、特效贴地……），每次 16 条视线 × 七十多次取高——
     // 镜头没动就沿用上一次的结果（同样的相机矩阵、画布、云底，算出来一模一样）；每帧 begin 时清掉，地形高度有变也跟得上
     const key = (this.gbKey ??= new Float64Array(36)), me = this.cam.matrixWorld.elements, pe = this.cam.projectionMatrix.elements;
