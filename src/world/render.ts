@@ -5,10 +5,11 @@ import { modx } from '../mod/hooks';
 import { prof } from '../core/prof';
 import { FrameBudget, RenderPriority } from './frameBudget';
 import { LOD } from '../gfx/lod';
+import { TreePatchCache, PATCH_MACRO_STRIPS, PATCH_MIN_TREES_L0, type PatchBakeBudget, type PatchTemplateFn, type TreePatch } from './treePatch';
 import { grassSprite, grassRes, grassFrame } from '../gfx/grass';
 import type { Game } from './game';
 import { FOG_CELL, FOG_W, FOG_H } from './game';
-import { CHUNK, Deco, TreeDeco, MtnDeco, FallDeco } from './terrain';
+import { CHUNK, Deco, TreeDeco, MtnDeco, FallDeco, type Terrain } from './terrain';
 import { releaseTerrainChunkJobs, terrainChunkJobs } from './terrain-chunk-jobs';
 import { planTerrainChunks } from './terrain-chunk-plan';
 import { makeFallCliff, fallGeometry, drawFallAnim, type FallMeta } from '../gfx/waterfall';
@@ -202,6 +203,8 @@ export class Renderer {
   private _wSinA = 0; private _wCosA = 0; private _wSinB = 0; private _wCosB = 0; private _wGlobal = 0;
   // 帧预算调度器（移植自 taixu071）：低优先级装饰按预算决定画不画
   readonly frameBudget = new FrameBudget();
+  // 树片金字塔缓存（移植自 taixu071）：远景树按片合图，不再逐棵画
+  readonly treePatches = new TreePatchCache();
   private treeWarmQ: { d: TreeDeco; season: Season; res: number }[] = [];
   private treeWarmSet = new Set<string>();
   private lastLight = { night: 0, dusk: 0, gloom: 0, dayK: 1, mul: [255, 255, 255] as number[] };
@@ -973,6 +976,8 @@ export class Renderer {
     const ui = GL ? this.uiCtx : ctx;
     const t = game.time;
     const season = game.season as Season;
+    // 树片金字塔：每帧重置状态（decoRevision 用 frame 代替）
+    this.treePatches.beginFrame(game.terrain, season, game.terrain.frame);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     ctx.imageSmoothingEnabled = true;
@@ -1153,6 +1158,13 @@ export class Renderer {
     const wkOn = WR.downCount > 0;
     const decoT0 = performance.now();
     const fixedTrees = this.treeSpriteZoom > 0;   // 选了固定清晰度档：树的数量不再随缩放变
+    // ── 树片金字塔：远景（z < 0.19）用宏片替代逐棵绘制 ──
+    const useMacroPatches = hd && z < 0.19 && !fixedTrees;
+    let macroPatchTrees = 0;
+    if (useMacroPatches) {
+      macroPatchTrees = this.emitMacroTreePatches(T, season, z, left, top, right, bottom, list);
+      nTrees += macroPatchTrees;
+    }
     for (let cy = cy0 - 1; cy <= cy1 + 2; cy++) for (let cx = cx0 - 1; cx <= cx1 + 1; cx++) {
       if (!T.hasChunk(cx, cy)) continue;
       // P10：山树也每帧限量生成新块（画面里的先生成；生成过的直接用）
@@ -1175,6 +1187,8 @@ export class Renderer {
           if (dd._refl) reflect.push(d);
         } else if (d.kind === 'tree') {
           if (wkOn) { const ws = WR.treeAt(d); if (ws) { if (d.lod <= lodMax) this.wreckDeco(list, d, ws, lodMax < 2 ? (lodMax === 0 ? 1.25 : 1.1) : 1, left, top, right, bottom); continue; } }   // 野外破坏：倒了的树（倒下、躺着、树桩、长回来）
+          // 树片金字塔：远景时已由宏片替代，跳过逐棵绘制
+          if (useMacroPatches) continue;
           if (!vis) continue;
           // 树木 LOD：
           // - 「树木精灵清晰度」选了固定档（treeSpriteZoom > 0）时数量固定——视野里有多少画多少，
@@ -2819,6 +2833,106 @@ export class Renderer {
     this.resize();
     if (!silent) this.game.toast(cap ? `世界层分辨率：上限 ${cap.toFixed(2)}×（画质略软，更省）` : '世界层分辨率：不限制（最清晰，最费）', 'info');
   }
+  // ── 树片金字塔（移植自 taixu071）──────────────────────────────────
+  /** 把一张已烘焙的树片包装成 Drawable */
+  private makeTreePatchDrawable(patch: TreePatch): Drawable {
+    const spr = patch.spr!;
+    return {
+      y: patch.sortY,
+      k: 'D·树片',
+      hx: patch.wx + patch.ww / 2,
+      hb: [0, patch.ww, -patch.wh, 0],
+      draw: () => {
+        const ctx = this.ctx;
+        const k = this.Z;
+        ctx.setTransform(k, 0, 0, k, this.ox, this.oy);
+        if (this._occA < 1) {
+          ctx.save(); ctx.globalAlpha *= this._occA;
+          ctx.drawImage(spr.canvas, patch.wx, patch.wy, patch.ww, patch.wh);
+          ctx.restore();
+        } else {
+          ctx.drawImage(spr.canvas, patch.wx, patch.wy, patch.ww, patch.wh);
+        }
+        this.world();
+      },
+    };
+  }
+
+  /**
+   * 远景树片发射：z < 0.19 时用树片金字塔替代逐棵绘制。
+   * 返回本帧用树片替代了多少棵树（用于统计）。
+   */
+  private emitMacroTreePatches(
+    T: Terrain, season: Season, z: number,
+    left: number, top: number, right: number, bottom: number,
+    list: Drawable[],
+  ): number {
+    const decoRev = T.frame;
+    const macroLevel: 1 | 2 = z < 0.05 ? 2 : 1;
+    const chunksPerMacro = macroLevel === 1 ? 2 : 4;
+    const macroSpan = chunksPerMacro * CHUNK;
+    const stripH = macroSpan / PATCH_MACRO_STRIPS;
+    const maxGx = Math.floor(WORLD_W / macroSpan);
+    const maxGy = Math.floor(WORLD_H / macroSpan);
+    const gx0 = Math.max(0, Math.floor(left / macroSpan));
+    const gx1 = Math.min(maxGx, Math.floor(right / macroSpan));
+    const gy0 = Math.max(0, Math.floor(top / macroSpan));
+    const gy1 = Math.min(maxGy, Math.floor(bottom / macroSpan));
+
+    // 按离镜头距离排序：近的优先烘焙
+    const camX = this.game.cam.x, camY = this.game.cam.y;
+    const cells: { gx: number; gy: number; d2: number }[] = [];
+    for (let gy = gy0; gy <= gy1; gy++) {
+      const cy = (gy + 0.5) * macroSpan - camY;
+      for (let gx = gx0; gx <= gx1; gx++) {
+        const cx = (gx + 0.5) * macroSpan - camX;
+        cells.push({ gx, gy, d2: cx * cx + cy * cy });
+      }
+    }
+    cells.sort((a, b) => a.d2 - b.d2);
+
+    // 树精灵模板：用 sprites.peek 查已有缓存，未命中则跳过（不阻塞帧）
+    const getTpl: PatchTemplateFn = (d: TreeDeco) => {
+      const seed = d.sp.charCodeAt(0) * 1000 + d.v * 37 + 11;
+      const base = `T:${d.sp}:${season}:${d.v}`;
+      return sprites.peek(base, 0.35) ?? null;
+    };
+
+    const budget: PatchBakeBudget = {
+      t0: performance.now(),
+      budgetMs: this.treePatches.size === 0 ? 6 : 2.5,  // 首帧多给预算
+      bakes: 0, scans: 0, pending: false,
+    };
+
+    let treeCount = 0;
+    const fallbacks: TreePatch[] = [];
+    for (let i = 0; i < cells.length; i++) {
+      const { gx, gy } = cells[i];
+      for (let strip = 0; strip < PATCH_MACRO_STRIPS; strip++) {
+        const sy0 = gy * macroSpan + strip * stripH;
+        const sy1 = sy0 + stripH;
+        if (sy1 < top - 300 || sy0 > bottom + 300) continue;
+        const p = this.treePatches.getMacroStrip(T, macroLevel, decoRev, season, gx, gy, strip, budget, getTpl);
+        if (p && !p.empty && p.spr) {
+          list.push(this.makeTreePatchDrawable(p));
+          treeCount += p.treeCount;
+        } else if (p === null) {
+          // 未就绪：用已缓存的子级片顶替
+          fallbacks.length = 0;
+          this.treePatches.collectCachedFallbackPatches(macroLevel, decoRev, season, gx, gy, strip, fallbacks);
+          for (let f = 0; f < fallbacks.length; f++) {
+            const fb = fallbacks[f];
+            if (!fb.empty && fb.spr) {
+              list.push(this.makeTreePatchDrawable(fb));
+              treeCount += fb.treeCount;
+            }
+          }
+        }
+      }
+    }
+    return treeCount;
+  }
+
   private drawTree(d: TreeDeco, t: number, lodScale: number, lodA = 1) {
     const z = this.game.cam.zoom;
     const s = this.treeSprite(d, z);
