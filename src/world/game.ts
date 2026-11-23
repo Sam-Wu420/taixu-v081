@@ -2273,24 +2273,26 @@ export class Game {
 
   // ---------- 操作 ----------
   setZoom(z: number) { this.cam.targetZoom = clamp(z, this.minZoom, 1.6); }
-  /** 镜头最远能拉到多远：借鉴 taixu071，按神识外圈 + 画布尺寸动态推导，而非固定阈值。
-   *  最远缩放时让完整神识圈刚好落在屏幕短边内；占山宗门额外允许拉到 0.13。 */
+  /** 镜头最远能拉到多远：基础值 0.22；占山宗门 0.13。
+   *  神识圈很大时（后期），senseFitZoom 允许拉得更远，让完整神识圈落在屏幕内。 */
   get minZoom(): number {
-    const r = this.senseRadius;
-    const w = this.renderer?.W || (typeof window !== 'undefined' ? window.innerWidth : 1280);
-    const h = this.renderer?.H || (typeof window !== 'undefined' ? window.innerHeight : 800);
-    // 镜头偏移（飞行 / 锁定目标自动运镜会偏镜头）；按更不利的一侧留足完整圆环空间
     const p = this.player;
-    const offsetX = Math.abs(p.x - this.cam.x);
-    const offsetY = Math.abs(p.y - this.cam.y);
-    const margin = 16;
-    const fitX = (w / 2 - margin) / (r + Math.abs(offsetX));
-    const fitY = (h / 2 - margin) / (r + Math.abs(offsetY));
-    const senseZoom = Math.max(0.05, Math.min(1.6, fitX, fitY));
-    // 占山宗门额外允许拉远（看得到整座山）
     const m = this.terrain?.surface?.massifAt(p.x, p.y);
-    const sectZoom = m && m.weight > 0.5 && isMajorSect(m.plan) ? 0.13 : 1;
-    return Math.min(senseZoom, sectZoom);
+    const base = m && m.weight > 0.5 && isMajorSect(m.plan) ? 0.13 : 0.22;
+    // 借鉴 taixu071：神识圈很大时允许拉得更远（senseFitZoom < base 时才生效）
+    const r = this.senseRadius;
+    if (r > 600) {
+      const w = this.renderer?.W || (typeof window !== 'undefined' ? window.innerWidth : 1280);
+      const h = this.renderer?.H || (typeof window !== 'undefined' ? window.innerHeight : 800);
+      const offsetX = Math.abs(p.x - this.cam.x);
+      const offsetY = Math.abs(p.y - this.cam.y);
+      const margin = 16;
+      const fitX = (w / 2 - margin) / (r + Math.abs(offsetX));
+      const fitY = (h / 2 - margin) / (r + Math.abs(offsetY));
+      const senseZoom = Math.max(0.05, Math.min(fitX, fitY));
+      return Math.min(base, senseZoom);
+    }
+    return base;
   }
   zoomBy(f: number) { if (this.xukong.inVoid) this.xukong.zoomBy(f); else this.setZoom(this.cam.targetZoom * f); }
   /** 第三十五步：禁空（追兵的禁空令）剩余秒数 */
