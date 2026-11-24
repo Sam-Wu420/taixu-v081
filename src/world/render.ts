@@ -1213,9 +1213,13 @@ export class Renderer {
     // 优化：循环不变量提前算好，避免每棵树重复计算
     const thinThresh = hd && z < 0.19 && !fixedTrees ? Math.pow(z / 0.19, 1.4) : -1;
     const repGridSize = hd && z < 0.25 && z >= 0.19 && !fixedTrees ? 40 / (z * dpr) : 0;
-    const closeGridSize = hd && z > 0.8 && !fixedTrees && (this.stillFrames < 8 || this.lowered >= 1)
-      ? (this.frameBudget.budgetMs < 6 ? 55 / (z * dpr) : this.frameBudget.budgetMs < 8 ? 55 / (z * dpr) : 0) : 0;
-    const closeBudgetK = closeGridSize > 0 ? (this.frameBudget.budgetMs < 6 ? 0.55 : 0.75) : 1;
+    // 优化（借鉴 taixu071）：降档级别驱动的树木密度控制
+    // lowered >= 4: 只画 1/3 的树（thin=3）；lowered >= 3: 1/2（thin=2）；缩放变化中也疏化
+    const closeThinFactor = !fixedTrees && hd && z > 0.5
+      ? (this.lowered >= 4 ? 3 : this.lowered >= 3 ? 2 : (this.stillFrames < 8 && this.lowered >= 1) ? 2 : 0)
+      : 0;
+    const closeGridSize = closeThinFactor > 0 ? 50 / (z * dpr) : 0;
+    const closeBudgetK = closeThinFactor > 0 ? 1 / closeThinFactor : 1;
     // ── 树片金字塔：远景（z < 0.19）用宏片替代逐棵绘制 ──
     const useMacroPatches = hd && z < 0.19 && !fixedTrees;
     let macroPatchTrees = 0;
@@ -1317,6 +1321,8 @@ export class Renderer {
           // 优化：弱机（降档 2+）更早隐藏小装饰物，减少立板打包压力
           const decoMinZ = this.lowered >= 2 ? 0.5 : 0.3;
           if (!vis || z < decoMinZ) continue;
+          // 优化（借鉴 taixu071）：降档 3+ 时按位置哈希疏化小装饰物（礁石、杂物）
+          if (this.lowered >= 3 && hash2(Math.round(d.x), Math.round(d.y), 191) > (this.lowered >= 4 ? 0.35 : 0.6)) continue;
           nD++;
           // 同上：绘制项和静态立板记在小景上反复用（画的时候取 this.ctx：HD2D 下绘制前会换画布的变换，画布本身不换）
           const dd = d as typeof d & { _dw?: Drawable };
