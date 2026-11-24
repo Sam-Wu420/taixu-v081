@@ -1234,7 +1234,9 @@ export class Renderer {
       if (!ds) {
         const inView = cx >= cx0 && cx <= cx1 && cy >= cy0 && cy <= cy1;
         if (decoBuilt >= (inView ? 3 : 1) || decoOverBudget) continue;
-        if (performance.now() - decoT0 > 4) { decoOverBudget = true; continue; }
+        // 优化：弱机时装饰物生成预算更紧（降档 4 时只给 1.5ms），避免和渲染抢时间导致帧尖峰
+        const decoBudget = this.lowered >= 4 ? 1.5 : this.lowered >= 2 ? 2.5 : 4;
+        if (performance.now() - decoT0 > decoBudget) { decoOverBudget = true; continue; }
         decoBuilt++; ds = T.getDecos(cx, cy);
       }
       for (const d of ds) {
