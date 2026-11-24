@@ -1164,7 +1164,8 @@ export class Renderer {
     // ---------- 2. 水波（GPU 地表自带流水、浪花、粼光）----------
     // LOD 波段平滑：水面波纹在 z∈[0.33,0.38] 渐显，避免硬切跳变
     { const waterK = LOD.k(LOD.BAND.water, z);
-      if (waterK > 0.01 && !GROUND && !game.jueyu.seaOwnsWater) {
+      // 优化：降档 3+ 跳过大地图水波（GPU 地表自带流水效果足够）
+      if (waterK > 0.01 && !GROUND && !game.jueyu.seaOwnsWater && this.lowered < 3) {
         const prevAlpha = ctx.globalAlpha;
         if (waterK < 0.99) ctx.globalAlpha *= waterK;
         this.drawWater(left, top, right, bottom, t);
@@ -1294,7 +1295,8 @@ export class Renderer {
           // 不再每帧往画布里画一遍。最远缩放时视野里有上千棵树，这是那时最大的一笔开销。
           // P10 收尾：每棵树的绘制项（对象 + 两个闭包）记在树上反复用——占山宗门镜头 0.13 时一屏五千棵树，
           // 每帧重新造一遍是每秒上百兆的垃圾，飞越时一次次整堆回收就是几十上百毫秒的长帧
-          const st = !!hd && z * dpr < 0.5 && ta > 0.98;
+          // 优化：中近景风小时也走静态立板——树位图缓存到静态图集，省掉每帧 canvas 绘制
+          const st = !!hd && ta > 0.98 && (z * dpr < 0.5 || Math.abs(this._wGlobal) < 0.12);
           // 优化：dk 不再含 ta（透明度每帧渐变，原来一渐变就重建闭包 → 大量短命对象）；
           // treeScale 和 ta 记在 TreeDeco 上，draw 闭包从对象读，只需建一次
           const dk = treeScale * 2 + (st ? 1 : 0);
@@ -1507,10 +1509,11 @@ export class Renderer {
     game.life.collectGround(list, view, t, dt); tag('D·生灵(人兽)');
     collectCombat(game.combat, list, view, t, dt, !!hd); tag('D·战斗单位');
     if (!hd) { game.jueyu.collect2D(list as never, ctx); tag('D·海上大件'); }   // 收官 B3：纯 2D 回退下鲸背、触须、蛟身、灵舟、鬼船、祭坛、遗迹（HD 下在 seathings 网格里）
-    // 远景 NPC 剔除：zoom 远时缩小收集范围，减少 60-80% 的 NPC 绘制
+    // 远景/弱机 NPC 剔除：缩小收集范围，减少 NPC 绘制与立板开销
     this.frameBudget.syncElapsed();
-    { const npcView = z < 0.3
-      ? (() => { const cx = (left + right) / 2, cy = (top + bottom) / 2, hw = (right - left) * 0.35, hh = (bottom - top) * 0.35; return { left: cx - hw, top: cy - hh, right: cx + hw, bottom: cy + hh }; })()
+    { const npcShrink = z < 0.3 ? 0.35 : this.lowered >= 4 ? 0.4 : this.lowered >= 3 ? 0.55 : 1;
+      const npcView = npcShrink < 1
+      ? (() => { const cx = (left + right) / 2, cy = (top + bottom) / 2, hw = (right - left) * npcShrink, hh = (bottom - top) * npcShrink; return { left: cx - hw, top: cy - hh, right: cx + hw, bottom: cy + hh }; })()
       : view;
       game.npcs.collect(list, npcView, t, dt); game.indoor.collect(list, npcView, t, dt); collectTownWorkers(game, list, npcView, dt); tag('D·NPC');
     }
