@@ -1223,8 +1223,11 @@ export class Renderer {
       macroPatchTrees = this.emitMacroTreePatches(T, season, z, left, top, right, bottom, list);
       nTrees += macroPatchTrees;
     }
+    // 优化：远景 HD2D 下装饰物遍历全是空操作（树→宏片替代，山/瀑布→3D地形处理，小景→z<0.3跳过），
+    // 几千个装饰物逐个 continue 白白花 4-7ms。直接跳过整个循环。
+    const skipDecoIter = useMacroPatches && !!hd;
     let decoOverBudget = false;
-    for (let cy = cy0 - 1; cy <= cy1 + 2; cy++) for (let cx = cx0 - 1; cx <= cx1 + 1; cx++) {
+    if (!skipDecoIter) for (let cy = cy0 - 1; cy <= cy1 + 2; cy++) for (let cx = cx0 - 1; cx <= cx1 + 1; cx++) {
       if (!T.hasChunk(cx, cy)) continue;
       // P10：山树也每帧限量生成新块（画面里的先生成；生成过的直接用）
       let ds = T.peekDecos(cx, cy);
