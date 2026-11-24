@@ -1312,7 +1312,9 @@ export class Renderer {
           if (!(d.x + d.w < left || d.x - d.w > right || d.y - d.h - 100 > bottom || d.y + d.w * 0.4 < top)) { nM++; list.push({ y: d.y, k: 'D·瀑布', hx: d.x, hb: hdBox.fall(d.w, d.h), draw: () => this.drawFall(d, t), occ: { get: () => this.wfSprite(d, z), x: d.x, y: d.y, footY: d.y, k: 0.5, ent: d } }); }
         } else {
           if (wkOn) { const ws = WR.treeAt(d); if (ws) { if (z >= 0.3) this.wreckDeco(list, d, ws, 1, left, top, right, bottom); continue; } }   // 野外破坏：压倒的灌木、芦苇，打碎的小石景
-          if (!vis || z < 0.3) continue;
+          // 优化：弱机（降档 2+）更早隐藏小装饰物，减少立板打包压力
+          const decoMinZ = this.lowered >= 2 ? 0.5 : 0.3;
+          if (!vis || z < decoMinZ) continue;
           nD++;
           // 同上：绘制项和静态立板记在小景上反复用（画的时候取 this.ctx：HD2D 下绘制前会换画布的变换，画布本身不换）
           const dd = d as typeof d & { _dw?: Drawable };

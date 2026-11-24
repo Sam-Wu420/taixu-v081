@@ -935,8 +935,10 @@ export class HdScene {
     }
     const availW = this.decalW, availH = this.work.height - start.py;
     const availArea = Math.max(1, availW * availH - (start.rowH > 0 ? start.px * start.rowH : 0));
-    let factor = totalArea > availArea ? Math.sqrt(availArea / totalArea) * 0.92 : 1;
+    // 优化：更保守的初始因子（0.82 留足填充余量）+ 最多 3 次重试
+    let factor = totalArea > availArea ? Math.sqrt(availArea / totalArea) * 0.82 : 1;
     factor = Math.max(minFactor, factor);
+    let retries = 0;
     for (;;) {
       this.px = start.px; this.py = start.py; this.rowH = start.rowH; this.items.length = start.count;
       let failed = false;
@@ -947,8 +949,9 @@ export class HdScene {
         slots[index] = cell;
         if (!cell) failed = true;
       }
-      if (!failed || factor === minFactor) return slots;
-      factor = Math.max(minFactor, factor * 0.8);
+      if (!failed || factor === minFactor || retries >= 3) return slots;
+      retries++;
+      factor = Math.max(minFactor, factor * 0.7);
     }
   }
 
