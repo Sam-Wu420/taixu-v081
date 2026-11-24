@@ -1001,7 +1001,7 @@ export class HdScene {
     gl.bindTexture(gl.TEXTURE_2D, handle);
     gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
     gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
     gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
