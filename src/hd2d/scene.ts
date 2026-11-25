@@ -389,9 +389,15 @@ export class HdGround {
   }
 
   sync(chunks: { cx: number; cy: number; canvas: HTMLCanvasElement }[], size: number): void {
-    // 新地块的网格分帧建：一帧最多几块，镜头拉远一下子露出上百块时不会卡成一长帧（晚到的几块下一帧补上）
+    // 新地块的网格分帧建：一帧最多几块，镜头拉远一下子露出上百块时不会卡成一长帧（晚到的几块下一帧补上）。
+    // 但分帧建的副作用是「建完的块与没建的块之间有视觉边界」：拉到最远（如 0.13）一帧露出上百块时这条边界最明显。
+    // 所以当本帧新露出的块很多时抬高预算（封顶 120）：整块地面一起建、一起出，不再有逐帧补上的边界。
     let budget = MOUNTAINS ? 6 : 1e9;
+    const farPush = MOUNTAINS && chunks.length > 12;   // 拉得很远、露出一百块：抬预算，整块一起建
+    if (farPush) budget = Math.min(chunks.length, 120);
+    const farT0 = farPush ? performance.now() : 0;
     for (const ch of chunks) {
+      if (farPush && performance.now() - farT0 > 12) break;   // 时间上限：慢机器到点停，剩的块下帧接着建
       const k = ch.cx + ',' + ch.cy;
       let e = this.chunks.get(k);
       if (!e && budget-- <= 0) continue;
